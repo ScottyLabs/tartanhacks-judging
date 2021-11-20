@@ -1,9 +1,8 @@
 import { makeStyles } from "@mui/styles"
 import { NextPage } from "next"
 import React, { ReactElement } from "react"
-import AuthenticationDialog from "src/components/auth/AuthenticationDialog"
-import WaveHeader from "src/components/design/WaveHeader"
-import ScottyLabsIcon from "src/components/design/ScottyLabsIcon"
+import AuthenticationDialog from "src/components/projects/AuthenticationDialog"
+import WaveHeader from "src/components/projects/WaveHeader"
 
 const useStyles = makeStyles((theme) => ({
   dialog: {
@@ -45,7 +44,9 @@ const RegisterPage: NextPage = (): ReactElement => {
     <div>
       <WaveHeader />
       <div className={classes.scottyContainer}>
-        <ScottyLabsIcon className={classes.scottyIcon} />
+      </div>
+      <div className={classes.dialog}>
+        <AuthenticationDialog registration={true} />
       </div>
       <div className={classes.dialog}>
         <AuthenticationDialog registration={true} />
