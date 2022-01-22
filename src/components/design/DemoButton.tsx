@@ -10,12 +10,12 @@ const useStyles = makeStyles((theme) => ({
     color: theme.palette.text.primary,
     width: "137px",
     height: "47px",
-    left: "224px",
-    top: "346px",
+    left: "61px",
+    top: "347px",
   },
 }));
 
-const RoundedButton = ({
+const DemoButton = ({
   className,
   children,
   type,
@@ -38,4 +38,4 @@ const RoundedButton = ({
   );
 };
 
-export default RoundedButton;
+export default DemoButton;

@@ -10,12 +10,12 @@ import { useRouter } from "next/dist/client/router";
 import { ReactElement, useState } from "react";
 import { useDispatch } from "react-redux";
 import actions from "src/actions";
-import RoundedButton from "../design/RoundedButton";
+import ProjectButtons from "../design/ProjectButtons";
 
 const useStyles = makeStyles((theme) => ({
   dialog: {
     display: "flex",
-    alignItems: "center",
+    // alignItems: "center",
     justifyContent: "center",
     width: "20%",
     padding: "1em",
@@ -23,7 +23,7 @@ const useStyles = makeStyles((theme) => ({
     textAlign: "center",
     radius: 25,
     [theme.breakpoints.down(theme.breakpoints.values.tablet)]: {
-      width: "50%",
+      width: "80%",
     },
     [theme.breakpoints.down(theme.breakpoints.values.mobile)]: {
       width: "80%",
@@ -43,6 +43,15 @@ const useStyles = makeStyles((theme) => ({
     WebkitBackgroundClip: "text",
     WebkitTextFillColor: "transparent",
     marginBottom: "1em",
+    position: "absolute",
+  },
+  titleRectangle : {
+    width: "500px",
+    height: "47px",
+    left: "43px",
+    top: "189px",
+    background: "#F6C744",
+    borderRadius: "10px",
   },
   switchAuth: {
     display: "flex",
@@ -56,9 +65,19 @@ const useStyles = makeStyles((theme) => ({
       filter: "brightness(85%)",
     },
   },
+  rectangle: {
+    background: `linear-gradient(316.54deg, ${theme.palette.lightGradient.start} 35.13%, ${theme.palette.lightGradient.end} 126.39%)`,
+    borderRadius: "1em",
+    boxShadow: "0px 4px 4px rgba(200, 116, 56, 0.25)",
+    color: theme.palette.text.primary,
+    height: "500px",
+    position: "relative",
+    width: "100%",
+    bottom: 0,
+  },
 }));
 
-const AuthenticationDialog = ({
+const ProjectDialog = ({
   registration = false,
 }: {
   registration: boolean;
@@ -114,6 +133,8 @@ const AuthenticationDialog = ({
           />
         </linearGradient>
       </defs>
+      <div className={classes.rectangle}>
+      
       <form
         className={classes.registrationForm}
         onSubmit={(e) => {
@@ -126,22 +147,19 @@ const AuthenticationDialog = ({
           }
         }}
       >
-      
+        <div className={classes.titleRectangle}>
         <Typography variant="h4" className={classes.header}>
           [Project Name Here]
         </Typography>
+        </div>
         <Typography variant="h5">
           [Project Description]
         </Typography>
-        <RoundedButton type="submit">
-          {registration ? "Demo" : "Login"}
-        </RoundedButton>
-        <RoundedButton type="submit">
-          {registration ? "Contact" : "Login"}
-        </RoundedButton>
+        <ProjectButtons />
       </form>
+    </div>
     </div>
   );
 };
 
-export default AuthenticationDialog;
+export default ProjectDialog;

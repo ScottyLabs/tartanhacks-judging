@@ -1,8 +1,9 @@
 import { makeStyles } from "@mui/styles"
 import { NextPage } from "next"
 import React, { ReactElement } from "react"
-import AuthenticationDialog from "src/components/projects/AuthenticationDialog"
+import ProjectDialog from "src/components/projects/ProjectDialog"
 import WaveHeader from "src/components/projects/WaveHeader"
+import RoundedRectangleProject from "src/components/projects/RoundedRectangleProject"
 
 const useStyles = makeStyles((theme) => ({
   dialog: {
@@ -45,11 +46,12 @@ const RegisterPage: NextPage = (): ReactElement => {
       <WaveHeader />
       <div className={classes.scottyContainer}>
       </div>
+      <RoundedRectangleProject />
       <div className={classes.dialog}>
-        <AuthenticationDialog registration={true} />
+        <ProjectDialog registration={true} />
       </div>
       <div className={classes.dialog}>
-        <AuthenticationDialog registration={true} />
+        <ProjectDialog registration={true} />
       </div>
     </div>
   )
