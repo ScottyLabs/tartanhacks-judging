@@ -1,4 +1,5 @@
 import { type NextPage } from "next";
+import { signIn, signOut, useSession } from "next-auth/react";
 import Head from "next/head";
 import Link from "next/link";
 
@@ -6,6 +7,8 @@ import { api } from "../utils/api";
 
 const Home: NextPage = () => {
   const hello = api.example.hello.useQuery({ text: "from tRPC" });
+  const protectedData = api.example.protected.useQuery();
+  const { data: session } = useSession();
 
   return (
     <>
@@ -45,6 +48,26 @@ const Home: NextPage = () => {
           </div>
           <p className="text-2xl text-white">
             {hello.data ? hello.data.greeting : "Loading tRPC query..."}
+          </p>
+          <div className="container text-white">
+            {session ? (
+              <button
+                className="rounded-xl bg-white/10 px-2 py-1"
+                onClick={() => void signOut()}
+              >
+                Sign Out
+              </button>
+            ) : (
+              <button
+                className="rounded-xl bg-white/10 px-2 py-1"
+                onClick={() => void signIn()}
+              >
+                Sign In
+              </button>
+            )}
+          </div>
+          <p className="text-2xl text-white">
+            {protectedData.data ? protectedData.data : "Not authorized"}
           </p>
         </div>
       </main>

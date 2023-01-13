@@ -1,6 +1,9 @@
 import { z } from "zod";
+import authMiddleware from "../middleware/authMiddleware";
 
 import { createTRPCRouter, publicProcedure } from "../trpc";
+
+const protectedProcedure = publicProcedure.use(authMiddleware);
 
 export const exampleRouter = createTRPCRouter({
   hello: publicProcedure
@@ -10,7 +13,5 @@ export const exampleRouter = createTRPCRouter({
         greeting: `Hello ${input.text}`,
       };
     }),
-  getAll: publicProcedure.query(({ ctx }) => {
-    return ctx.prisma.example.findMany();
-  }),
+  protected: protectedProcedure.query(() => "Protected Data"),
 });

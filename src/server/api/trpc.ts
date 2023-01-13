@@ -42,8 +42,17 @@ const createInnerTRPCContext = (_opts: CreateContextOptions) => {
  * process every request that goes through your tRPC endpoint
  * @link https://trpc.io/docs/context
  */
-export const createTRPCContext = (_opts: CreateNextContextOptions) => {
-  return createInnerTRPCContext({});
+export const createTRPCContext = (opts: CreateNextContextOptions) => {
+  return unstable_getServerSession(opts.req, opts.res, authOptions).then(
+    (session) => {
+      return {
+        ...createInnerTRPCContext({}),
+        req: opts.req,
+        res: opts.res,
+        session,
+      };
+    }
+  );
 };
 
 /**
@@ -54,6 +63,8 @@ export const createTRPCContext = (_opts: CreateNextContextOptions) => {
  */
 import { initTRPC } from "@trpc/server";
 import superjson from "superjson";
+import { unstable_getServerSession } from "next-auth";
+import { authOptions } from "../../pages/api/auth/[...nextauth]";
 
 const t = initTRPC.context<typeof createTRPCContext>().create({
   transformer: superjson,
@@ -83,3 +94,5 @@ export const createTRPCRouter = t.router;
  * can still access user session data if they are logged in
  */
 export const publicProcedure = t.procedure;
+
+export const middleware = t.middleware;
