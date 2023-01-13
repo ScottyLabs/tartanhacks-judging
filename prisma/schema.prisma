@@ -6,12 +6,36 @@ generator client {
 }
 
 datasource db {
-    provider = "sqlite"
+    provider = "mongodb"
     url      = env("DATABASE_URL")
 }
 
-model Example {
-    id        String   @id @default(cuid())
+model Prize {
+    id               String                 @id @default(cuid()) @map("_id")
+    name             String
+    description      String
+    eligibility      String
+    judgeAssignments JudgePrizeAssignment[]
+}
+
+model Project {
+    id          String @id @default(cuid()) @map("_id")
+    name        String
+    description String
+    location    String
+    team        String
+
+    leadingPrizes JudgePrizeAssignment[]
+}
+
+model JudgePrizeAssignment {
+    id               String  @id @default(cuid()) @map("_id")
+    prizeId          String
+    prize            Prize   @relation(fields: [prizeId], references: [id])
+    leadingProjectId String
+    leadingProject   Project @relation(fields: [projectId], references: [id])
+
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
+    projectId String
 }
