@@ -15,7 +15,7 @@ const MyApp: AppType<AppProps> = ({ Component, pageProps }) => {
   return (
     <SessionProvider session={pageProps.session}>
       <Head>
-        <title>TartanHacks 2023 | Feb 3-4, 2023</title>
+        <title>TartanHacks Judging</title>
         <meta name="title" content="TartanHacks 2023 | Feb 3-4, 2023" />
         <meta
           name="description"
