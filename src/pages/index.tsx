@@ -3,10 +3,24 @@ import { useSession } from "next-auth/react";
 import Button from "../components/Button";
 import Header from "../components/Header";
 import PrizeListing from "../components/PrizeListing";
+import { DateTime } from "luxon";
+import { useEffect, useState } from "react";
+
+const JUDGING_DEADLINE = DateTime.fromISO("2023-02-04T08:00:00.000");
 
 const Home: NextPage = () => {
   const { data: session } = useSession();
-  console.log(session);
+  const [timeLeft, setTimeLeft] = useState("00:00:00");
+
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      const now = DateTime.now();
+      const diff = JUDGING_DEADLINE.diffNow();
+      setTimeLeft(diff.toFormat("hh:mm:ss"));
+    }, 1000);
+
+    return () => clearInterval(intervalId);
+  }, [timeLeft, setTimeLeft]);
 
   return (
     <>
@@ -19,7 +33,7 @@ const Home: NextPage = () => {
         {/* Timer */}
         <div className="w-12/12 flex flex-col items-center justify-center gap-3">
           <p className="text-2xl font-bold">Judging Time Left</p>
-          <p className="text-3xl font-bold text-yellow">03:58</p>
+          <p className="text-3xl font-bold text-yellow">{timeLeft}</p>
         </div>
 
         {/* Prizes */}
