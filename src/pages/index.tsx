@@ -1,16 +1,20 @@
 import { type NextPage } from "next";
+import { useSession } from "next-auth/react";
 import Button from "../components/Button";
 import Header from "../components/Header";
 import PrizeListing from "../components/PrizeListing";
 
 const Home: NextPage = () => {
+  const { data: session } = useSession();
+  console.log(session);
+
   return (
     <>
       <Header />
       <main className="flex flex-col items-center gap-5 py-5 px-2 md:px-10">
-        <p className="text-lg">
+        {/* <p className="text-lg">
           Welcome, <span className="font-semibold text-yellow">Gram!</span>
-        </p>
+        </p> */}
 
         {/* Timer */}
         <div className="w-12/12 flex flex-col items-center justify-center gap-3">
