@@ -7,7 +7,7 @@ const Home: NextPage = () => {
   return (
     <>
       <Header />
-      <main className="flex flex-col items-center gap-5 py-5 md:px-10">
+      <main className="flex flex-col items-center gap-5 py-5 px-2 md:px-10">
         <p className="text-lg">
           Welcome, <span className="font-semibold text-yellow">Gram!</span>
         </p>
@@ -36,7 +36,7 @@ const Home: NextPage = () => {
         </div>
 
         {/* Action buttons */}
-        <div className="flex flex-col items-center gap-3">
+        <div className="mt-10 flex flex-col items-center gap-3">
           <Button text="View Current Results" className="w-12/12" />
           <Button text="Start Judging" className="w-12/12" />
         </div>
