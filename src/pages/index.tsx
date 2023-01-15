@@ -14,7 +14,6 @@ const Home: NextPage = () => {
 
   useEffect(() => {
     const intervalId = setInterval(() => {
-      const now = DateTime.now();
       const diff = JUDGING_DEADLINE.diffNow();
       setTimeLeft(diff.toFormat("hh:mm:ss"));
     }, 1000);
