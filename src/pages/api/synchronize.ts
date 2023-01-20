@@ -127,8 +127,8 @@ async function synchronizeProjects() {
 }
 
 /**
- * Pull prizes and projects from the Helix backend and synchronize
- * with the judging database
+ * Pull prizes and projects from the Helix backend and
+ * synchronize with the judging database
  */
 export default async function handler(
   req: NextApiRequest,
