@@ -6,8 +6,8 @@ import Link from "next/link";
 import { api } from "../utils/api";
 
 const Home: NextPage = () => {
-  const hello = api.example.hello.useQuery({ text: "from tRPC" });
-  const protectedData = api.example.protected.useQuery();
+  // const hello = api.example.hello.useQuery({ text: "from tRPC" });
+  // const protectedData = api.example.protected.useQuery();
   const { data: session } = useSession();
 
   return (
@@ -47,7 +47,7 @@ const Home: NextPage = () => {
             </Link>
           </div>
           <p className="text-2xl text-white">
-            {hello.data ? hello.data.greeting : "Loading tRPC query..."}
+            {/* {hello.data ? hello.data.greeting : "Loading tRPC query..."} */}
           </p>
           <div className="container text-white">
             {session ? (
@@ -67,7 +67,7 @@ const Home: NextPage = () => {
             )}
           </div>
           <p className="text-2xl text-white">
-            {protectedData.data ? protectedData.data : "Not authorized"}
+            {/* {protectedData.data ? protectedData.data : "Not authorized"} */}
           </p>
         </div>
       </main>
