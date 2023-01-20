@@ -8,6 +8,8 @@ const protectedProcedure = publicProcedure.use(authMiddleware);
 export const judgingRouter = createTRPCRouter({
   getNext: protectedProcedure.query(({ ctx, input }) => {
     // TODO: Return next project to be assigned
+    const user = ctx?.session?.user;
+
     return;
   }),
   compare: protectedProcedure
@@ -20,6 +22,7 @@ export const judgingRouter = createTRPCRouter({
     )
     .query(async ({ ctx, input }) => {
       // TODO: Update computation based on current pair-wise comparison
+      const user = ctx?.session?.user;
       const prize = await ctx.prisma.prize.findFirst({
         where: { id: input.prizeId },
       });
@@ -30,6 +33,7 @@ export const judgingRouter = createTRPCRouter({
     .input(z.object({ prizeId: z.string() }))
     .query(({ ctx, input }) => {
       // TODO: return top projects for the specified prize
+      const user = ctx?.session?.user;
       return;
     }),
 });
