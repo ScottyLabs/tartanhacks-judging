@@ -11,31 +11,54 @@ datasource db {
 }
 
 model Prize {
-    id               String                 @id @default(cuid()) @map("_id")
-    name             String
-    description      String
-    eligibility      String
+    id          String  @id @default(cuid()) @map("_id")
+    helixId     String
+    name        String
+    description String
+    eligibility String?
+    provider    String?
+
     judgeAssignments JudgePrizeAssignment[]
+    projectRelations ProjectPrizeRelation[]
+
+    @@unique([helixId])
 }
 
 model Project {
     id          String @id @default(cuid()) @map("_id")
+    helixId     String
     name        String
     description String
     location    String
     team        String
 
-    leadingPrizes JudgePrizeAssignment[]
+    leadingPrizes  JudgePrizeAssignment[]
+    prizeRelations ProjectPrizeRelation[]
+
+    @@unique([helixId])
+}
+
+model ProjectPrizeRelation {
+    id        String @id @default(cuid()) @map("_id")
+    projectId String
+    prizeId   String
+
+    project Project @relation(fields: [projectId], references: [id])
+    prize   Prize   @relation(fields: [prizeId], references: [id])
+
+    @@unique([projectId, prizeId])
 }
 
 model JudgePrizeAssignment {
     id               String  @id @default(cuid()) @map("_id")
+    email            String
     prizeId          String
     prize            Prize   @relation(fields: [prizeId], references: [id])
     leadingProjectId String
-    leadingProject   Project @relation(fields: [projectId], references: [id])
+    leadingProject   Project @relation(fields: [leadingProjectId], references: [id])
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
-    projectId String
+
+    @@unique([email, prizeId])
 }
