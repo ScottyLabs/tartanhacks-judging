@@ -2,7 +2,15 @@
 module.exports = {
   content: ["./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
-    extend: {},
+    extend: {
+      // TH 2023 colors
+      colors: {
+        purple: "#4200ff",
+        blue: "#6e9afd",
+        yellow: "#fea801",
+        beige: "#f7f1e2",
+      },
+    },
   },
   plugins: [],
 };

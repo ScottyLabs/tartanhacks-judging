@@ -1,4 +1,6 @@
 import NextAuth, { type User, type AuthOptions } from "next-auth";
+import type { Session } from "next-auth";
+import type { JWT } from "next-auth/jwt/types.js";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { env } from "../../../env/server.mjs";
 import { type HelixUser } from "../../../types/user.js";
@@ -23,7 +25,8 @@ export const authOptions: AuthOptions = {
         // e.g. return { id: 1, name: 'J Smith', email: 'jsmith@example.com' }
         // You can also use the `req` object to obtain additional parameters
         // (i.e., the request IP address)
-        const res = await fetch(`${env.HELIX_BASE_URL}/auth/login`, {
+
+        const authResponse = await fetch(`${env.HELIX_BASE_URL}/auth/login`, {
           method: "POST",
           body: JSON.stringify({
             email: credentials?.username,
@@ -31,8 +34,13 @@ export const authOptions: AuthOptions = {
           }),
           headers: { "Content-Type": "application/json" },
         });
-        const helixUser = (await res.json()) as HelixUser | null;
-        if (res.ok && helixUser) {
+
+        if (!authResponse.ok) {
+          return null;
+        }
+
+        const helixUser = (await authResponse.json()) as HelixUser | null;
+        if (helixUser) {
           const user: User = {
             id: helixUser._id,
             email: helixUser.email,
@@ -52,9 +60,9 @@ export const authOptions: AuthOptions = {
       }
       return token;
     },
-    session: async ({ session, token }) => {
+    session: ({ session, token }: { session: Session; token: JWT }) => {
       if (token) {
-        session.id = token.id;
+        session.id = token.id as string;
       }
       return session;
     },
