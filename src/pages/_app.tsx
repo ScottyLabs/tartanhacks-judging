@@ -1,6 +1,7 @@
 import { type AppType } from "next/app";
 import { type Session } from "next-auth";
 import { SessionProvider } from "next-auth/react";
+import { Poppins } from "@next/font/google";
 
 import { api } from "../utils/api";
 
@@ -10,6 +11,8 @@ import Head from "next/head";
 interface AppProps {
   session: Session;
 }
+
+const poppins = Poppins({ subsets: ["latin"], weight: "400" });
 
 const MyApp: AppType<AppProps> = ({ Component, pageProps }) => {
   return (
@@ -49,6 +52,11 @@ const MyApp: AppType<AppProps> = ({ Component, pageProps }) => {
           content="https://tartanhacks.com/cover-photo-2023.png"
         />
         <link rel="icon" href="https://tartanhacks.com/favicon.png" />
+        <style jsx global>{`
+          html {
+            font-family: ${poppins.style.fontFamily};
+          }
+        `}</style>
       </Head>
       <Component {...pageProps} />
     </SessionProvider>
