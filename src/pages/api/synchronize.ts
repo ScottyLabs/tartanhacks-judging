@@ -124,18 +124,20 @@ async function synchronizeProjects() {
       })
     )
   );
-
-  return minifiedProjects;
 }
 
+/**
+ * Pull prizes and projects from the Helix backend and synchronize
+ * with the judging database
+ */
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
   try {
     await synchronizePrizes();
-    const projects = await synchronizeProjects();
-    res.status(200).send(JSON.stringify(projects, null, 2));
+    await synchronizeProjects();
+    res.status(200).end();
   } catch (err) {
     console.error(err);
     res.status(500).send("An error occured");
