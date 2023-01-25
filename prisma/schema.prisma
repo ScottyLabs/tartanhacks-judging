@@ -25,17 +25,24 @@ model Judge {
 
 // Projects can be submitted towards different prizes over which they are judged for
 model Prize {
-    id               String                 @id @default(cuid()) @map("_id")
-    name             String
-    description      String
-    eligibility      String
+    id          String  @id @default(cuid()) @map("_id")
+    helixId     String
+    name        String
+    description String
+    eligibility String?
+    provider    String?
+
     judgeAssignments JudgePrizeAssignment[]
     judgingInstances JudgingInstance[]
+    projectRelations ProjectPrizeRelation[]
+
+    @@unique([helixId])
 }
 
 // Projects are compared against each other by judges
 model Project {
     id          String @id @default(cuid()) @map("_id")
+    helixId     String
     name        String
     description String
     location    String
@@ -44,6 +51,20 @@ model Project {
     leadingPrizes    JudgePrizeAssignment[]
     incomingJudges   Judge[]
     judgingInstances JudgingInstance[]
+    prizeRelations   ProjectPrizeRelation[]
+
+    @@unique([helixId])
+}
+
+model ProjectPrizeRelation {
+    id        String @id @default(cuid()) @map("_id")
+    projectId String
+    prizeId   String
+
+    project Project @relation(fields: [projectId], references: [id])
+    prize   Prize   @relation(fields: [prizeId], references: [id])
+
+    @@unique([projectId, prizeId])
 }
 
 // Information tied to a project-prize tuple used to determine ranking
@@ -61,12 +82,14 @@ model JudgingInstance {
 // Assignments of judges to prizes
 model JudgePrizeAssignment {
     id               String  @id @default(cuid()) @map("_id")
+    email            String
     prizeId          String
     prize            Prize   @relation(fields: [prizeId], references: [id])
     leadingProjectId String
-    leadingProject   Project @relation(fields: [projectId], references: [id])
+    leadingProject   Project @relation(fields: [leadingProjectId], references: [id])
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
-    projectId String
+
+    @@unique([email, prizeId])
 }

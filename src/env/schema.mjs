@@ -9,6 +9,7 @@ export const serverSchema = z.object({
   DATABASE_URL: z.string().url(),
   NODE_ENV: z.enum(["development", "test", "production"]),
   HELIX_BASE_URL: z.string().url(),
+  HELIX_ADMIN_TOKEN: z.string(),
 });
 
 /**
