@@ -10,14 +10,27 @@ datasource db {
     url      = env("DATABASE_URL")
 }
 
+// Judges compare different projects and have some associated priors (alpha, beta)
+model Judge {
+    id            String  @id @default(cuid()) @map("_id")
+    email         String
+    alpha         Float
+    beta          Float
+    nextProjectId String
+    nextProject   Project @relation(fields: [nextProjectId], references: [id])
+}
+
+// Projects can be submitted towards different prizes over which they are judged for
 model Prize {
     id               String                 @id @default(cuid()) @map("_id")
     name             String
     description      String
     eligibility      String
     judgeAssignments JudgePrizeAssignment[]
+    judgingInstances JudgingInstance[]
 }
 
+// Projects are compared against each other by judges
 model Project {
     id          String @id @default(cuid()) @map("_id")
     name        String
@@ -25,9 +38,24 @@ model Project {
     location    String
     team        String
 
-    leadingPrizes JudgePrizeAssignment[]
+    leadingPrizes    JudgePrizeAssignment[]
+    incomingJudges   Judge[]
+    judgingInstances JudgingInstance[]
 }
 
+// Information tied to a project-prize tuple used to determine ranking
+model JudgingInstance {
+    id        String  @id @default(cuid()) @map("_id")
+    prizeId   String
+    prize     Prize   @relation(fields: [prizeId], references: [id])
+    projectId String
+    project   Project @relation(fields: [projectId], references: [id])
+
+    mu     Float
+    sigma2 Float
+}
+
+// Assignments of judges to prizes
 model JudgePrizeAssignment {
     id               String  @id @default(cuid()) @map("_id")
     prizeId          String
