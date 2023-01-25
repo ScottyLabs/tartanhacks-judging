@@ -13,11 +13,14 @@ datasource db {
 // Judges compare different projects and have some associated priors (alpha, beta)
 model Judge {
     id            String  @id @default(cuid()) @map("_id")
+    helixId       String
     email         String
     alpha         Float
     beta          Float
     nextProjectId String
     nextProject   Project @relation(fields: [nextProjectId], references: [id])
+
+    @@unique([email])
 }
 
 // Projects can be submitted towards different prizes over which they are judged for
