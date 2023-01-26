@@ -6,13 +6,16 @@ import Header from "../../components/Header";
 
 interface Props {
   csrfToken?: string;
+  url?: string;
 }
 
-const Login: NextPage<Props> = ({ csrfToken }) => {
+const Login: NextPage<Props> = ({ csrfToken, url }) => {
   const router = useRouter();
   const signInError = router.query.error;
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+
+  console.log(url);
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -75,6 +78,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
   return {
     props: {
       csrfToken: await getCsrfToken(context),
+      url: process.env.NEXTAUTH_URL,
     },
   };
 };
