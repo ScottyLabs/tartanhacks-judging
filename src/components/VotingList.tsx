@@ -1,4 +1,4 @@
-import { Prize, Project } from "@prisma/client";
+import type { Prize, Project } from "@prisma/client";
 import { useState } from "react";
 import { getSponsorLogo } from "../utils/prizes";
 import Button from "./Button";
@@ -30,7 +30,7 @@ export default function VotingList({
 
   const numPrizes = prizes.length;
 
-  const startVotes: Votes[] = new Array(numPrizes).fill(Votes.None);
+  const startVotes: Votes[] = new Array(numPrizes).fill(Votes.None) as Votes[];
   const [votes, setVotes] = useState(startVotes);
   const [numVotes, setNumVotes] = useState(0);
 

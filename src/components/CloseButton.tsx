@@ -1,9 +1,11 @@
-import { useRouter } from "next/router";
+import Link from "next/link";
 
 export default function CloseButton() {
-  const router = useRouter();
   return (
-    <button className="self-end pr-8 absolute" onClick={() => router.push("/")}>
+    <Link
+      className="absolute self-end pr-8"
+      href='/'
+    >
       <svg
         className="h-9 w-9"
         xmlns="http://www.w3.org/2000/svg"
@@ -19,6 +21,6 @@ export default function CloseButton() {
           d="M6 18L18 6M6 6l12 12"
         />
       </svg>
-    </button>
+    </Link>
   );
 }

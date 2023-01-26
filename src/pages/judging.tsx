@@ -1,4 +1,4 @@
-import { Prize, Project } from "@prisma/client";
+import type { Prize, Project } from "@prisma/client";
 import { useEffect, useState } from "react";
 import Button from "../components/Button";
 import CloseButton from "../components/CloseButton";

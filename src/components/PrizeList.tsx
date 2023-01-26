@@ -1,4 +1,4 @@
-import { Prize } from "@prisma/client";
+import type { Prize } from "@prisma/client";
 import { getSponsorLogo } from "../utils/prizes";
 import PrizeListing from "./PrizeListing";
 
