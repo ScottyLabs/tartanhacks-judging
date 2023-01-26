@@ -6,7 +6,8 @@ export interface PrizeListingProps {
   className?: string;
   prizeName: string;
   sponsorLogo: string;
-  prizeDescription?: string
+  prizeDescription?: string;
+  children?: ReactElement;
 }
 
 /**
@@ -16,7 +17,8 @@ export default function PrizeListing({
   className,
   prizeName,
   sponsorLogo,
-  prizeDescription
+  prizeDescription,
+  children
 }: PrizeListingProps): ReactElement {
   return (
     <div
@@ -25,7 +27,7 @@ export default function PrizeListing({
         "w-12/12 rounded-2xl bg-white py-3 px-5 drop-shadow"
       )}
     >
-      <div className="flex flex-row items-center gap-3">
+      <div className="flex flex-row items-center justify-center gap-3">
         <Image src={sponsorLogo} height={32} width={32} alt="Company logo" />
         <p>{prizeName}</p>
       </div>
@@ -38,6 +40,7 @@ export default function PrizeListing({
               </div>
             </details>
       }
+      {children}
     </div>
   );
 }

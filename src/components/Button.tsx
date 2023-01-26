@@ -5,12 +5,14 @@ export interface ButtonProps {
   className?: string;
   text: string;
   onClick?: () => void;
+  disabled?: boolean
 }
 
 export default function Button({
   className,
   text,
   onClick,
+  disabled
 }: ButtonProps): ReactElement {
   return (
     <button
@@ -20,6 +22,7 @@ export default function Button({
       )}
       type="button"
       onClick={onClick}
+      disabled={disabled}
     >
       {text}
     </button>
