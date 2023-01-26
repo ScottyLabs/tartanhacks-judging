@@ -20,6 +20,8 @@ model Judge {
     nextProjectId String
     nextProject   Project @relation(fields: [nextProjectId], references: [id])
 
+    prizeAssignments JudgePrizeAssignment[]
+
     @@unique([email])
 }
 
@@ -90,6 +92,8 @@ model JudgePrizeAssignment {
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
+    Judge     Judge?   @relation(fields: [judgeId], references: [id])
+    judgeId   String?
 
     @@unique([email, prizeId])
 }
