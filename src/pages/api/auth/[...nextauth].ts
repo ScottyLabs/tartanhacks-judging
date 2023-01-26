@@ -4,8 +4,11 @@ import type { JWT } from "next-auth/jwt/types.js";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { env } from "../../../env/server.mjs";
 import { type HelixUser } from "../../../types/user.js";
+import { PrismaAdapter } from "@next-auth/prisma-adapter";
+import { prisma } from "../../../server/db";
 
 export const authOptions: AuthOptions = {
+  adapter: PrismaAdapter(prisma),
   // Configure one or more authentication providers
   providers: [
     CredentialsProvider({
