@@ -41,7 +41,11 @@ export default function VotingList({
         text={numVotes > 0 ? "Submit votes" : "Skip"}
         className="h-14 w-60 text-xl disabled:bg-slate-400"
         disabled={numVotes > 0 && numVotes < numPrizes}
+        onClick={() => {
+          // TODO submit votes
+        }}
       />
+      <p className="mt-5 text-center">Which project is better? Click project name to select.</p>
       <div className="flex flex-col content-center gap-5">
         {prizes.map((prize, i) => {
           return (
@@ -52,7 +56,7 @@ export default function VotingList({
             >
               <div>
                 <div className="mt-3 flex flex-col items-center">
-                  <p className="text-xl font-bold" style={{
+                  <p className="text-xl font-bold select-none" style={{
                     color: votes[i] === Votes.This ? votedColor : inactiveColor
                   }} onClick={() => {
                     const curVote = votes[i]
@@ -71,7 +75,7 @@ export default function VotingList({
                     {project.name}
                   </p>
                   <p className="text-lg font-bold">vs</p>
-                  <p className="text-xl font-bold" style={{
+                  <p className="text-xl font-bold select-none" style={{
                     color: votes[i] === Votes.Other ? votedColor : inactiveColor
                   }} onClick={() => {
                     const curVote = votes[i]
