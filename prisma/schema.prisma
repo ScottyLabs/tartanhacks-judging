@@ -10,6 +10,24 @@ datasource db {
     url      = env("DATABASE_URL")
 }
 
+// Judges compare different projects and have some associated priors (alpha, beta)
+model Judge {
+    id            String  @id @default(cuid()) @map("_id")
+    helixId       String
+    email         String
+    alpha         Float
+    beta          Float
+    nextProjectId String
+    nextProject   Project @relation(fields: [nextProjectId], references: [id])
+
+    prizeAssignments JudgePrizeAssignment[]
+    ignoredProjects  IgnoreProjects[]
+    judgments        ProjectComparisonResult[]
+
+    @@unique([helixId])
+}
+
+// Projects can be submitted towards different prizes over which they are judged for
 model Prize {
     id          String  @id @default(cuid()) @map("_id")
     helixId     String
@@ -19,11 +37,13 @@ model Prize {
     provider    String?
 
     judgeAssignments JudgePrizeAssignment[]
-    projectRelations ProjectPrizeRelation[]
+    judgingInstances JudgingInstance[]
+    judgments        ProjectComparisonResult[]
 
     @@unique([helixId])
 }
 
+// Projects are compared against each other by judges
 model Project {
     id          String @id @default(cuid()) @map("_id")
     helixId     String
@@ -32,33 +52,72 @@ model Project {
     location    String
     team        String
 
-    leadingPrizes  JudgePrizeAssignment[]
-    prizeRelations ProjectPrizeRelation[]
+    leadingPrizes    JudgePrizeAssignment[]
+    incomingJudges   Judge[]
+    judgingInstances JudgingInstance[]
+    ignores          IgnoreProjects[]
+
+    wins   ProjectComparisonResult[] @relation(name: "Winning project")
+    losses ProjectComparisonResult[] @relation(name: "Losing project")
 
     @@unique([helixId])
 }
 
-model ProjectPrizeRelation {
-    id        String @id @default(cuid()) @map("_id")
-    projectId String
-    prizeId   String
+// A judgment (comparison) of two projects by a judge for a specific prize
+model ProjectComparisonResult {
+    id               String @id @default(cuid()) @map("_id")
+    judgeId          String
+    prizeId          String
+    winningProjectId String
+    losingProjectId  String
 
+    judge Judge @relation(fields: [judgeId], references: [id])
+    prize Prize @relation(fields: [prizeId], references: [id])
+
+    winningProject Project @relation(name: "Winning project", fields: [winningProjectId], references: [id])
+    losingProject  Project @relation(name: "Losing project", fields: [losingProjectId], references: [id])
+}
+
+// Ignore projects that have already been seen by the judge
+// Separate from JudgingInstance to account for skips
+model IgnoreProjects {
+    id        String @id @default(cuid()) @map("_id")
+    judgeId   String
+    projectId String
+
+    judge   Judge   @relation(fields: [judgeId], references: [id])
     project Project @relation(fields: [projectId], references: [id])
+}
+
+// Information tied to a project-prize tuple used to determine ranking
+model JudgingInstance {
+    id        String @id @default(cuid()) @map("_id")
+    prizeId   String
+    projectId String
+
     prize   Prize   @relation(fields: [prizeId], references: [id])
+    project Project @relation(fields: [projectId], references: [id])
+
+    mu     Float @default(0)
+    sigma2 Float @default(0)
 
     @@unique([projectId, prizeId])
 }
 
+// Assignments of judges to prizes
 model JudgePrizeAssignment {
-    id               String  @id @default(cuid()) @map("_id")
+    id               String @id @default(cuid()) @map("_id")
     email            String
     prizeId          String
-    prize            Prize   @relation(fields: [prizeId], references: [id])
     leadingProjectId String
-    leadingProject   Project @relation(fields: [leadingProjectId], references: [id])
+
+    prize          Prize   @relation(fields: [prizeId], references: [id])
+    leadingProject Project @relation(fields: [leadingProjectId], references: [id])
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
+    Judge     Judge?   @relation(fields: [judgeId], references: [id])
+    judgeId   String?
 
     @@unique([email, prizeId])
 }

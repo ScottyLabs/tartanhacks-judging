@@ -112,7 +112,7 @@ async function synchronizeProjects() {
   // Upsert project-prize relations
   await prisma.$transaction(
     prizeRelations.map((relation) =>
-      prisma.projectPrizeRelation.upsert({
+      prisma.judgingInstance.upsert({
         where: {
           projectId_prizeId: {
             projectId: relation.projectId,
