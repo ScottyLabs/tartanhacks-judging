@@ -10,7 +10,6 @@ interface Props {
 const Login: NextPage<Props> = ({ csrfToken }) => {
   const router = useRouter();
   const signInError = router.query.error;
-
   return (
     <div className="flex min-h-screen flex-col">
       <Header hideAuth />
