@@ -1,6 +1,7 @@
 import { type GetServerSideProps, type NextPage } from "next";
-import { getCsrfToken } from "next-auth/react";
+import { getCsrfToken, signIn } from "next-auth/react";
 import { useRouter } from "next/router";
+import { useState } from "react";
 import Header from "../../components/Header";
 
 interface Props {
@@ -10,6 +11,8 @@ interface Props {
 const Login: NextPage<Props> = ({ csrfToken }) => {
   const router = useRouter();
   const signInError = router.query.error;
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -17,16 +20,22 @@ const Login: NextPage<Props> = ({ csrfToken }) => {
       <main className="flex flex-grow flex-col items-center justify-center gap-5 py-5 px-2 md:px-10">
         <div className="text-3xl">Welcome</div>
         <form
-          method="post"
-          action="/api/auth/callback/credentials"
+          onSubmit={(e) => {
+            e.preventDefault();
+            void signIn("credentials", {
+              username,
+              password,
+              callbackUrl: window.location.origin,
+            });
+          }}
           className="w-80"
         >
           <input name="csrfToken" type="hidden" defaultValue={csrfToken} />
           <div className="mb-6">
             <input
               type="text"
-              id="username"
-              name="username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               className="form-control m-0 block w-full rounded border border-solid border-gray-300 bg-white bg-clip-padding px-4 py-2 text-xl font-normal text-gray-700 transition ease-in-out placeholder:text-purple/25 focus:border-purple focus:bg-white focus:text-purple focus:outline-none"
               placeholder="Email"
             />
@@ -34,8 +43,8 @@ const Login: NextPage<Props> = ({ csrfToken }) => {
           <div className="mb-6">
             <input
               type="password"
-              id="password"
-              name="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               className="form-control m-0 block w-full rounded border border-solid border-gray-300 bg-white bg-clip-padding px-4 py-2 text-xl font-normal text-gray-700 transition ease-in-out placeholder:text-purple/25 focus:border-purple focus:bg-white focus:text-purple focus:outline-none"
               placeholder="Password"
             />
