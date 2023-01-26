@@ -21,8 +21,10 @@ model Judge {
     nextProject   Project @relation(fields: [nextProjectId], references: [id])
 
     prizeAssignments JudgePrizeAssignment[]
+    ignoredProjects  IgnoreProjects[]
+    judgments        ProjectComparisonResult[]
 
-    @@unique([email])
+    @@unique([helixId])
 }
 
 // Projects can be submitted towards different prizes over which they are judged for
@@ -36,7 +38,7 @@ model Prize {
 
     judgeAssignments JudgePrizeAssignment[]
     judgingInstances JudgingInstance[]
-    projectRelations ProjectPrizeRelation[]
+    judgments        ProjectComparisonResult[]
 
     @@unique([helixId])
 }
@@ -53,42 +55,62 @@ model Project {
     leadingPrizes    JudgePrizeAssignment[]
     incomingJudges   Judge[]
     judgingInstances JudgingInstance[]
-    prizeRelations   ProjectPrizeRelation[]
+    ignores          IgnoreProjects[]
+
+    wins   ProjectComparisonResult[] @relation(name: "Winning project")
+    losses ProjectComparisonResult[] @relation(name: "Losing project")
 
     @@unique([helixId])
 }
 
-model ProjectPrizeRelation {
+// A judgment (comparison) of two projects by a judge for a specific prize
+model ProjectComparisonResult {
+    id               String @id @default(cuid()) @map("_id")
+    judgeId          String
+    prizeId          String
+    winningProjectId String
+    losingProjectId  String
+
+    judge Judge @relation(fields: [judgeId], references: [id])
+    prize Prize @relation(fields: [prizeId], references: [id])
+
+    winningProject Project @relation(name: "Winning project", fields: [winningProjectId], references: [id])
+    losingProject  Project @relation(name: "Losing project", fields: [losingProjectId], references: [id])
+}
+
+// Ignore projects that have already been seen by the judge
+// Separate from JudgingInstance to account for skips
+model IgnoreProjects {
     id        String @id @default(cuid()) @map("_id")
+    judgeId   String
     projectId String
-    prizeId   String
 
+    judge   Judge   @relation(fields: [judgeId], references: [id])
     project Project @relation(fields: [projectId], references: [id])
-    prize   Prize   @relation(fields: [prizeId], references: [id])
-
-    @@unique([projectId, prizeId])
 }
 
 // Information tied to a project-prize tuple used to determine ranking
 model JudgingInstance {
-    id        String  @id @default(cuid()) @map("_id")
+    id        String @id @default(cuid()) @map("_id")
     prizeId   String
-    prize     Prize   @relation(fields: [prizeId], references: [id])
     projectId String
-    project   Project @relation(fields: [projectId], references: [id])
 
-    mu     Float
-    sigma2 Float
+    prize   Prize   @relation(fields: [prizeId], references: [id])
+    project Project @relation(fields: [projectId], references: [id])
+
+    mu     Float @default(0)
+    sigma2 Float @default(0)
 }
 
 // Assignments of judges to prizes
 model JudgePrizeAssignment {
-    id               String  @id @default(cuid()) @map("_id")
+    id               String @id @default(cuid()) @map("_id")
     email            String
     prizeId          String
-    prize            Prize   @relation(fields: [prizeId], references: [id])
     leadingProjectId String
-    leadingProject   Project @relation(fields: [leadingProjectId], references: [id])
+
+    prize          Prize   @relation(fields: [prizeId], references: [id])
+    leadingProject Project @relation(fields: [leadingProjectId], references: [id])
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
