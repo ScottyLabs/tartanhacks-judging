@@ -1,21 +1,15 @@
 import { type GetServerSideProps, type NextPage } from "next";
-import { getCsrfToken, signIn } from "next-auth/react";
+import { getCsrfToken } from "next-auth/react";
 import { useRouter } from "next/router";
-import { useState } from "react";
 import Header from "../../components/Header";
 
 interface Props {
   csrfToken?: string;
-  url?: string;
 }
 
-const Login: NextPage<Props> = ({ csrfToken, url }) => {
+const Login: NextPage<Props> = ({ csrfToken }) => {
   const router = useRouter();
   const signInError = router.query.error;
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-
-  console.log(url);
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -23,22 +17,16 @@ const Login: NextPage<Props> = ({ csrfToken, url }) => {
       <main className="flex flex-grow flex-col items-center justify-center gap-5 py-5 px-2 md:px-10">
         <div className="text-3xl">Welcome</div>
         <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            void signIn("credentials", {
-              username,
-              password,
-              callbackUrl: window.location.origin,
-            });
-          }}
+          method="post"
+          action="/api/auth/callback/credentials"
           className="w-80"
         >
           <input name="csrfToken" type="hidden" defaultValue={csrfToken} />
           <div className="mb-6">
             <input
               type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              id="username"
+              name="username"
               className="form-control m-0 block w-full rounded border border-solid border-gray-300 bg-white bg-clip-padding px-4 py-2 text-xl font-normal text-gray-700 transition ease-in-out placeholder:text-purple/25 focus:border-purple focus:bg-white focus:text-purple focus:outline-none"
               placeholder="Email"
             />
@@ -46,8 +34,8 @@ const Login: NextPage<Props> = ({ csrfToken, url }) => {
           <div className="mb-6">
             <input
               type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              id="password"
+              name="password"
               className="form-control m-0 block w-full rounded border border-solid border-gray-300 bg-white bg-clip-padding px-4 py-2 text-xl font-normal text-gray-700 transition ease-in-out placeholder:text-purple/25 focus:border-purple focus:bg-white focus:text-purple focus:outline-none"
               placeholder="Password"
             />
@@ -78,7 +66,6 @@ export const getServerSideProps: GetServerSideProps<Props> = async (
   return {
     props: {
       csrfToken: await getCsrfToken(context),
-      url: process.env.NEXTAUTH_URL,
     },
   };
 };
