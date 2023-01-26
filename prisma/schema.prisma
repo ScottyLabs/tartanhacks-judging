@@ -100,6 +100,8 @@ model JudgingInstance {
 
     mu     Float @default(0)
     sigma2 Float @default(0)
+
+    @@unique([projectId, prizeId])
 }
 
 // Assignments of judges to prizes
