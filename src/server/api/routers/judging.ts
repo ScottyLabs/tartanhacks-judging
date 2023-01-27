@@ -1,5 +1,7 @@
+import { Prize } from "@prisma/client";
 import { z } from "zod";
 import type { HelixUser } from "../../../types/user";
+import cmp from "../../controllers/cmp";
 import { getNext } from "../../controllers/getNext";
 import authMiddleware from "../middleware/authMiddleware";
 
@@ -9,7 +11,6 @@ const protectedProcedure = publicProcedure.use(authMiddleware);
 
 export const judgingRouter = createTRPCRouter({
   getNext: protectedProcedure.query(async ({ ctx }) => {
-    // TODO: Return next project to be assigned
     const user = ctx?.session?.user as HelixUser;
     const judge = await ctx.prisma.judge.findFirst({
       where: { helixId: user._id },
@@ -42,10 +43,21 @@ export const judgingRouter = createTRPCRouter({
     )
     .query(async ({ ctx, input }) => {
       // TODO: Update computation based on current pair-wise comparison
-      const user = ctx?.session?.user;
-      const prize = await ctx.prisma.prize.findFirst({
+      const user = ctx?.session?.user as HelixUser;
+      const prize = (await ctx.prisma.prize.findFirst({
         where: { id: input.prizeId },
+      })) as Prize;
+      const judge = await ctx.prisma.judge.findFirst({
+        where: { helixId: user._id },
       });
+      const winner = await ctx.prisma.judgingInstance.findFirst({
+        where: { prizeId: input.prizeId, projectId: input.winnerId },
+      });
+      const loser = await ctx.prisma.judgingInstance.findFirst({
+        where: { prizeId: input.prizeId, projectId: input.loserId },
+      });
+
+      await cmp(winner, loser, judge, ctx.prisma);
 
       return;
     }),
