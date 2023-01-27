@@ -86,7 +86,7 @@ export const getNext = async (
   prisma: PrismaClient
 ): Promise<Project | null | undefined> => {
   const preferredProjects = await getPreferredProjects(judge, prisma);
-  if (!preferredProjects) {
+  if (!preferredProjects || preferredProjects?.length == 0) {
     return null;
   }
 
