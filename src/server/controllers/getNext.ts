@@ -10,13 +10,14 @@ import { argmax, EPSILON, expected_information_gain } from "../utils/crowd-bt";
 import { mapReduce, mapReducePartial } from "../utils/fp";
 
 type JudgeNext = Judge & {
-  prizeAssignments: (JudgePrizeAssignment & {
-    leadingProject: ProjectNext;
-  })[];
+  prizeAssignments: PrizeAssignmentNext[];
   ignoredProjects: IgnoreProjects[];
 };
 type ProjectNext = Project & {
   judgingInstances: JudgingInstance[];
+};
+type PrizeAssignmentNext = JudgePrizeAssignment & {
+  leadingProject: ProjectNext;
 };
 
 const MIN_VIEWS = 1;
@@ -86,24 +87,15 @@ export const getNext = async (
     return null;
   }
 
-  const getPrizeLeader = async (
-    pa: JudgePrizeAssignment
-  ): Promise<[string, JudgingInstance]> => {
-    const leadingProject = (await prisma?.project.findUnique({
-      where: { id: pa.leadingProjectId },
-      include: {
-        judgingInstances: {
-          where: {
-            prizeId: pa.prizeId,
-          },
-        },
-      },
-    })) as ProjectNext;
-    return [pa.prizeId, leadingProject.judgingInstances[0] as JudgingInstance];
+  const getPrizeLeader = (
+    pa: PrizeAssignmentNext
+  ): [string, JudgingInstance] => {
+    const leadingJudgingInstance = pa.leadingProject.judgingInstances.find(
+      (ji) => ji.prizeId == pa.prizeId
+    );
+    return [pa.prizeId, leadingJudgingInstance as JudgingInstance];
   };
-  const prizeBests = new Map(
-    await Promise.all(judge.prizeAssignments.map(getPrizeLeader))
-  );
+  const prizeBests = new Map(judge.prizeAssignments.map(getPrizeLeader));
 
   const shuffled_projects = arrayShuffle(preferred_projects);
   if (Math.random() < EPSILON) {
