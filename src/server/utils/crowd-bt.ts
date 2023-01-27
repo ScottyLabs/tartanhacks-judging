@@ -27,203 +27,187 @@ function argmax<T>(f: (x: T) => number, xs: T[]): T {
   return xs.map(uproduct(f, id)).reduce(update)[1];
 }
 
-const divergence_gaussian = (
-  mu_1: number,
-  sigma_sq_1: number,
-  mu_2: number,
-  sigma_sq_2: number
+const divergenceGaussian = (
+  mu1: number,
+  sigmaSq1: number,
+  mu2: number,
+  sigmaSq2: number
 ): number => {
-  const ratio = sigma_sq_1 / sigma_sq_2;
-  return (
-    (mu_1 - mu_2) ** 2 / (2 * sigma_sq_2) + (ratio - 1 - Math.log(ratio)) / 2
-  );
+  const ratio = sigmaSq1 / sigmaSq2;
+  return (mu1 - mu2) ** 2 / (2 * sigmaSq2) + (ratio - 1 - Math.log(ratio)) / 2;
 };
 
-const divergence_beta = (
-  alpha_1: number,
-  beta_1: number,
-  alpha_2: number,
-  beta_2: number
+const divergenceBeta = (
+  alpha1: number,
+  beta1: number,
+  alpha2: number,
+  beta2: number
 ): number => {
   return (
-    betaln(alpha_2, beta_2) -
-    betaln(alpha_1, beta_1) +
-    (alpha_1 - alpha_2) * digamma(alpha_1) +
-    (beta_1 - beta_2) * digamma(beta_1) +
-    (alpha_2 - alpha_1 + beta_2 - beta_1) * digamma(alpha_1 + beta_1)
+    betaln(alpha2, beta2) -
+    betaln(alpha1, beta1) +
+    (alpha1 - alpha2) * digamma(alpha1) +
+    (beta1 - beta2) * digamma(beta1) +
+    (alpha2 - alpha1 + beta2 - beta1) * digamma(alpha1 + beta1)
   );
 };
 
 const update = (
   alpha: number,
   beta: number,
-  mu_winner: number,
-  sigma_sq_winner: number,
-  mu_loser: number,
-  sigma_sq_loser: number
+  muWinner: number,
+  sigmaSqWinner: number,
+  muLoser: number,
+  sigmaSqLoser: number
 ): [number, number, number, number, number, number] => {
-  const [updated_alpha, updated_beta] = _updated_annotator(
+  const [updatedAlpha, updatedBeta] = updatedAnnotator(
     alpha,
     beta,
-    mu_winner,
-    sigma_sq_winner,
-    mu_loser,
-    sigma_sq_loser
+    muWinner,
+    sigmaSqWinner,
+    muLoser,
+    sigmaSqLoser
   );
-  const [updated_mu_winner, updated_mu_loser] = _updated_mus(
+  const [updatedMuWinner, updatedMuLoser] = updatedMus(
     alpha,
     beta,
-    mu_winner,
-    sigma_sq_winner,
-    mu_loser,
-    sigma_sq_loser
+    muWinner,
+    sigmaSqWinner,
+    muLoser,
+    sigmaSqLoser
   );
-  const [updated_sigma_sq_winner, updated_sigma_sq_loser] = _updated_sigma_sqs(
+  const [updatedSigmaSqWinner, updatedSigmaSqLoser] = updatedSigmaSqs(
     alpha,
     beta,
-    mu_winner,
-    sigma_sq_winner,
-    mu_loser,
-    sigma_sq_loser
+    muWinner,
+    sigmaSqWinner,
+    muLoser,
+    sigmaSqLoser
   );
   return [
-    updated_alpha,
-    updated_beta,
-    updated_mu_winner,
-    updated_sigma_sq_winner,
-    updated_mu_loser,
-    updated_sigma_sq_loser,
+    updatedAlpha,
+    updatedBeta,
+    updatedMuWinner,
+    updatedSigmaSqWinner,
+    updatedMuLoser,
+    updatedSigmaSqLoser,
   ];
 };
 
-const expected_information_gain = (
+const expectedInformationGain = (
   alpha: number,
   beta: number,
-  mu_a: number,
-  sigma_sq_a: number,
-  mu_b: number,
-  sigma_sq_b: number
+  muA: number,
+  sigmaSqA: number,
+  muB: number,
+  sigmaSqB: number
 ): number => {
-  const [alpha_1, beta_1, c] = _updated_annotator(
+  const [alpha1, beta1, c] = updatedAnnotator(
     alpha,
     beta,
-    mu_a,
-    sigma_sq_a,
-    mu_b,
-    sigma_sq_b
+    muA,
+    sigmaSqA,
+    muB,
+    sigmaSqB
   );
-  const [mu_a_1, mu_b_1] = _updated_mus(
+  const [muA1, muB1] = updatedMus(alpha, beta, muA, sigmaSqA, muB, sigmaSqB);
+  const [sigmaSqA1, sigmaSqB1] = updatedSigmaSqs(
     alpha,
     beta,
-    mu_a,
-    sigma_sq_a,
-    mu_b,
-    sigma_sq_b
+    muA,
+    sigmaSqA,
+    muB,
+    sigmaSqB
   );
-  const [sigma_sq_a_1, sigma_sq_b_1] = _updated_sigma_sqs(
+  const probARankedAbove = c;
+  const [alpha2, beta2] = updatedAnnotator(
     alpha,
     beta,
-    mu_a,
-    sigma_sq_a,
-    mu_b,
-    sigma_sq_b
+    muB,
+    sigmaSqB,
+    muA,
+    sigmaSqA
   );
-  const prob_a_ranked_above = c;
-  const [alpha_2, beta_2] = _updated_annotator(
+  const [muB2, muA2] = updatedMus(alpha, beta, muB, sigmaSqB, muA, sigmaSqA);
+  const [sigmaSqB2, sigmaSqA2] = updatedSigmaSqs(
     alpha,
     beta,
-    mu_b,
-    sigma_sq_b,
-    mu_a,
-    sigma_sq_a
-  );
-  const [mu_b_2, mu_a_2] = _updated_mus(
-    alpha,
-    beta,
-    mu_b,
-    sigma_sq_b,
-    mu_a,
-    sigma_sq_a
-  );
-  const [sigma_sq_b_2, sigma_sq_a_2] = _updated_sigma_sqs(
-    alpha,
-    beta,
-    mu_b,
-    sigma_sq_b,
-    mu_a,
-    sigma_sq_a
+    muB,
+    sigmaSqB,
+    muA,
+    sigmaSqA
   );
 
   return (
-    prob_a_ranked_above *
-      (divergence_gaussian(mu_a_1, sigma_sq_a_1, mu_a, sigma_sq_a) +
-        divergence_gaussian(mu_b_1, sigma_sq_b_1, mu_b, sigma_sq_b) +
-        GAMMA * divergence_beta(alpha_1, beta_1, alpha, beta)) +
-    (1 - prob_a_ranked_above) *
-      (divergence_gaussian(mu_a_2, sigma_sq_a_2, mu_a, sigma_sq_a) +
-        divergence_gaussian(mu_b_2, sigma_sq_b_2, mu_b, sigma_sq_b) +
-        GAMMA * divergence_beta(alpha_2, beta_2, alpha, beta))
+    probARankedAbove *
+      (divergenceGaussian(muA1, sigmaSqA1, muA, sigmaSqA) +
+        divergenceGaussian(muB1, sigmaSqB1, muB, sigmaSqB) +
+        GAMMA * divergenceBeta(alpha1, beta1, alpha, beta)) +
+    (1 - probARankedAbove) *
+      (divergenceGaussian(muA2, sigmaSqA2, muA, sigmaSqA) +
+        divergenceGaussian(muB2, sigmaSqB2, muB, sigmaSqB) +
+        GAMMA * divergenceBeta(alpha2, beta2, alpha, beta))
   );
 };
 // returns (updated mu of winner, updated mu of loser)
-const _updated_mus = (
+const updatedMus = (
   alpha: number,
   beta: number,
-  mu_winner: number,
-  sigma_sq_winner: number,
-  mu_loser: number,
-  sigma_sq_loser: number
+  muWinner: number,
+  sigmaSqWinner: number,
+  muLoser: number,
+  sigmaSqLoser: number
 ): [number, number] => {
   const mult =
-    (alpha * Math.exp(mu_winner)) /
-      (alpha * Math.exp(mu_winner) + beta * Math.exp(mu_loser)) -
-    Math.exp(mu_winner) / (Math.exp(mu_winner) + Math.exp(mu_loser));
-  const updated_mu_winner = mu_winner + sigma_sq_winner * mult;
-  const updated_mu_loser = mu_loser - sigma_sq_loser * mult;
+    (alpha * Math.exp(muWinner)) /
+      (alpha * Math.exp(muWinner) + beta * Math.exp(muLoser)) -
+    Math.exp(muWinner) / (Math.exp(muWinner) + Math.exp(muLoser));
+  const updatedMuWinner = muWinner + sigmaSqWinner * mult;
+  const updatedMuLoser = muLoser - sigmaSqLoser * mult;
 
-  return [updated_mu_winner, updated_mu_loser];
+  return [updatedMuWinner, updatedMuLoser];
 };
 
 // returns (updated sigma squared of winner, updated sigma squared of loser)
-const _updated_sigma_sqs = (
+const updatedSigmaSqs = (
   alpha: number,
   beta: number,
-  mu_winner: number,
-  sigma_sq_winner: number,
-  mu_loser: number,
-  sigma_sq_loser: number
+  muWinner: number,
+  sigmaSqWinner: number,
+  muLoser: number,
+  sigmaSqLoser: number
 ): [number, number] => {
   const mult =
-    (alpha * Math.exp(mu_winner) * beta * Math.exp(mu_loser)) /
-      (alpha * Math.exp(mu_winner) + beta * Math.exp(mu_loser)) ** 2 -
-    (Math.exp(mu_winner) * Math.exp(mu_loser)) /
-      (Math.exp(mu_winner) + Math.exp(mu_loser)) ** 2;
+    (alpha * Math.exp(muWinner) * beta * Math.exp(muLoser)) /
+      (alpha * Math.exp(muWinner) + beta * Math.exp(muLoser)) ** 2 -
+    (Math.exp(muWinner) * Math.exp(muLoser)) /
+      (Math.exp(muWinner) + Math.exp(muLoser)) ** 2;
 
-  const updated_sigma_sq_winner =
-    sigma_sq_winner * Math.max(1 + sigma_sq_winner * mult, KAPPA);
-  const updated_sigma_sq_loser =
-    sigma_sq_loser * Math.max(1 + sigma_sq_loser * mult, KAPPA);
+  const updatedSigmaSqWinner =
+    sigmaSqWinner * Math.max(1 + sigmaSqWinner * mult, KAPPA);
+  const updatedSigmaSqLoser =
+    sigmaSqLoser * Math.max(1 + sigmaSqLoser * mult, KAPPA);
 
-  return [updated_sigma_sq_winner, updated_sigma_sq_loser];
+  return [updatedSigmaSqWinner, updatedSigmaSqLoser];
 };
 
 // returns (updated alpha, updated beta, pr i >k j which is c)
-const _updated_annotator = (
+const updatedAnnotator = (
   alpha: number,
   beta: number,
-  mu_winner: number,
-  sigma_sq_winner: number,
-  mu_loser: number,
-  sigma_sq_loser: number
+  muWinner: number,
+  sigmaSqWinner: number,
+  muLoser: number,
+  sigmaSqLoser: number
 ): [number, number, number] => {
   const c_1 =
-    Math.exp(mu_winner) / (Math.exp(mu_winner) + Math.exp(mu_loser)) +
+    Math.exp(muWinner) / (Math.exp(muWinner) + Math.exp(muLoser)) +
     (0.5 *
-      (sigma_sq_winner + sigma_sq_loser) *
-      (Math.exp(mu_winner) *
-        Math.exp(mu_loser) *
-        (Math.exp(mu_loser) - Math.exp(mu_winner)))) /
-      (Math.exp(mu_winner) + Math.exp(mu_loser)) ** 3;
+      (sigmaSqWinner + sigmaSqLoser) *
+      (Math.exp(muWinner) *
+        Math.exp(muLoser) *
+        (Math.exp(muLoser) - Math.exp(muWinner)))) /
+      (Math.exp(muWinner) + Math.exp(muLoser)) ** 3;
   const c_2 = 1 - c_1;
   const c = (c_1 * alpha + c_2 * beta) / (alpha + beta);
 
@@ -236,18 +220,18 @@ const _updated_annotator = (
     (c * (alpha + beta + 2) * (alpha + beta + 1) * (alpha + beta));
 
   const variance = expt_sq - expt ** 2;
-  const updated_alpha = ((expt - expt_sq) * expt) / variance;
-  const updated_beta = ((expt - expt_sq) * (1 - expt)) / variance;
+  const updatedAlpha = ((expt - expt_sq) * expt) / variance;
+  const updatedBeta = ((expt - expt_sq) * (1 - expt)) / variance;
 
-  return [updated_alpha, updated_beta, c];
+  return [updatedAlpha, updatedBeta, c];
 };
 
 export {
   argmax,
-  divergence_gaussian,
-  divergence_beta,
+  divergenceGaussian,
+  divergenceBeta,
   update,
-  expected_information_gain,
+  expectedInformationGain,
   GAMMA,
   LAMBDA,
   MU_PRIOR,

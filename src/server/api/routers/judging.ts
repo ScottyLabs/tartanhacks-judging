@@ -11,26 +11,26 @@ export const judgingRouter = createTRPCRouter({
   getNext: protectedProcedure.query(async ({ ctx }) => {
     // TODO: Return next project to be assigned
     const user = ctx?.session?.user as HelixUser;
-    const judge = await prisma?.judge.findFirst({
+    const judge = await ctx.prisma.judge.findFirst({
       where: { helixId: user._id },
       include: {
         prizeAssignments: {
           include: {
             leadingProject: {
               include: {
-                judgingInstances: {},
+                judgingInstances: true,
               },
             },
           },
         },
-        ignoredProjects: {},
+        ignoredProjects: true,
       },
     });
     if (!judge) {
       return null;
     }
 
-    return await getNext(judge);
+    return await getNext(judge, ctx.prisma);
   }),
   compare: protectedProcedure
     .input(

@@ -3,10 +3,11 @@ import type {
   Judge,
   JudgePrizeAssignment,
   JudgingInstance,
+  PrismaClient,
   Project,
 } from "@prisma/client";
 import arrayShuffle from "array-shuffle";
-import { argmax, EPSILON, expected_information_gain } from "../utils/crowd-bt";
+import { argmax, EPSILON, expectedInformationGain } from "../utils/crowd-bt";
 import { mapReduce, mapReducePartial } from "../utils/fp";
 
 type JudgeNext = Judge & {
@@ -23,12 +24,13 @@ type PrizeAssignmentNext = JudgePrizeAssignment & {
 const MIN_VIEWS = 1;
 const TIMEOUT = 5 * 60 * 1000; // in milliseconds
 
-const _preferred_projects = async (
-  judge: JudgeNext
+const getPreferredProjects = async (
+  judge: JudgeNext,
+  prisma: PrismaClient
 ): Promise<ProjectNext[]> => {
   const ignoredIds = judge.ignoredProjects.map((ip) => ip.projectId);
   const prizeIds = judge.prizeAssignments.map((pa) => pa.prizeId);
-  const projects = await prisma?.project.findMany({
+  const projects = await prisma.project.findMany({
     where: {
       id: {
         notIn: ignoredIds,
@@ -80,10 +82,11 @@ const _preferred_projects = async (
 };
 
 export const getNext = async (
-  judge: JudgeNext
+  judge: JudgeNext,
+  prisma: PrismaClient
 ): Promise<Project | null | undefined> => {
-  const preferred_projects = await _preferred_projects(judge);
-  if (!preferred_projects) {
+  const preferredProjects = await getPreferredProjects(judge, prisma);
+  if (!preferredProjects) {
     return null;
   }
 
@@ -97,15 +100,15 @@ export const getNext = async (
   };
   const prizeBests = new Map(judge.prizeAssignments.map(getPrizeLeader));
 
-  const shuffled_projects = arrayShuffle(preferred_projects);
+  const shuffledProjects = arrayShuffle(preferredProjects);
   if (Math.random() < EPSILON) {
-    return shuffled_projects[0];
+    return shuffledProjects[0];
   } else {
     return argmax(
       (project) =>
         mapReduce(
           (ji) =>
-            expected_information_gain(
+            expectedInformationGain(
               judge.alpha,
               judge.beta,
               (prizeBests.get(ji.prizeId) as JudgingInstance).mu,
@@ -117,7 +120,7 @@ export const getNext = async (
           0,
           project.judgingInstances
         ),
-      shuffled_projects
+      shuffledProjects
     );
   }
 };
