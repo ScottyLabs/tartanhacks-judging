@@ -4,8 +4,8 @@
  * https://github.com/anishathalye/gavel/blob/master/gavel/crowd_bt.py
  */
 
-import betaln from "@stdlib/math-base-special-betaln/docs/types";
-import digamma from "@stdlib/math-base-special-digamma/docs/types";
+import betaln from "@stdlib/math-base-special-betaln";
+import digamma from "@stdlib/math-base-special-digamma";
 import { id, uproduct } from "./fp";
 
 /* See this paper for more information:
