@@ -109,7 +109,7 @@ async function synchronizeProjects() {
     )
   );
 
-  // Upsert project-prize relations
+  // Upsert judging instances
   await prisma.$transaction(
     prizeRelations.map((relation) =>
       prisma.judgingInstance.upsert({

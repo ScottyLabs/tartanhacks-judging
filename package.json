@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@next/font": "^13.1.3",
-    "@prisma/client": "^4.8.0",
+    "@prisma/client": "^4.9.0",
     "@stdlib/math-base-special-betaln": "^0.0.6",
     "@stdlib/math-base-special-digamma": "^0.0.6",
     "@tanstack/react-query": "^4.20.0",
@@ -19,6 +19,7 @@
     "@trpc/next": "^10.8.1",
     "@trpc/react-query": "^10.8.1",
     "@trpc/server": "^10.8.1",
+    "array-shuffle": "^3.0.0",
     "clsx": "^1.2.1",
     "luxon": "^3.2.1",
     "next": "13.1.1",
@@ -43,7 +44,7 @@
     "postcss": "^8.4.14",
     "prettier": "^2.8.1",
     "prettier-plugin-tailwindcss": "^0.2.1",
-    "prisma": "^4.8.0",
+    "prisma": "^4.9.0",
     "tailwindcss": "^3.2.0",
     "typescript": "^4.9.4"
   },

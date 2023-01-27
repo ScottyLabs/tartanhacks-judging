@@ -1,5 +1,6 @@
 import { z } from "zod";
 import type { HelixUser } from "../../../types/user";
+import { getNext } from "../../controllers/getNext";
 import authMiddleware from "../middleware/authMiddleware";
 
 import { createTRPCRouter, publicProcedure } from "../trpc";
@@ -7,14 +8,29 @@ import { createTRPCRouter, publicProcedure } from "../trpc";
 const protectedProcedure = publicProcedure.use(authMiddleware);
 
 export const judgingRouter = createTRPCRouter({
-  getNext: protectedProcedure.query(async ({ ctx, input }) => {
+  getNext: protectedProcedure.query(async ({ ctx }) => {
     // TODO: Return next project to be assigned
     const user = ctx?.session?.user as HelixUser;
-    const judge = await prisma?.judge.findFirst({
+    const judge = await ctx.prisma.judge.findFirst({
       where: { helixId: user._id },
+      include: {
+        prizeAssignments: {
+          include: {
+            leadingProject: {
+              include: {
+                judgingInstances: true,
+              },
+            },
+          },
+        },
+        ignoredProjects: true,
+      },
     });
+    if (!judge) {
+      return null;
+    }
 
-    return;
+    return await getNext(judge, ctx.prisma);
   }),
   compare: protectedProcedure
     .input(
