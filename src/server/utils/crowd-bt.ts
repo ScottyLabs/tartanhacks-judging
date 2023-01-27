@@ -21,7 +21,7 @@ const ALPHA_PRIOR = 10;
 const BETA_PRIOR = 1;
 const EPSILON = 0.25;
 
-function argmax<T>(f: (x: T) => number, xs: [T]): T {
+function argmax<T>(f: (x: T) => number, xs: T[]): T {
   const update = (e1: [number, T], e2: [number, T]) =>
     e2[0] > e1[0] ? e2 : e1;
   return xs.map(uproduct(f, id)).reduce(update)[1];
@@ -96,6 +96,75 @@ const update = (
   ];
 };
 
+const expected_information_gain = (
+  alpha: number,
+  beta: number,
+  mu_a: number,
+  sigma_sq_a: number,
+  mu_b: number,
+  sigma_sq_b: number
+): number => {
+  const [alpha_1, beta_1, c] = _updated_annotator(
+    alpha,
+    beta,
+    mu_a,
+    sigma_sq_a,
+    mu_b,
+    sigma_sq_b
+  );
+  const [mu_a_1, mu_b_1] = _updated_mus(
+    alpha,
+    beta,
+    mu_a,
+    sigma_sq_a,
+    mu_b,
+    sigma_sq_b
+  );
+  const [sigma_sq_a_1, sigma_sq_b_1] = _updated_sigma_sqs(
+    alpha,
+    beta,
+    mu_a,
+    sigma_sq_a,
+    mu_b,
+    sigma_sq_b
+  );
+  const prob_a_ranked_above = c;
+  const [alpha_2, beta_2] = _updated_annotator(
+    alpha,
+    beta,
+    mu_b,
+    sigma_sq_b,
+    mu_a,
+    sigma_sq_a
+  );
+  const [mu_b_2, mu_a_2] = _updated_mus(
+    alpha,
+    beta,
+    mu_b,
+    sigma_sq_b,
+    mu_a,
+    sigma_sq_a
+  );
+  const [sigma_sq_b_2, sigma_sq_a_2] = _updated_sigma_sqs(
+    alpha,
+    beta,
+    mu_b,
+    sigma_sq_b,
+    mu_a,
+    sigma_sq_a
+  );
+
+  return (
+    prob_a_ranked_above *
+      (divergence_gaussian(mu_a_1, sigma_sq_a_1, mu_a, sigma_sq_a) +
+        divergence_gaussian(mu_b_1, sigma_sq_b_1, mu_b, sigma_sq_b) +
+        GAMMA * divergence_beta(alpha_1, beta_1, alpha, beta)) +
+    (1 - prob_a_ranked_above) *
+      (divergence_gaussian(mu_a_2, sigma_sq_a_2, mu_a, sigma_sq_a) +
+        divergence_gaussian(mu_b_2, sigma_sq_b_2, mu_b, sigma_sq_b) +
+        GAMMA * divergence_beta(alpha_2, beta_2, alpha, beta))
+  );
+};
 // returns (updated mu of winner, updated mu of loser)
 const _updated_mus = (
   alpha: number,
@@ -178,6 +247,7 @@ export {
   divergence_gaussian,
   divergence_beta,
   update,
+  expected_information_gain,
   GAMMA,
   LAMBDA,
   MU_PRIOR,
