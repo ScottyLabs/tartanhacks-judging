@@ -42,13 +42,14 @@ export const judgingRouter = createTRPCRouter({
       })
     )
     .query(async ({ ctx, input }) => {
-      // TODO: Update computation based on current pair-wise comparison
+      // Update computation based on current pair-wise comparison
       const user = ctx?.session?.user as HelixUser;
-      const prize = (await ctx.prisma.prize.findFirst({
-        where: { id: input.prizeId },
-      })) as Prize;
+
       const judge = await ctx.prisma.judge.findFirst({
         where: { helixId: user._id },
+      });
+      const prize = await ctx.prisma.prize.findFirst({
+        where: { id: input.prizeId },
       });
       const winner = await ctx.prisma.judgingInstance.findFirst({
         where: { prizeId: input.prizeId, projectId: input.winnerId },
@@ -57,7 +58,11 @@ export const judgingRouter = createTRPCRouter({
         where: { prizeId: input.prizeId, projectId: input.loserId },
       });
 
-      await cmp(winner, loser, judge, ctx.prisma);
+      if (!(judge && winner && loser && prize)) {
+        throw "Invalid judge, winner, loser, or prize ID";
+      }
+
+      await cmp(winner, loser, prize, judge, ctx.prisma);
 
       return;
     }),
