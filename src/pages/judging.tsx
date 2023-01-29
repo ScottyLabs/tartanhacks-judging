@@ -118,7 +118,7 @@ export default function JudgingPage() {
               <div className="overflow-hidden">
                 <p className="pr-10 text-xl font-bold">Description:</p>
                 <div>
-                  <p className="break-normal text-xl">{project.description}</p>
+                  <p className="break-normal text-md">{project.description}</p>
                 </div>
               </div>
             </div>
