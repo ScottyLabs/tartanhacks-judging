@@ -26,13 +26,27 @@ export default function VotingList({
 }: Props) {
   // Default project selection color
   const inactiveColor = "#000000";
-  const votedColor = "#87db69";
+  const votedColor = "#2e8540";
 
   const numPrizes = prizes.length;
 
   const startVotes: Votes[] = new Array(numPrizes).fill(Votes.None) as Votes[];
   const [votes, setVotes] = useState(startVotes);
   const [numVotes, setNumVotes] = useState(0);
+
+  const updateVotes = (i: number, newVote: Votes) => {
+    const curVote = votes[i];
+    if (curVote === Votes.None && newVote !== Votes.None) {
+      setNumVotes(numVotes + 1);
+    } else if (newVote === Votes.None && curVote !== Votes.None) {
+      setNumVotes(numVotes - 1);
+    }
+    setVotes(
+      votes.map((vote, j) => {
+        return j === i ? newVote : vote;
+      })
+    );
+  };
 
   return (
     <>
@@ -45,8 +59,8 @@ export default function VotingList({
           // TODO submit votes
         }}
       />
-      <p className="mt-5 text-center">Which project is better? Click project name to select.</p>
-      <div className="flex flex-col content-center gap-5">
+      <p className="mt-5 text-center text-xl font-bold">Which project is better?</p>
+      <div className="flex flex-col gap-5">
         {prizes.map((prize, i) => {
           return (
             <PrizeListing
@@ -54,54 +68,68 @@ export default function VotingList({
               prizeName={prize.name}
               key={i}
             >
-              <div>
-                <div className="mt-3 flex flex-col items-center">
-                  <p className="text-xl font-bold select-none" style={{
-                    color: votes[i] === Votes.This ? votedColor : inactiveColor
-                  }} onClick={() => {
-                    const curVote = votes[i]
-                    if (curVote === Votes.None) {
-                      setNumVotes(numVotes + 1);
-                    } else if (curVote === Votes.This) {
-                      setNumVotes(numVotes - 1);
-                    }
-                    setVotes(votes.map((vote, j) => {
-                      // if already selected, reset, otherwise switch vote to this
-                      return j === i ?
-                      curVote === Votes.This ? Votes.None : Votes.This :
-                      vote
-                    }))
-                  }}>
+              <div className="mt-3 flex flex-col gap-3">
+                <label className="flex flex-row gap-2">
+                  <input
+                    type="radio"
+                    value={Votes.This}
+                    name={`prize${i}`}
+                    onChange={() => {
+                      updateVotes(i, Votes.This);
+                    }}
+                    checked={votes[i] === Votes.This}
+                    className="text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                  />
+                  <p
+                    className="select-none text-xl font-bold"
+                    style={{
+                      color:
+                        votes[i] === Votes.This ? votedColor : inactiveColor,
+                    }}
+                  >
                     {project.name}
                   </p>
-                  <p className="text-lg font-bold">vs</p>
-                  <p className="text-xl font-bold select-none" style={{
-                    color: votes[i] === Votes.Other ? votedColor : inactiveColor
-                  }} onClick={() => {
-                    const curVote = votes[i]
-                    if (curVote === Votes.None) {
-                      setNumVotes(numVotes + 1);
-                    } else if (curVote === Votes.Other) {
-                      setNumVotes(numVotes - 1);
-                    }
-                    setVotes(votes.map((vote, j) => {
-                      // if already selected, reset, otherwise switch vote to other
-                      return j === i ?
-                      curVote === Votes.Other ? Votes.None : Votes.Other :
-                      vote
-                    }))
-                  }}>
+                </label>
+                <label className="flex flex-row gap-2">
+                  <input
+                    type="radio"
+                    value={Votes.Other}
+                    name={`prize${i}`}
+                    onChange={() => {
+                      updateVotes(i, Votes.Other);
+                    }}
+                    checked={votes[i] === Votes.Other}
+                    className="text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                  />
+
+                  <p
+                    className="select-none text-xl font-bold"
+                    style={{
+                      color:
+                        votes[i] === Votes.Other ? votedColor : inactiveColor,
+                    }}
+                  >
                     {compareProjects[i]?.name}
                   </p>
-                  <details className="pt-2 text-center">
-                    <summary className="text-md">Project description</summary>
-                    <div className="pt-2 text-left">
-                      <p className="break-normal">
-                        {compareProjects[i]?.description}
-                      </p>
-                    </div>
-                  </details>
-                </div>
+                </label>
+                <button
+                  className="text-lg underline w-fit"
+                  onClick={() => {
+                    updateVotes(i, Votes.None);
+                  }}
+                >
+                  Clear
+                </button>
+                <details className="pt-2 text-center">
+                  <summary className="text-md">
+                    {compareProjects[i]?.name} description
+                  </summary>
+                  <div className="pt-2 text-left">
+                    <p className="break-normal">
+                      {compareProjects[i]?.description}
+                    </p>
+                  </div>
+                </details>
               </div>
             </PrizeListing>
           );

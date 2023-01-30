@@ -72,7 +72,7 @@ export default function JudgingPage() {
       {
         id: "3",
         helixId: "3",
-        name: "Other project 2",
+        name: "Very long name project with a very long name.",
         location: "Table 42069",
         team: "Other team 2",
         description:
