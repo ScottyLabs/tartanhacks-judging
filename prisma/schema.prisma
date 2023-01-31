@@ -12,13 +12,13 @@ datasource db {
 
 // Judges compare different projects and have some associated priors (alpha, beta)
 model Judge {
-    id            String  @id @default(cuid()) @map("_id")
+    id            String   @id @default(cuid()) @map("_id")
     helixId       String
     email         String
-    alpha         Float
-    beta          Float
-    nextProjectId String
-    nextProject   Project @relation(fields: [nextProjectId], references: [id])
+    alpha         Float    @default(0)
+    beta          Float    @default(0)
+    nextProjectId String?
+    nextProject   Project? @relation(fields: [nextProjectId], references: [id])
 
     prizeAssignments JudgePrizeAssignment[]
     ignoredProjects  IgnoreProjects[]
@@ -110,7 +110,7 @@ model JudgingInstance {
 // Assignments of judges to prizes
 model JudgePrizeAssignment {
     id               String @id @default(cuid()) @map("_id")
-    email            String
+    judgeId          String
     prizeId          String
     leadingProjectId String
 
@@ -119,8 +119,7 @@ model JudgePrizeAssignment {
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
-    Judge     Judge?   @relation(fields: [judgeId], references: [id])
-    judgeId   String?
+    Judge     Judge    @relation(fields: [judgeId], references: [id])
 
-    @@unique([email, prizeId])
+    @@unique([judgeId, prizeId])
 }
