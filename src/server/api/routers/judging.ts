@@ -68,9 +68,31 @@ export const judgingRouter = createTRPCRouter({
     }),
   getTopProjects: protectedProcedure
     .input(z.object({ prizeId: z.string() }))
-    .query(({ ctx, input }) => {
-      // TODO: return top projects for the specified prize
-      const user = ctx?.session?.user;
-      return;
+    .query(async ({ ctx, input }) => {
+      // Get judging instances with populated projects
+      // Winner should have the highest mean score and lowest variance
+      const judgments = await ctx.prisma.judgingInstance.findMany({
+        where: {
+          prizeId: input.prizeId,
+        },
+        include: {
+          project: true,
+        },
+        orderBy: [
+          {
+            mu: "desc",
+          },
+          {
+            sigma2: "asc",
+          },
+          {
+            project: {
+              name: "asc",
+            },
+          },
+        ],
+      });
+
+      return judgments;
     }),
 });
