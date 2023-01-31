@@ -1,5 +1,4 @@
 import React from "react";
-import CloseButton from "./CloseButton";
 
 interface Props {
   showModal: boolean;

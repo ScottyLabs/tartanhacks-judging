@@ -25,10 +25,6 @@ export default function VotingList({
   project,
   compareProjects,
 }: Props) {
-  // Default project selection color
-  const inactiveColor = "#000000";
-  const votedColor = "#2e8540";
-
   const numPrizes = prizes.length;
 
   const startVotes: Votes[] = new Array(numPrizes).fill(Votes.None) as Votes[];
@@ -122,14 +118,12 @@ export default function VotingList({
                       updateVotes(i, Votes.This);
                     }}
                     checked={votes[i] === Votes.This}
-                    className="text-blue-600 focus:ring-blue-500 dark:focus:ring-blue-600 border-gray-300 bg-gray-100 focus:ring-2 dark:border-gray-600 dark:bg-gray-700 dark:ring-offset-gray-800"
+                    className="text-blue-600 border-gray-300 bg-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:ring-offset-gray-800"
                   />
                   <p
-                    className="select-none text-xl font-bold"
-                    style={{
-                      color:
-                        votes[i] === Votes.This ? votedColor : inactiveColor,
-                    }}
+                    className={`select-none text-xl font-bold ${
+                      votes[i] === Votes.This ? "text-voted" : "text-inactive"
+                    }`}
                   >
                     {project.name}
                   </p>
@@ -143,15 +137,13 @@ export default function VotingList({
                       updateVotes(i, Votes.Other);
                     }}
                     checked={votes[i] === Votes.Other}
-                    className="text-blue-600 focus:ring-blue-500 dark:focus:ring-blue-600 border-gray-300 bg-gray-100 focus:ring-2 dark:border-gray-600 dark:bg-gray-700 dark:ring-offset-gray-800"
+                    className="text-blue-600 border-gray-300 bg-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:ring-offset-gray-800"
                   />
 
                   <p
-                    className="select-none text-xl font-bold"
-                    style={{
-                      color:
-                        votes[i] === Votes.Other ? votedColor : inactiveColor,
-                    }}
+                    className={`select-none text-xl font-bold ${
+                      votes[i] === Votes.Other ? "text-voted" : "text-inactive"
+                    }`}
                   >
                     {compareProjects[i]?.name}
                   </p>

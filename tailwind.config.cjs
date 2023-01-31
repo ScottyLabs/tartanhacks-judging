@@ -9,6 +9,8 @@ module.exports = {
         blue: "#6e9afd",
         yellow: "#fea801",
         beige: "#f7f1e2",
+        inactive: "#000000",
+        voted: "#2e8540"
       },
     },
   },
