@@ -5,6 +5,7 @@ import Header from "../components/Header";
 import PrizeListing from "../components/PrizeListing";
 import { DateTime } from "luxon";
 import { useEffect, useState } from "react";
+import Link from "next/link";
 
 const JUDGING_DEADLINE = DateTime.fromISO("2023-02-04T08:00:00.000");
 
@@ -55,7 +56,9 @@ const Home: NextPage = () => {
         {/* Action buttons */}
         <div className="mt-10 flex flex-col items-center gap-3">
           <Button text="View Current Results" className="w-12/12" />
-          <Button text="Start Judging" className="w-12/12" />
+          <Link href="/judging">
+            <Button text="Start Judging" className="w-12/12" />
+          </Link>
         </div>
       </main>
     </>
