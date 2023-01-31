@@ -86,7 +86,7 @@ export default function VotingList({
               type="button"
               onClick={() => setShowModal(false)}
             >
-              No, don't skip
+              No, don&apos;t skip
             </button>
             <button
               className="mr-1 mb-1 rounded bg-emerald-500 px-6 py-3 text-sm font-bold uppercase text-white shadow outline-none transition-all duration-150 ease-linear hover:shadow-lg focus:outline-none active:bg-emerald-600"
