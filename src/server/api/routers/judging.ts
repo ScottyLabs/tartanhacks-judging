@@ -1,6 +1,5 @@
-import { Prize } from "@prisma/client";
+import type { User } from "next-auth";
 import { z } from "zod";
-import type { HelixUser } from "../../../types/user";
 import cmp from "../../controllers/cmp";
 import { getNext } from "../../controllers/getNext";
 import authMiddleware from "../middleware/authMiddleware";
@@ -10,10 +9,11 @@ import { createTRPCRouter, publicProcedure } from "../trpc";
 const protectedProcedure = publicProcedure.use(authMiddleware);
 
 export const judgingRouter = createTRPCRouter({
+  // Get the next project for the current judge
   getNext: protectedProcedure.query(async ({ ctx }) => {
-    const user = ctx?.session?.user as HelixUser;
+    const user = ctx?.session?.user as User;
     const judge = await ctx.prisma.judge.findFirst({
-      where: { helixId: user._id },
+      where: { helixId: user.id },
       include: {
         prizeAssignments: {
           include: {
@@ -33,6 +33,8 @@ export const judgingRouter = createTRPCRouter({
 
     return await getNext(judge, ctx.prisma);
   }),
+
+  // Perform a comparison between two projects for a specific prize
   compare: protectedProcedure
     .input(
       z.object({
@@ -43,10 +45,10 @@ export const judgingRouter = createTRPCRouter({
     )
     .query(async ({ ctx, input }) => {
       // Update computation based on current pair-wise comparison
-      const user = ctx?.session?.user as HelixUser;
+      const user = ctx?.session?.user as User;
 
       const judge = await ctx.prisma.judge.findFirst({
-        where: { helixId: user._id },
+        where: { helixId: user.id },
       });
       const prize = await ctx.prisma.prize.findFirst({
         where: { id: input.prizeId },
@@ -66,6 +68,8 @@ export const judgingRouter = createTRPCRouter({
 
       return;
     }),
+
+  // Get the top projects for a specific prize
   getTopProjects: protectedProcedure
     .input(z.object({ prizeId: z.string() }))
     .query(async ({ ctx, input }) => {
@@ -95,4 +99,26 @@ export const judgingRouter = createTRPCRouter({
 
       return judgments;
     }),
+
+  // Get prizes that a judge is judging
+  getJudgingPrizes: protectedProcedure.query(async ({ ctx }) => {
+    const user = ctx?.session?.user as User;
+    const judge = await ctx.prisma.judge.findFirst({
+      where: {
+        helixId: user.id,
+      },
+      include: {
+        prizeAssignments: {
+          include: {
+            prize: true,
+          },
+        },
+      },
+    });
+    const prizes = judge?.prizeAssignments.map(
+      (assignment) => assignment.prize
+    );
+
+    return prizes;
+  }),
 });

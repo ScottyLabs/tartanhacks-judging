@@ -1,17 +1,21 @@
+import { DateTime } from "luxon";
 import { type NextPage } from "next";
-import { useSession } from "next-auth/react";
+import Link from "next/link";
+import { useEffect, useState } from "react";
 import Button from "../components/Button";
 import Header from "../components/Header";
 import PrizeListing from "../components/PrizeListing";
-import { DateTime } from "luxon";
-import { useEffect, useState } from "react";
-import Link from "next/link";
+import { api } from "../utils/api";
+import { getSponsorLogo } from "../utils/prizes";
 
 const JUDGING_DEADLINE = DateTime.fromISO("2023-02-04T08:00:00.000");
 
 const Home: NextPage = () => {
-  const { data: session } = useSession();
   const [timeLeft, setTimeLeft] = useState("00:00:00");
+
+  const { data: prizeData } = api.judging.getJudgingPrizes.useQuery();
+
+  const prizes = prizeData ?? [];
 
   useEffect(() => {
     const intervalId = setInterval(() => {
@@ -26,10 +30,6 @@ const Home: NextPage = () => {
     <>
       <Header />
       <main className="flex flex-col items-center gap-5 py-5 px-2 md:px-10">
-        {/* <p className="text-lg">
-          Welcome, <span className="font-semibold text-yellow">Gram!</span>
-        </p> */}
-
         {/* Timer */}
         <div className="w-12/12 flex flex-col items-center justify-center gap-3">
           <p className="text-2xl font-bold">Judging Time Left</p>
@@ -37,28 +37,35 @@ const Home: NextPage = () => {
         </div>
 
         {/* Prizes */}
-        <p className="mt-5">You are judging the following prizes</p>
+        {prizes.length > 0 ? (
+          <p className="mt-5">You are judging the following prizes</p>
+        ) : (
+          <p className="mt-5">
+            You have not been assigned to judge any prizes!
+          </p>
+        )}
         <div className="w-12/12 flex flex-col gap-5">
-          <PrizeListing
-            sponsorLogo="/sponsors/scottylabs.svg"
-            prizeName="Scott Krulcik Grand Prize"
-          />
-          <PrizeListing
-            sponsorLogo="/sponsors/scottylabs.svg"
-            prizeName="First Penguin Award"
-          />
-          <PrizeListing
-            sponsorLogo="/sponsors/algorand.png"
-            prizeName="Best Use of Algorand"
-          />
+          {prizes.map((prize) => {
+            const sponsorLogo = getSponsorLogo(prize.provider);
+
+            return (
+              <PrizeListing
+                key={prize.name}
+                sponsorLogo={sponsorLogo}
+                prizeName={prize.name}
+              />
+            );
+          })}
         </div>
 
         {/* Action buttons */}
         <div className="mt-10 flex flex-col items-center gap-3">
           <Button text="View Current Results" className="w-12/12" />
-          <Link href="/judging">
-            <Button text="Start Judging" className="w-12/12" />
-          </Link>
+          {prizes.length > 0 ? (
+            <Link href="/judging">
+              <Button text="Start Judging" className="w-12/12" />
+            </Link>
+          ) : null}
         </div>
       </main>
     </>
