@@ -9,6 +9,7 @@ export const authOptions: AuthOptions = {
   // Configure one or more authentication providers
   providers: [
     CredentialsProvider({
+      id: "credentials",
       name: "Email",
       credentials: {
         username: {
@@ -70,7 +71,9 @@ export const authOptions: AuthOptions = {
   session: {
     strategy: "jwt",
   },
-  secret: "secret123",
+  pages: {
+    signIn: "/auth/login",
+  },
 };
 
 export default NextAuth(authOptions);

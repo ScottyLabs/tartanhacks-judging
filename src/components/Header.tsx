@@ -1,12 +1,33 @@
 import Link from "next/link";
 import Logo from "../../public/svg/logo.svg";
+import { signOut } from "next-auth/react";
 
-export default function Header() {
+interface Props {
+  hideAuth?: boolean;
+}
+
+export default function Header({ hideAuth = false }: Props) {
   return (
-    <header className="sticky top-0 z-30 w-full bg-gradient-to-b from-blue to-purple px-4 pt-4 pb-4 text-beige">
-      <Link href="/">
-        <Logo className="h-12" />
-      </Link>
+    <header>
+      <nav className="navbar navbar-expand-lg bg-gradient-to-b from-blue to-purple py-2 shadow-md">
+        <div className="mx-auto flex max-w-screen-xl flex-wrap items-center justify-between">
+          {!hideAuth && (
+            <div className="flex items-center lg:order-2">
+              <a href="#" onClick={() => void signOut()} className="text-white">
+                Sign out
+              </a>
+            </div>
+          )}
+          <div
+            className="hidden w-full items-center justify-between lg:order-1 lg:flex lg:w-auto"
+            id="mobile-menu-2"
+          >
+            <Link href="/">
+              <Logo className="h-12" />
+            </Link>
+          </div>
+        </div>
+      </nav>
     </header>
   );
 }
