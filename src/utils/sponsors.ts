@@ -1,10 +1,10 @@
-export type Sponsor = "algorand" | "scottylabs";
-
 const sponsorLogoMapping = {
-  algorand: "/sponsors/algorand.png",
-  scottylabs: "/sponsors/scottylabs.svg",
+  Algorand: "/sponsors/algorand.png",
+  ScottyLabs: "/sponsors/scottylabs.svg",
 } as const;
 
+export type Sponsor = keyof typeof sponsorLogoMapping;
+
 export function getSponsorLogoUrl(sponsor: Sponsor): string {
-  return sponsorLogoMapping[sponsor];
+  return sponsorLogoMapping[sponsor ?? "ScottyLabs"];
 }

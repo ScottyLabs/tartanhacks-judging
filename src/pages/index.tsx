@@ -6,7 +6,7 @@ import Button from "../components/Button";
 import Header from "../components/Header";
 import PrizeListing from "../components/PrizeListing";
 import { api } from "../utils/api";
-import { getSponsorLogo } from "../utils/prizes";
+import { getSponsorLogoUrl, Sponsor } from "../utils/sponsors";
 
 const JUDGING_DEADLINE = DateTime.fromISO("2023-02-04T08:00:00.000");
 
@@ -46,7 +46,7 @@ const Home: NextPage = () => {
         )}
         <div className="w-12/12 flex flex-col gap-5">
           {prizes.map((prize) => {
-            const sponsorLogo = getSponsorLogo(prize.provider);
+            const sponsorLogo = getSponsorLogoUrl(prize.provider as Sponsor);
 
             return (
               <PrizeListing

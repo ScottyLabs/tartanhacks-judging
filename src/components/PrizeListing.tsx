@@ -18,7 +18,7 @@ export default function PrizeListing({
   prizeName,
   sponsorLogo,
   prizeDescription,
-  children
+  children,
 }: PrizeListingProps): ReactElement {
   return (
     <div
@@ -28,18 +28,17 @@ export default function PrizeListing({
       )}
     >
       <div className="flex flex-row items-center justify-center gap-3">
-        <Image src={sponsorLogo} height={32} width={32} alt="Company logo" />
+        <Image src={sponsorLogo} height={32} width={32} alt={sponsorLogo} />
         <p>{prizeName}</p>
       </div>
-      {
-        prizeDescription && 
-            <details className="pt-2">
-              <summary className="text-md">Description</summary>
-              <div className="pt-2">
-                <p className="break-normal">{prizeDescription}</p>
-              </div>
-            </details>
-      }
+      {prizeDescription && (
+        <details className="pt-2">
+          <summary className="text-md">Description</summary>
+          <div className="pt-2">
+            <p className="break-normal">{prizeDescription}</p>
+          </div>
+        </details>
+      )}
       {children}
     </div>
   );
