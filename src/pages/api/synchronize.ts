@@ -120,11 +120,6 @@ async function synchronizeProjects() {
     })
   );
 
-  // Extract prize relations
-  const prizeRelations = helixProjects.flatMap(({ _id, prizes }) =>
-    prizes.map((prize) => ({ prizeId: prize._id, projectId: _id }))
-  );
-
   // Upsert projects
   await prisma.$transaction(
     minifiedProjects.map((project) =>
@@ -134,6 +129,28 @@ async function synchronizeProjects() {
         create: project,
       })
     )
+  );
+
+  // Prepare helixId to id mapping for projects and prizes
+  const projects = await prisma.project.findMany({});
+  const prizes = await prisma.prize.findMany({});
+
+  const projectMapping = new Map<string, string>();
+  for (const project of projects) {
+    projectMapping.set(project.helixId, project.id);
+  }
+
+  const prizeMapping = new Map<string, string>();
+  for (const prize of prizes) {
+    prizeMapping.set(prize.helixId, prize.id);
+  }
+
+  const prizeRelations = helixProjects.flatMap(
+    ({ _id, prizes: projectPrizes }) =>
+      projectPrizes.map((prize) => ({
+        prizeId: prizeMapping.get(prize._id) as string,
+        projectId: projectMapping.get(_id) as string,
+      }))
   );
 
   // Upsert judging instances

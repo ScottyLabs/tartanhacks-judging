@@ -47,7 +47,6 @@ const getPreferredProjects = async (
     },
   });
   if (projects == null) {
-    console.log("No matching projects");
     return [];
   }
   const cutoff = new Date(Date.now() - TIMEOUT);
@@ -74,7 +73,6 @@ const getPreferredProjects = async (
     0,
     candidateProjects
   );
-  console.log("Candidate projects", candidateProjects.length);
 
   return maxUnderviewedCount > 0
     ? candidateProjects.filter(
@@ -90,7 +88,6 @@ export const getNext = async (
 ): Promise<Project | null | undefined> => {
   const preferredProjects = await getPreferredProjects(judge, prisma);
   if (!preferredProjects || preferredProjects?.length == 0) {
-    console.log("No preferred projects");
     return null;
   }
 

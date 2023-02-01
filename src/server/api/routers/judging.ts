@@ -40,7 +40,6 @@ export const judgingRouter = createTRPCRouter({
       // If current project hasn't been assigned yet
       const project = await getNext(judge, ctx.prisma);
       if (project == null) {
-        console.log("No projects left to judge");
         // No more projects to judge!
         return null;
       }
@@ -61,8 +60,8 @@ export const judgingRouter = createTRPCRouter({
     return judge;
   }),
 
-  // Compute the next project for this judge
-  getNext: protectedProcedure.query(async ({ ctx }) => {
+  // Set the next project for this judge
+  computeNext: protectedProcedure.mutation(async ({ ctx }) => {
     const user = ctx?.session?.user as User;
     const judge = await ctx.prisma.judge.findFirst({
       where: { helixId: user.id },
@@ -77,13 +76,55 @@ export const judgingRouter = createTRPCRouter({
           },
         },
         ignoredProjects: true,
+        nextProject: {
+          include: {
+            judgingInstances: true,
+          },
+        },
       },
     });
     if (!judge) {
-      return null;
+      return;
     }
 
-    return await getNext(judge, ctx.prisma);
+    const prizeAssignments = judge.prizeAssignments ?? [];
+    const judgingInstances = judge.nextProject?.judgingInstances ?? [];
+    const projectPrizeIds = new Set(
+      judgingInstances.map((instance) => instance.prizeId)
+    );
+
+    for (const assignment of prizeAssignments) {
+      // If no previous project for a prize assignment and
+      // current project is entered for this prize,
+      // Set this project as the leading project for that prize assignment
+      if (
+        assignment.leadingProjectId == null &&
+        projectPrizeIds.has(assignment.prizeId)
+      ) {
+        await ctx.prisma.judgePrizeAssignment.update({
+          where: {
+            id: assignment.id,
+          },
+          data: {
+            leadingProjectId: judge.nextProjectId,
+          },
+        });
+      }
+    }
+
+    const project = await getNext(judge, ctx.prisma);
+    if (project == null) {
+      return;
+    }
+
+    await ctx.prisma.judge.update({
+      where: {
+        id: judge.id,
+      },
+      data: {
+        nextProjectId: project.id,
+      },
+    });
   }),
 
   // Perform a comparison between two projects for a specific prize
