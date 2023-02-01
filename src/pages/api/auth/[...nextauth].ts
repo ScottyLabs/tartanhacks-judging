@@ -5,6 +5,10 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { env } from "../../../env/server.mjs";
 import { type HelixUser } from "../../../types/user.js";
 
+export interface JudgingUser extends User {
+  judge: boolean;
+}
+
 export const authOptions: AuthOptions = {
   // Configure one or more authentication providers
   providers: [
@@ -42,9 +46,10 @@ export const authOptions: AuthOptions = {
 
         const helixUser = (await authResponse.json()) as HelixUser | null;
         if (helixUser) {
-          const user: User = {
+          const user: JudgingUser = {
             id: helixUser._id,
             email: helixUser.email,
+            judge: helixUser.judge,
           };
           return user;
         }
@@ -66,6 +71,9 @@ export const authOptions: AuthOptions = {
         session.id = token.id as string;
       }
       return session;
+    },
+    signIn: ({ user }): boolean => {
+      return (user as JudgingUser)?.judge ?? false;
     },
   },
   session: {
