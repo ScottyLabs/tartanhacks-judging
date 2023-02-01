@@ -1,3 +1,4 @@
+import { JudgePrizeAssignment } from "@prisma/client";
 import type { NextApiRequest, NextApiResponse } from "next";
 import { env } from "../../env/server.mjs";
 import { prisma } from "../../server/db";
@@ -58,6 +59,7 @@ async function synchronizeJudges() {
   const judges = helixJudges.map((judge) => ({
     helixId: judge._id,
     email: judge.email,
+    company: judge.company,
   }));
 
   // Upsert users
@@ -113,8 +115,8 @@ async function synchronizeProjects() {
       helixId: _id,
       name,
       description,
-      location,
-      team: team?.name,
+      location: location ?? "Table",
+      team: team?.name ?? "Missing team name",
     })
   );
 
@@ -152,6 +154,43 @@ async function synchronizeProjects() {
 }
 
 /**
+ * Assign judges to projects
+ */
+async function initJudgePrizeAssignments() {
+  const judges = await prisma.judge.findMany({});
+  const prizes = await prisma.prize.findMany({});
+
+  // Temporarily assign all judges to all prizes
+  // TODO: figure out what sponsors are judging their own prizes
+  const assignments = [] as { judgeId: string; prizeId: string }[];
+  for (const judge of judges) {
+    for (const prize of prizes) {
+      const assignment = {
+        judgeId: judge.id,
+        prizeId: prize.id,
+      };
+      assignments.push(assignment);
+    }
+  }
+
+  // Upsert judge prize assignments
+  await prisma.$transaction(
+    assignments.map((assignment) =>
+      prisma.judgePrizeAssignment.upsert({
+        where: {
+          judgeId_prizeId: {
+            judgeId: assignment.judgeId,
+            prizeId: assignment.prizeId,
+          },
+        },
+        update: {},
+        create: assignment,
+      })
+    )
+  );
+}
+
+/**
  * Pull prizes and projects from the Helix backend and
  * synchronize with the judging database
  */
@@ -163,6 +202,7 @@ export default async function handler(
     await synchronizeJudges();
     await synchronizePrizes();
     await synchronizeProjects();
+    await initJudgePrizeAssignments();
     res.status(200).end();
   } catch (err) {
     console.error(err);
