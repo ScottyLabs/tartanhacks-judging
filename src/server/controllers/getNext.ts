@@ -18,7 +18,7 @@ type ProjectNext = Project & {
   judgingInstances: JudgingInstance[];
 };
 type PrizeAssignmentNext = JudgePrizeAssignment & {
-  leadingProject: ProjectNext;
+  leadingProject: ProjectNext | null;
 };
 
 const MIN_VIEWS = 1;
@@ -92,11 +92,15 @@ export const getNext = async (
 
   const getPrizeLeader = (
     pa: PrizeAssignmentNext
-  ): [string, JudgingInstance] => {
-    const leadingJudgingInstance = pa.leadingProject.judgingInstances.find(
-      (ji) => ji.prizeId == pa.prizeId
-    );
-    return [pa.prizeId, leadingJudgingInstance as JudgingInstance];
+  ): [string | null, JudgingInstance | null] => {
+    if (pa.leadingProject != null) {
+      const leadingJudgingInstance = pa.leadingProject.judgingInstances.find(
+        (ji) => ji.prizeId == pa.prizeId
+      );
+      return [pa.prizeId, leadingJudgingInstance as JudgingInstance];
+    } else {
+      return [null, null];
+    }
   };
   const prizeBests = new Map(judge.prizeAssignments.map(getPrizeLeader));
 
@@ -111,8 +115,8 @@ export const getNext = async (
             expectedInformationGain(
               judge.alpha,
               judge.beta,
-              (prizeBests.get(ji.prizeId) as JudgingInstance).mu,
-              (prizeBests.get(ji.prizeId) as JudgingInstance).sigma2,
+              (prizeBests.get(ji.prizeId) as JudgingInstance)?.mu ?? 0,
+              (prizeBests.get(ji.prizeId) as JudgingInstance)?.sigma2 ?? 0,
               ji.mu,
               ji.sigma2
             ),

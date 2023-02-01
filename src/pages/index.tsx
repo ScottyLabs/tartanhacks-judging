@@ -4,16 +4,13 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import Button from "../components/Button";
 import Header from "../components/Header";
-import PrizeCard from "../components/PrizeCard";
 import PrizeList from "../components/PrizeList";
 import { api } from "../utils/api";
-import { getSponsorLogoUrl, Sponsor } from "../utils/sponsors";
 
 const JUDGING_DEADLINE = DateTime.fromISO("2023-02-04T08:00:00.000");
 
 const Home: NextPage = () => {
   const [timeLeft, setTimeLeft] = useState("00:00:00");
-
   const { data: prizeData } = api.judging.getJudgingPrizes.useQuery();
 
   const prizes = prizeData ?? [];

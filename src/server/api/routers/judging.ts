@@ -31,6 +31,31 @@ export const judgingRouter = createTRPCRouter({
       return null;
     }
 
+    // Assign next project if not yet assigned
+    for (const assignment of judge.prizeAssignments) {
+      if (assignment.leadingProjectId == null) {
+        const instance = await ctx.prisma.judgingInstance.findFirst({
+          where: {
+            prizeId: assignment.prizeId,
+          },
+          orderBy: {
+            timesJudged: "asc",
+          },
+        });
+        if (instance != null) {
+          // If there is a project available for judging
+          await ctx.prisma.judgePrizeAssignment.update({
+            where: {
+              id: assignment.id,
+            },
+            data: {
+              leadingProjectId: instance.id,
+            },
+          });
+        }
+      }
+    }
+
     return await getNext(judge, ctx.prisma);
   }),
 

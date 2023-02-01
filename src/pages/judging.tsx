@@ -6,6 +6,8 @@ import Header from "../components/Header";
 import PrizeList from "../components/PrizeList";
 import VotingList from "../components/VotingList";
 
+// TODO: need to selectively disable vote cards if a project was not submitted for that prize
+
 export default function JudgingPage() {
   // whether this is the first project being judged
   const [isFirstProject, setIsFirstProject] = useState(true);
