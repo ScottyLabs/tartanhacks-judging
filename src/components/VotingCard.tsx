@@ -3,23 +3,16 @@ import clsx from "clsx";
 import Image from "next/image";
 import type { ReactElement } from "react";
 import { getSponsorLogoUrl, type Sponsor } from "../utils/sponsors";
+import { Vote } from "./VotingList";
 
 export interface VotingCardProps {
   className?: string;
   prize: Prize;
-  votes: Votes[];
-  updateVotes: (index: number, newVote: Votes) => void;
+  votes: Vote[];
+  updateVotes: (index: number, newVote: Vote) => void;
   index: number;
   project: Project;
-  prevProject: Project;
-}
-
-enum Votes {
-  None,
-  // vote for this project
-  This,
-  // vote for compared project
-  Other,
+  prevProject: Project | null;
 }
 
 /**
@@ -59,17 +52,17 @@ export default function VotingCard({
         <label className="flex flex-row gap-2">
           <input
             type="radio"
-            value={Votes.This}
+            value={Vote.THIS}
             name={`prize${index}`}
             onChange={() => {
-              updateVotes(index, Votes.This);
+              updateVotes(index, Vote.THIS);
             }}
-            checked={votes[index] === Votes.This}
+            checked={votes[index] === Vote.THIS}
             className="text-blue-600 border-gray-300 bg-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:ring-offset-gray-800"
           />
           <p
             className={`select-none text-xl font-bold ${
-              votes[index] === Votes.This ? "text-voted" : "text-inactive"
+              votes[index] === Vote.THIS ? "text-voted" : "text-inactive"
             }`}
           >
             {project.name}
@@ -78,35 +71,35 @@ export default function VotingCard({
         <label className="flex flex-row gap-2">
           <input
             type="radio"
-            value={Votes.Other}
+            value={Vote.OTHER}
             name={`prize${index}`}
             onChange={() => {
-              updateVotes(index, Votes.Other);
+              updateVotes(index, Vote.OTHER);
             }}
-            checked={votes[index] === Votes.Other}
+            checked={votes[index] === Vote.OTHER}
             className="text-blue-600 border-gray-300 bg-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:ring-offset-gray-800"
           />
-
+          {/* TODO: handle case where prev project is null */}
           <p
             className={`select-none text-xl font-bold ${
-              votes[index] === Votes.Other ? "text-voted" : "text-inactive"
+              votes[index] === Vote.OTHER ? "text-voted" : "text-inactive"
             }`}
           >
-            {prevProject.name}
+            {prevProject?.name}
           </p>
         </label>
         <button
           className="w-fit text-lg underline"
           onClick={() => {
-            updateVotes(index, Votes.None);
+            updateVotes(index, Vote.NONE);
           }}
         >
           Clear
         </button>
         <details className="pt-2 text-center">
-          <summary className="text-md">{prevProject.name} description</summary>
+          <summary className="text-md">{prevProject?.name} description</summary>
           <div className="pt-2 text-left">
-            <p className="break-normal">{prevProject.description}</p>
+            <p className="break-normal">{prevProject?.description}</p>
           </div>
         </details>
       </div>

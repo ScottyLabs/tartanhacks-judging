@@ -12,21 +12,24 @@ export const judgingRouter = createTRPCRouter({
   // Get the current project to be judged
   getCurrent: protectedProcedure.query(async ({ ctx }) => {
     const user = ctx?.session?.user as User;
-    const judge = await ctx.prisma.judge.findFirst({
-      where: { helixId: user.id },
-      include: {
-        prizeAssignments: {
-          include: {
-            leadingProject: {
-              include: {
-                judgingInstances: true,
-              },
+    const judgeIncludeFields = {
+      prizeAssignments: {
+        include: {
+          leadingProject: {
+            include: {
+              judgingInstances: true,
             },
           },
+          prize: true,
         },
-        ignoredProjects: true,
-        nextProject: true,
       },
+      ignoredProjects: true,
+      nextProject: true,
+    };
+
+    const judge = await ctx.prisma.judge.findFirst({
+      where: { helixId: user.id },
+      include: judgeIncludeFields,
     });
 
     if (judge == null) {
@@ -35,9 +38,9 @@ export const judgingRouter = createTRPCRouter({
 
     if (judge.nextProject == null) {
       // If current project hasn't been assigned yet
-
       const project = await getNext(judge, ctx.prisma);
       if (project == null) {
+        console.log("No projects left to judge");
         // No more projects to judge!
         return null;
       }
@@ -50,18 +53,7 @@ export const judgingRouter = createTRPCRouter({
         data: {
           nextProjectId: project.id,
         },
-        include: {
-          prizeAssignments: {
-            include: {
-              leadingProject: {
-                include: {
-                  judgingInstances: true,
-                },
-              },
-            },
-          },
-          nextProject: true,
-        },
+        include: judgeIncludeFields,
       });
       return updatedJudge;
     }

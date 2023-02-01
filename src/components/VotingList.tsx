@@ -1,41 +1,44 @@
-import type { Prize, Project } from "@prisma/client";
+import type { JudgePrizeAssignment, Prize, Project } from "@prisma/client";
 import { useState } from "react";
 import Button from "./Button";
 import Modal from "./Modal";
 import VotingCard from "./VotingCard";
 
-interface Props {
-  prizes: Prize[];
+type PopulatedJudgePrizeAssignment = JudgePrizeAssignment & {
+  prize: Prize;
+  leadingProject: Project | null;
+};
+
+interface VotingListProps {
+  prizeAssignments: PopulatedJudgePrizeAssignment[];
   project: Project;
-  compareProjects: Project[];
 }
 
-enum Votes {
-  None,
+export enum Vote {
+  NONE,
   // vote for this project
-  This,
+  THIS,
   // vote for compared project
-  Other,
+  OTHER,
 }
 
 // list multiple prizes with voting options
 export default function VotingList({
-  prizes,
+  prizeAssignments,
   project,
-  compareProjects,
-}: Props) {
-  const numPrizes = prizes.length;
+}: VotingListProps) {
+  const numPrizes = prizeAssignments.length;
 
-  const startVotes: Votes[] = new Array(numPrizes).fill(Votes.None) as Votes[];
+  const startVotes: Vote[] = new Array(numPrizes).fill(Vote.NONE) as Vote[];
   const [votes, setVotes] = useState(startVotes);
   const [numVotes, setNumVotes] = useState(0);
   const [showModal, setShowModal] = useState(false);
 
-  const updateVotes = (i: number, newVote: Votes) => {
+  const updateVotes = (i: number, newVote: Vote) => {
     const curVote = votes[i];
-    if (curVote === Votes.None && newVote !== Votes.None) {
+    if (curVote === Vote.NONE && newVote !== Vote.NONE) {
       setNumVotes(numVotes + 1);
-    } else if (newVote === Votes.None && curVote !== Votes.None) {
+    } else if (newVote === Vote.NONE && curVote !== Vote.NONE) {
       setNumVotes(numVotes - 1);
     }
     setVotes(
@@ -100,16 +103,16 @@ export default function VotingList({
         Which project is better?
       </p>
       <div className="flex flex-col gap-5">
-        {prizes.map((prize, i) => {
+        {prizeAssignments.map((prizeAssignment, i) => {
           return (
             <VotingCard
-              prize={prize}
+              prize={prizeAssignment.prize}
               votes={votes}
               updateVotes={updateVotes}
               index={i}
               project={project}
-              prevProject={compareProjects[i] as Project}
-              key={prize.name}
+              prevProject={prizeAssignment.leadingProject}
+              key={i}
             />
           );
         })}

@@ -47,6 +47,7 @@ const getPreferredProjects = async (
     },
   });
   if (projects == null) {
+    console.log("No matching projects");
     return [];
   }
   const cutoff = new Date(Date.now() - TIMEOUT);
@@ -57,11 +58,11 @@ const getPreferredProjects = async (
       },
     },
   });
-  const busyProjects = busyJudges?.map((bj) => bj.nextProjectId);
-  const unbusyProjects = projects.filter((project) =>
-    busyProjects?.includes(project.id)
+  const busyProjects = new Set(busyJudges?.map((bj) => bj.nextProjectId) ?? []);
+  const availableProjects = projects.filter(
+    (project) => !busyProjects.has(project.id)
   );
-  const candidateProjects = unbusyProjects ? unbusyProjects : projects;
+  const candidateProjects = availableProjects ? availableProjects : projects;
   const getUnderviewedCount = mapReducePartial(
     (ji: JudgingInstance) => (ji.timesJudged < MIN_VIEWS ? 1 : 0),
     (x, y) => x + y,
@@ -73,6 +74,8 @@ const getPreferredProjects = async (
     0,
     candidateProjects
   );
+  console.log("Candidate projects", candidateProjects.length);
+
   return maxUnderviewedCount > 0
     ? candidateProjects.filter(
         (project) =>
@@ -87,6 +90,7 @@ export const getNext = async (
 ): Promise<Project | null | undefined> => {
   const preferredProjects = await getPreferredProjects(judge, prisma);
   if (!preferredProjects || preferredProjects?.length == 0) {
+    console.log("No preferred projects");
     return null;
   }
 
