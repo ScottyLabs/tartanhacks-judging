@@ -105,7 +105,7 @@ async function synchronizePrizes() {
 /**
  * Synchronize projects with Helix
  */
-async function synchronizeProjects() {
+export async function synchronizeProjects() {
   const helixProjects = await fetchData<HelixProject[]>("/projects", "GET");
 
   // Remove unnecessary fields

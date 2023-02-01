@@ -127,39 +127,46 @@ export const judgingRouter = createTRPCRouter({
     });
   }),
 
-  // Perform a comparison between two projects for a specific prize
-  compare: protectedProcedure
+  // Perform multiple comparisons at once
+  compareMany: protectedProcedure
     .input(
-      z.object({
-        prizeId: z.string(),
-        winnerId: z.string(),
-        loserId: z.string(),
-      })
+      z.array(
+        z.object({
+          prizeId: z.string(),
+          winnerId: z.string(),
+          loserId: z.string(),
+        })
+      )
     )
-    .query(async ({ ctx, input }) => {
+    .mutation(async ({ ctx, input }) => {
       // Update computation based on current pair-wise comparison
       const user = ctx?.session?.user as User;
 
-      const judge = await ctx.prisma.judge.findFirst({
-        where: { helixId: user.id },
-      });
-      const prize = await ctx.prisma.prize.findFirst({
-        where: { id: input.prizeId },
-      });
-      const winner = await ctx.prisma.judgingInstance.findFirst({
-        where: { prizeId: input.prizeId, projectId: input.winnerId },
-      });
-      const loser = await ctx.prisma.judgingInstance.findFirst({
-        where: { prizeId: input.prizeId, projectId: input.loserId },
-      });
+      const comparisonInputs = [] as Parameters<typeof cmp>[];
+      for (const { prizeId, winnerId, loserId } of input) {
+        const judge = await ctx.prisma.judge.findFirst({
+          where: { helixId: user.id },
+        });
+        const prize = await ctx.prisma.prize.findFirst({
+          where: { id: prizeId },
+        });
+        const winner = await ctx.prisma.judgingInstance.findFirst({
+          where: { prizeId: prizeId, projectId: winnerId },
+        });
+        const loser = await ctx.prisma.judgingInstance.findFirst({
+          where: { prizeId: prizeId, projectId: loserId },
+        });
 
-      if (!(judge && winner && loser && prize)) {
-        throw "Invalid judge, winner, loser, or prize ID";
+        if (!(judge && winner && loser && prize)) {
+          throw "Invalid judge, winner, loser, or prize ID";
+        }
+
+        comparisonInputs.push([winner, loser, prize, judge, ctx.prisma]);
       }
 
-      await cmp(winner, loser, prize, judge, ctx.prisma);
-
-      return;
+      for (const [winner, loser, prize, judge] of comparisonInputs) {
+        await cmp(winner, loser, prize, judge, ctx.prisma);
+      }
     }),
 
   // Get the top projects for a specific prize

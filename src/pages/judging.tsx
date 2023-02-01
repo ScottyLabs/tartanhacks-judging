@@ -7,7 +7,6 @@ import VotingList from "../components/VotingList";
 import { api } from "../utils/api";
 
 // TODO: need to selectively hide vote cards if a project was not submitted for that prize
-
 export default function JudgingPage() {
   // whether this is the first project being judged
   const {
@@ -112,6 +111,7 @@ export default function JudgingPage() {
                   <VotingList
                     prizeAssignments={prizeAssignments}
                     project={project}
+                    refetch={async () => await refetch()}
                   />
                 )}
               </div>

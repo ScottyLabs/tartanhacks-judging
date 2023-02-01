@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { prisma } from "../../server/db";
-import { initJudgePrizeAssignments } from "./synchronize";
+import { initJudgePrizeAssignments, synchronizeProjects } from "./synchronize";
 
 /**
  * Clear judge prize assignments
@@ -11,6 +11,9 @@ export default async function handler(
 ) {
   try {
     await prisma.judgePrizeAssignment.deleteMany({});
+    await prisma.judgingInstance.deleteMany({});
+
+    await synchronizeProjects();
     await initJudgePrizeAssignments();
     res.status(200).end();
   } catch (err) {
