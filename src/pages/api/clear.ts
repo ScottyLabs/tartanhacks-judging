@@ -3,7 +3,8 @@ import { prisma } from "../../server/db";
 import { initJudgePrizeAssignments, synchronizeProjects } from "./synchronize";
 
 /**
- * Clear judge prize assignments
+ * TODO: remove
+ * Debug endpoint for clearing the database
  */
 export default async function handler(
   req: NextApiRequest,
