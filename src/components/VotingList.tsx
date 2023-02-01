@@ -14,7 +14,7 @@ interface VotingListProps {
   prizeAssignments: PopulatedJudgePrizeAssignment[];
   project: Project;
   isFetching: boolean;
-  refetch: () => Promise<void>;
+  onVoteFinish: () => void;
 }
 
 export enum Vote {
@@ -29,20 +29,25 @@ export enum Vote {
 export default function VotingList({
   prizeAssignments,
   project,
-  isFetching,
-  refetch,
+  isFetching: isDataFetching,
+  onVoteFinish,
 }: VotingListProps) {
-  const { mutate: compareMany } = api.judging.compareMany.useMutation({
-    onSuccess: async () => {
-      await refetch();
-    },
-  });
-
   const numPrizes = prizeAssignments.length;
   const startVotes: Vote[] = new Array(numPrizes).fill(Vote.NONE) as Vote[];
   const [votes, setVotes] = useState(startVotes);
   const [numVotes, setNumVotes] = useState(0);
   const [showModal, setShowModal] = useState(false);
+
+  const { mutate: compareMany, isLoading: isMutationLoading } =
+    api.judging.compareMany.useMutation({
+      onSuccess: () => {
+        onVoteFinish();
+        setNumVotes(0);
+        setVotes(startVotes);
+      },
+    });
+
+  const isFetching = isDataFetching || isMutationLoading;
 
   const updateVotes = (i: number, newVote: Vote) => {
     const curVote = votes[i];

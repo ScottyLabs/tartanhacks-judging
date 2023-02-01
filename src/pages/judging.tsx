@@ -111,7 +111,10 @@ export default function JudgingPage() {
                   <VotingList
                     prizeAssignments={prizeAssignments}
                     project={project}
-                    refetch={async () => await refetch()}
+                    isFetching={isFetching}
+                    onVoteFinish={() => {
+                      loadNextProject();
+                    }}
                   />
                 )}
               </div>

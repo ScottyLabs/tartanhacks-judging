@@ -11,10 +11,12 @@ export default async function handler(
 ) {
   try {
     await prisma.judgePrizeAssignment.deleteMany({});
-    await prisma.judgingInstance.deleteMany({});
-
-    await synchronizeProjects();
     await initJudgePrizeAssignments();
+
+    await prisma.judgingInstance.deleteMany({});
+    await synchronizeProjects();
+
+    await prisma.projectComparisonResult.deleteMany({});
     res.status(200).end();
   } catch (err) {
     console.error(err);
