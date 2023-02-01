@@ -2,7 +2,7 @@ import clsx from "clsx";
 import Image from "next/image";
 import type { ReactElement } from "react";
 
-export interface PrizeListingProps {
+export interface PrizeCardProps {
   className?: string;
   prizeName: string;
   sponsorLogo: string;
@@ -11,15 +11,14 @@ export interface PrizeListingProps {
 }
 
 /**
- * A prize listing displayed on the landing page
+ * A prize card displayed on the landing page
  */
-export default function PrizeListing({
+export default function PrizeCard({
   className,
   prizeName,
   sponsorLogo,
   prizeDescription,
-  children,
-}: PrizeListingProps): ReactElement {
+}: PrizeCardProps): ReactElement {
   return (
     <div
       className={clsx(
@@ -39,7 +38,6 @@ export default function PrizeListing({
           </div>
         </details>
       )}
-      {children}
     </div>
   );
 }

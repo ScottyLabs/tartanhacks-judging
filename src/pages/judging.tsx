@@ -34,7 +34,7 @@ export default function JudgingPage() {
         id: "1",
         helixId: "1",
         eligibility: null,
-        provider: "scottylabs",
+        provider: "ScottyLabs",
         name: "Scott Krulcik Grand Prize",
         description:
           "Lorem ipsum dolor sit amet consectetur adipisicing elit. Repellendus consequuntur exercitationem soluta, in autem maiores animi? Iure veniam consectetur cumque exercitationem blanditiis nihil provident voluptatibus ab, eaque quisquam amet excepturi.",
@@ -43,7 +43,7 @@ export default function JudgingPage() {
         id: "2",
         helixId: "2",
         eligibility: null,
-        provider: "scottylabs",
+        provider: "ScottyLabs",
         name: "First Penguin Award",
         description:
           "Lorem ipsum dolor sit amet consectetur adipisicing elit. Repellendus consequuntur exercitationem soluta, in autem maiores animi? Iure veniam consectetur cumque exercitationem blanditiis nihil provident voluptatibus ab, eaque quisquam amet excepturi.",
@@ -52,7 +52,7 @@ export default function JudgingPage() {
         id: "3",
         helixId: "3",
         eligibility: null,
-        provider: "algorand",
+        provider: "Algorand",
         name: "Best Use of Algorand",
         description:
           "Lorem ipsum dolor sit amet consectetur adipisicing elit. Repellendus consequuntur exercitationem soluta, in autem maiores animi? Iure veniam consectetur cumque exercitationem blanditiis nihil provident voluptatibus ab, eaque quisquam amet excepturi.",
@@ -113,12 +113,14 @@ export default function JudgingPage() {
               </div>
               <div className="flex grow flex-row items-center justify-start pb-4">
                 <p className="pr-10 text-xl font-bold">Location:</p>
-                <p className="text-xl font-bold text-yellow">{project.location}</p>
+                <p className="text-xl font-bold text-yellow">
+                  {project.location}
+                </p>
               </div>
               <div className="overflow-hidden">
                 <p className="pr-10 text-xl font-bold">Description:</p>
                 <div>
-                  <p className="break-normal text-md">{project.description}</p>
+                  <p className="text-md break-normal">{project.description}</p>
                 </div>
               </div>
             </div>
@@ -131,7 +133,11 @@ export default function JudgingPage() {
                 <PrizeList prizes={prizes} />
               </>
             ) : (
-              <VotingList prizes={prizes} project={project} compareProjects={compareProjects} />
+              <VotingList
+                prizes={prizes}
+                project={project}
+                compareProjects={compareProjects}
+              />
             )}
           </div>
         )}

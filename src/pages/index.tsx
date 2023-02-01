@@ -4,7 +4,8 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import Button from "../components/Button";
 import Header from "../components/Header";
-import PrizeListing from "../components/PrizeListing";
+import PrizeCard from "../components/PrizeCard";
+import PrizeList from "../components/PrizeList";
 import { api } from "../utils/api";
 import { getSponsorLogoUrl, Sponsor } from "../utils/sponsors";
 
@@ -44,19 +45,7 @@ const Home: NextPage = () => {
             You have not been assigned to judge any prizes!
           </p>
         )}
-        <div className="w-12/12 flex flex-col gap-5">
-          {prizes.map((prize) => {
-            const sponsorLogo = getSponsorLogoUrl(prize.provider as Sponsor);
-
-            return (
-              <PrizeListing
-                key={prize.name}
-                sponsorLogo={sponsorLogo}
-                prizeName={prize.name}
-              />
-            );
-          })}
-        </div>
+        <PrizeList prizes={prizes} />
 
         {/* Action buttons */}
         <div className="mt-10 flex flex-col items-center gap-3">

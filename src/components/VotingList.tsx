@@ -1,9 +1,8 @@
 import type { Prize, Project } from "@prisma/client";
 import { useState } from "react";
-import { getSponsorLogo } from "../utils/prizes";
 import Button from "./Button";
 import Modal from "./Modal";
-import PrizeListing from "./PrizeListing";
+import VotingCard from "./VotingCard";
 
 interface Props {
   prizes: Prize[];
@@ -103,71 +102,15 @@ export default function VotingList({
       <div className="flex flex-col gap-5">
         {prizes.map((prize, i) => {
           return (
-            <PrizeListing
-              sponsorLogo={getSponsorLogo(prize.provider)}
-              prizeName={prize.name}
-              key={i}
-            >
-              <div className="mt-3 flex flex-col gap-3">
-                <label className="flex flex-row gap-2">
-                  <input
-                    type="radio"
-                    value={Votes.This}
-                    name={`prize${i}`}
-                    onChange={() => {
-                      updateVotes(i, Votes.This);
-                    }}
-                    checked={votes[i] === Votes.This}
-                    className="text-blue-600 border-gray-300 bg-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:ring-offset-gray-800"
-                  />
-                  <p
-                    className={`select-none text-xl font-bold ${
-                      votes[i] === Votes.This ? "text-voted" : "text-inactive"
-                    }`}
-                  >
-                    {project.name}
-                  </p>
-                </label>
-                <label className="flex flex-row gap-2">
-                  <input
-                    type="radio"
-                    value={Votes.Other}
-                    name={`prize${i}`}
-                    onChange={() => {
-                      updateVotes(i, Votes.Other);
-                    }}
-                    checked={votes[i] === Votes.Other}
-                    className="text-blue-600 border-gray-300 bg-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:ring-offset-gray-800"
-                  />
-
-                  <p
-                    className={`select-none text-xl font-bold ${
-                      votes[i] === Votes.Other ? "text-voted" : "text-inactive"
-                    }`}
-                  >
-                    {compareProjects[i]?.name}
-                  </p>
-                </label>
-                <button
-                  className="w-fit text-lg underline"
-                  onClick={() => {
-                    updateVotes(i, Votes.None);
-                  }}
-                >
-                  Clear
-                </button>
-                <details className="pt-2 text-center">
-                  <summary className="text-md">
-                    {compareProjects[i]?.name} description
-                  </summary>
-                  <div className="pt-2 text-left">
-                    <p className="break-normal">
-                      {compareProjects[i]?.description}
-                    </p>
-                  </div>
-                </details>
-              </div>
-            </PrizeListing>
+            <VotingCard
+              prize={prize}
+              votes={votes}
+              updateVotes={updateVotes}
+              index={i}
+              project={project}
+              prevProject={compareProjects[i] as Project}
+              key={prize.name}
+            />
           );
         })}
       </div>
