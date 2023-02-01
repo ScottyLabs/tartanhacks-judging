@@ -9,7 +9,67 @@ import { createTRPCRouter, publicProcedure } from "../trpc";
 const protectedProcedure = publicProcedure.use(authMiddleware);
 
 export const judgingRouter = createTRPCRouter({
-  // Get the next project for the current judge
+  // Get the current project to be judged
+  getCurrent: protectedProcedure.query(async ({ ctx }) => {
+    const user = ctx?.session?.user as User;
+    const judge = await ctx.prisma.judge.findFirst({
+      where: { helixId: user.id },
+      include: {
+        prizeAssignments: {
+          include: {
+            leadingProject: {
+              include: {
+                judgingInstances: true,
+              },
+            },
+          },
+        },
+        ignoredProjects: true,
+        nextProject: true,
+      },
+    });
+
+    if (judge == null) {
+      return null;
+    }
+
+    if (judge.nextProject == null) {
+      // If current project hasn't been assigned yet
+
+      const project = await getNext(judge, ctx.prisma);
+      if (project == null) {
+        // No more projects to judge!
+        return null;
+      }
+
+      // Set the next project
+      const updatedJudge = await ctx.prisma.judge.update({
+        where: {
+          id: judge.id,
+        },
+        data: {
+          nextProjectId: project.id,
+        },
+        include: {
+          prizeAssignments: {
+            include: {
+              leadingProject: {
+                include: {
+                  judgingInstances: true,
+                },
+              },
+            },
+          },
+          nextProject: true,
+        },
+      });
+      return updatedJudge;
+    }
+
+    return judge;
+  }),
+
+  // Compute the next project for this judge
   getNext: protectedProcedure.query(async ({ ctx }) => {
     const user = ctx?.session?.user as User;
     const judge = await ctx.prisma.judge.findFirst({
@@ -29,31 +89,6 @@ export const judgingRouter = createTRPCRouter({
     });
     if (!judge) {
       return null;
-    }
-
-    // Assign next project if not yet assigned
-    for (const assignment of judge.prizeAssignments) {
-      if (assignment.leadingProjectId == null) {
-        const instance = await ctx.prisma.judgingInstance.findFirst({
-          where: {
-            prizeId: assignment.prizeId,
-          },
-          orderBy: {
-            timesJudged: "asc",
-          },
-        });
-        if (instance != null) {
-          // If there is a project available for judging
-          await ctx.prisma.judgePrizeAssignment.update({
-            where: {
-              id: assignment.id,
-            },
-            data: {
-              leadingProjectId: instance.id,
-            },
-          });
-        }
-      }
     }
 
     return await getNext(judge, ctx.prisma);
