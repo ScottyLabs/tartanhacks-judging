@@ -1,4 +1,3 @@
-import { JudgePrizeAssignment } from "@prisma/client";
 import type { NextApiRequest, NextApiResponse } from "next";
 import { env } from "../../env/server.mjs";
 import { prisma } from "../../server/db";
@@ -173,7 +172,7 @@ async function synchronizeProjects() {
 /**
  * Assign judges to projects
  */
-async function initJudgePrizeAssignments() {
+export async function initJudgePrizeAssignments() {
   const judges = await prisma.judge.findMany({});
   const prizes = await prisma.prize.findMany({});
 

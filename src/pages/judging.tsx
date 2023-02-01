@@ -4,7 +4,6 @@ import Button from "../components/Button";
 import Header from "../components/Header";
 import PrizeList from "../components/PrizeList";
 import VotingList from "../components/VotingList";
-import { getNext } from "../server/controllers/getNext";
 import { api } from "../utils/api";
 
 // TODO: need to selectively hide vote cards if a project was not submitted for that prize
@@ -13,15 +12,21 @@ export default function JudgingPage() {
   // whether this is the first project being judged
   const {
     isLoading,
-    isFetching,
+    isFetching: isFetchingQuery,
     data: judge,
     refetch,
   } = api.judging.getCurrent.useQuery();
-  const computeNext = api.judging.computeNext.useMutation();
+  const { mutate: computeNext, isLoading: isLoadingMutation } =
+    api.judging.computeNext.useMutation({
+      onSuccess: async () => {
+        await refetch();
+      },
+    });
 
-  const loadNextProject = async () => {
-    computeNext.mutate();
-    await refetch();
+  const isFetching = isFetchingQuery || isLoadingMutation;
+
+  const loadNextProject = () => {
+    computeNext();
   };
 
   const prizeAssignments = judge?.prizeAssignments ?? [];
@@ -93,7 +98,10 @@ export default function JudgingPage() {
                     <Button
                       text="Get Next Project"
                       className="px-20"
-                      onClick={loadNextProject}
+                      onClick={() => {
+                        void loadNextProject();
+                      }}
+                      disabled={isFetching}
                     />
 
                     {/* Prizes */}
