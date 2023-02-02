@@ -95,6 +95,8 @@ model IgnoreProjects {
 
     judge   Judge   @relation(fields: [judgeId], references: [id])
     project Project @relation(fields: [projectId], references: [id])
+
+    @@unique([judgeId, projectId])
 }
 
 // Information tied to a project-prize tuple used to determine ranking

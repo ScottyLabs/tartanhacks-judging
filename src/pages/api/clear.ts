@@ -15,16 +15,18 @@ export default async function handler(
   res: NextApiResponse
 ) {
   try {
+    await prisma.ignoreProjects.deleteMany();
+
     await prisma.judge.deleteMany();
     await synchronizeJudges();
 
-    await prisma.judgePrizeAssignment.deleteMany({});
+    await prisma.judgePrizeAssignment.deleteMany();
     await initJudgePrizeAssignments();
 
-    await prisma.judgingInstance.deleteMany({});
+    await prisma.judgingInstance.deleteMany();
     await synchronizeProjects();
 
-    await prisma.projectComparisonResult.deleteMany({});
+    await prisma.projectComparisonResult.deleteMany();
     res.status(200).end();
   } catch (err) {
     console.error(err);

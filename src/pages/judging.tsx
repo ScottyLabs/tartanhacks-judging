@@ -23,11 +23,6 @@ export default function JudgingPage() {
     });
 
   const isFetching = isFetchingQuery || isLoadingMutation;
-
-  const loadNextProject = () => {
-    computeNext();
-  };
-
   const prizeAssignments = judge?.prizeAssignments ?? [];
 
   // If no leading project for all prize assignments, then this is the first project being viewed
@@ -37,7 +32,18 @@ export default function JudgingPage() {
   );
 
   const project = judge?.nextProject;
-  const prizes = prizeAssignments.map((assignment) => assignment.prize);
+  const projectPrizes = new Set(
+    project?.judgingInstances?.map((instance) => instance.prizeId) ?? []
+  );
+  const relevantPrizeAssignments = prizeAssignments.filter(
+    (assignment) =>
+      projectPrizes.has(assignment.prizeId) &&
+      assignment.leadingProjectId != null
+  );
+
+  const relevantPrizes = prizeAssignments
+    .filter((assignment) => projectPrizes.has(assignment.prizeId))
+    .map((assignment) => assignment.prize);
 
   return (
     <>
@@ -98,22 +104,24 @@ export default function JudgingPage() {
                       text="Get Next Project"
                       className="px-20"
                       onClick={() => {
-                        void loadNextProject();
+                        void computeNext();
                       }}
                       disabled={isFetching}
                     />
 
                     {/* Prizes */}
-                    <p className="mt-5">You are judging the following prizes</p>
-                    <PrizeList prizes={prizes} />
+                    <p className="mt-5">
+                      This project was submitted for the following prizes
+                    </p>
+                    <PrizeList prizes={relevantPrizes} />
                   </>
                 ) : (
                   <VotingList
-                    prizeAssignments={prizeAssignments}
+                    prizeAssignments={relevantPrizeAssignments}
                     project={project}
                     isFetching={isFetching}
                     onVoteFinish={() => {
-                      loadNextProject();
+                      void computeNext();
                     }}
                   />
                 )}

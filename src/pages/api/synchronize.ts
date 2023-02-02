@@ -144,12 +144,23 @@ export async function synchronizeProjects() {
     prizeMapping.set(prize.helixId, prize.id);
   }
 
-  const prizeRelations = helixProjects.flatMap(
-    ({ _id, prizes: projectPrizes }) =>
-      projectPrizes.map((prize) => ({
-        prizeId: prizeMapping.get(prize._id) as string,
-        projectId: projectMapping.get(_id) as string,
-      }))
+  let prizeRelations = helixProjects.flatMap(({ _id, prizes: projectPrizes }) =>
+    projectPrizes.map((prize) => ({
+      prizeId: prizeMapping.get(prize._id) as string,
+      projectId: projectMapping.get(_id) as string,
+    }))
+  );
+
+  // TODO: remove
+  const projectBlacklist = [
+    "cldmaig570008tuis0wq91op3",
+    "cldmaig57000atuisfi36krpw",
+    "cldmaig57000ctuis34mtv3yo",
+  ];
+  prizeRelations = prizeRelations.filter(
+    (relation) =>
+      relation.prizeId != "cldmaifw50006tuis9p0wopl4" ||
+      !projectBlacklist.includes(relation.projectId)
   );
 
   // Upsert judging instances

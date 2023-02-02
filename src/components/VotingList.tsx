@@ -34,6 +34,7 @@ export default function VotingList({
 }: VotingListProps) {
   const numPrizes = prizeAssignments.length;
   const startVotes: Vote[] = new Array(numPrizes).fill(Vote.NONE) as Vote[];
+
   const [votes, setVotes] = useState(startVotes);
   const [numVotes, setNumVotes] = useState(0);
   const [showModal, setShowModal] = useState(false);
