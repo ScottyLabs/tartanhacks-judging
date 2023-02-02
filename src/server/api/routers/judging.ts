@@ -289,6 +289,18 @@ export const judgingRouter = createTRPCRouter({
 
       const judge = await ctx.prisma.judge.findFirst({
         where: { helixId: user.id },
+        include: {
+          prizeAssignments: {
+            include: {
+              leadingProject: {
+                include: {
+                  judgingInstances: true,
+                },
+              },
+            },
+          },
+          ignoredProjects: true,
+        },
       });
 
       if (judge == null) {
@@ -307,6 +319,23 @@ export const judgingRouter = createTRPCRouter({
         create: {
           judgeId: judge.id,
           projectId: input.projectId,
+        },
+      });
+
+      // Get next project
+      const project = await getNext(judge, ctx.prisma);
+
+      if (project == null) {
+        return;
+      }
+
+      // Set project as next project
+      await ctx.prisma.judge.update({
+        where: {
+          id: judge.id,
+        },
+        data: {
+          nextProjectId: project.id,
         },
       });
     }),

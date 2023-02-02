@@ -1,6 +1,8 @@
 import Link from "next/link";
+import { useState } from "react";
 import Button from "../components/Button";
 import Header from "../components/Header";
+import Modal from "../components/Modal";
 import PrizeList from "../components/PrizeList";
 import ProjectCard from "../components/ProjectCard";
 import Spinner from "../components/Spinner";
@@ -14,14 +16,20 @@ export default function JudgingPage() {
     data: judge,
     refetch,
   } = api.judging.getCurrent.useQuery();
-  const { mutate: computeNext, isLoading: isLoadingMutation } =
+  const { mutate: computeNext, isLoading: isNextLoading } =
     api.judging.computeNext.useMutation({
       onSuccess: async () => {
         await refetch();
       },
     });
 
-  const isFetching = isFetchingQuery || isLoadingMutation;
+  const {mutate: skipProject, isLoading: isSkipLoading} = api.judging.skipProject.useMutation({
+    onSuccess: async () => {
+      await refetch()
+    }
+  })
+
+  const isFetching = isFetchingQuery || isNextLoading || isSkipLoading;
   const prizeAssignments = judge?.prizeAssignments ?? [];
 
   // If no leading project for all prize assignments, then this is the first project being viewed
@@ -43,6 +51,8 @@ export default function JudgingPage() {
   const relevantPrizes = prizeAssignments
     .filter((assignment) => projectPrizes.has(assignment.prizeId))
     .map((assignment) => assignment.prize);
+
+  const [showModal, setShowModal] = useState(false);
 
   return (
     <>
@@ -66,7 +76,7 @@ export default function JudgingPage() {
                       text="Get Next Project"
                       className="px-20"
                       onClick={() => {
-                        void computeNext();
+                        setShowModal(true);
                       }}
                       disabled={isFetching}
                     />
@@ -76,6 +86,45 @@ export default function JudgingPage() {
                       This project was submitted for the following prizes
                     </p>
                     <PrizeList prizes={relevantPrizes} />
+                    {/** Modal to potentially skip the project */}
+                    <Modal
+                      showModal={showModal}
+                      setShowModal={setShowModal}
+                      title="Were you able to take a look at the project?"
+                    >
+                      <div>
+                        {/*body*/}
+                        <div className="relative flex-auto p-6">
+                          <p className="my-4 text-lg leading-relaxed text-slate-500">
+                            If you were unable to find the team at the designated location, you should skip this project.
+                          </p>
+                        </div>
+
+                        {/*footer*/}
+                        <div className="flex items-center justify-end rounded-b border-t border-solid border-slate-200 p-6">
+                          <button
+                            className="background-transparent mr-1 mb-1 px-6 py-2 text-sm font-bold uppercase text-red-500 outline-none transition-all duration-150 ease-linear focus:outline-none"
+                            type="button"
+                            onClick={() => {
+                              setShowModal(false);
+                              skipProject({ projectId: project.id })
+                            }}
+                          >
+                            Skip
+                          </button>
+                          <button
+                            className="mr-1 mb-1 rounded bg-emerald-500 px-6 py-3 text-sm font-bold uppercase text-white shadow outline-none transition-all duration-150 ease-linear hover:shadow-lg focus:outline-none active:bg-emerald-600"
+                            type="button"
+                            onClick={() => {
+                              setShowModal(false);
+                              void computeNext();
+                            }}
+                          >
+                            Yes, I have seen the project
+                          </button>
+                        </div>
+                      </div>
+                    </Modal>
                   </>
                 ) : (
                   <VotingList
