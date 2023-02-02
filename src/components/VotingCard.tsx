@@ -49,7 +49,7 @@ export default function VotingCard({
         </details>
       )}
       <div className="mt-3 flex flex-col gap-3">
-        <label className="flex flex-row gap-2">
+        <label className="flex flex-row items-center gap-2">
           <input
             type="radio"
             value={Vote.THIS}
@@ -68,7 +68,7 @@ export default function VotingCard({
             {project.name}
           </p>
         </label>
-        <label className="flex flex-row gap-2">
+        <label className="flex flex-row items-center gap-2">
           <input
             type="radio"
             value={Vote.OTHER}
