@@ -1,139 +1,105 @@
-import type { Prize, Project } from "@prisma/client";
-import { useEffect, useState } from "react";
+import clsx from "clsx";
+import Link from "next/link";
 import Button from "../components/Button";
-import CloseButton from "../components/CloseButton";
 import Header from "../components/Header";
 import PrizeList from "../components/PrizeList";
+import ProjectCard from "../components/ProjectCard";
+import Spinner from "../components/Spinner";
 import VotingList from "../components/VotingList";
+import { api } from "../utils/api";
 
 export default function JudgingPage() {
-  // whether this is the first project being judged
-  const [isFirstProject, setIsFirstProject] = useState(true);
-  // current project
-  const [project, setProject] = useState<Project | null>(null);
-  const [prizes, setPrizes] = useState<Prize[]>([]);
-  // projects to compare with
-  const [compareProjects, setCompareProjects] = useState<Project[]>([]);
-
-  useEffect(() => {
-    // TODO replace placeholders
-    setIsFirstProject(false);
-
-    setProject({
-      id: "1",
-      helixId: "1",
-      name: "My Project",
-      location: "Table 69",
-      team: "My team",
-      description:
-        "Lorem ipsum dolor sit amet consectetur adipisicing elit. Repellendus consequuntur exercitationem soluta, in autem maiores animi? Iure veniam consectetur cumque exercitationem blanditiis nihil provident voluptatibus ab, eaque quisquam amet excepturi.",
+  const {
+    isLoading,
+    isFetching: isFetchingQuery,
+    data: judge,
+    refetch,
+  } = api.judging.getCurrent.useQuery();
+  const { mutate: computeNext, isLoading: isLoadingMutation } =
+    api.judging.computeNext.useMutation({
+      onSuccess: async () => {
+        await refetch();
+      },
     });
 
-    setPrizes([
-      {
-        id: "1",
-        helixId: "1",
-        eligibility: null,
-        provider: "scottylabs",
-        name: "Scott Krulcik Grand Prize",
-        description:
-          "Lorem ipsum dolor sit amet consectetur adipisicing elit. Repellendus consequuntur exercitationem soluta, in autem maiores animi? Iure veniam consectetur cumque exercitationem blanditiis nihil provident voluptatibus ab, eaque quisquam amet excepturi.",
-      },
-      {
-        id: "2",
-        helixId: "2",
-        eligibility: null,
-        provider: "scottylabs",
-        name: "First Penguin Award",
-        description:
-          "Lorem ipsum dolor sit amet consectetur adipisicing elit. Repellendus consequuntur exercitationem soluta, in autem maiores animi? Iure veniam consectetur cumque exercitationem blanditiis nihil provident voluptatibus ab, eaque quisquam amet excepturi.",
-      },
-      {
-        id: "3",
-        helixId: "3",
-        eligibility: null,
-        provider: "algorand",
-        name: "Best Use of Algorand",
-        description:
-          "Lorem ipsum dolor sit amet consectetur adipisicing elit. Repellendus consequuntur exercitationem soluta, in autem maiores animi? Iure veniam consectetur cumque exercitationem blanditiis nihil provident voluptatibus ab, eaque quisquam amet excepturi.",
-      },
-    ]);
+  const isFetching = isFetchingQuery || isLoadingMutation;
+  const prizeAssignments = judge?.prizeAssignments ?? [];
 
-    setCompareProjects([
-      {
-        id: "2",
-        helixId: "2",
-        name: "Other project 1",
-        location: "Table 420",
-        team: "Other team 1",
-        description:
-          "Lorem ipsum dolor sit amet consectetur adipisicing elit. Repellendus consequuntur exercitationem soluta, in autem maiores animi? Iure veniam consectetur cumque exercitationem blanditiis nihil provident voluptatibus ab, eaque quisquam amet excepturi.",
-      },
-      {
-        id: "3",
-        helixId: "3",
-        name: "Very long name project with a very long name.",
-        location: "Table 42069",
-        team: "Other team 2",
-        description:
-          "Lorem ipsum dolor sit amet consectetur adipisicing elit. Repellendus consequuntur exercitationem soluta, in autem maiores animi? Iure veniam consectetur cumque exercitationem blanditiis nihil provident voluptatibus ab, eaque quisquam amet excepturi.",
-      },
-      {
-        id: "4",
-        helixId: "4",
-        name: "Other project 3",
-        location: "Table 69420",
-        team: "Other team 3",
-        description:
-          "Lorem ipsum dolor sit amet consectetur adipisicing elit. Repellendus consequuntur exercitationem soluta, in autem maiores animi? Iure veniam consectetur cumque exercitationem blanditiis nihil provident voluptatibus ab, eaque quisquam amet excepturi.",
-      },
-    ]);
-  }, []);
+  // If no leading project for all prize assignments, then this is the first project being viewed
+  const isFirstProject = prizeAssignments.reduce(
+    (acc, assignment) => acc && assignment.leadingProjectId == null,
+    true
+  );
+
+  const project = judge?.nextProject;
+  const projectPrizes = new Set(
+    project?.judgingInstances?.map((instance) => instance.prizeId) ?? []
+  );
+  const relevantPrizeAssignments = prizeAssignments.filter(
+    (assignment) =>
+      projectPrizes.has(assignment.prizeId) &&
+      assignment.leadingProjectId != null
+  );
+
+  const relevantPrizes = prizeAssignments
+    .filter((assignment) => projectPrizes.has(assignment.prizeId))
+    .map((assignment) => assignment.prize);
 
   return (
     <>
       <Header />
       <main className="flex flex-col items-center gap-5 py-5 px-2 md:px-10">
-        <CloseButton />
-        {project && (
-          <div className="flex max-w-xl flex-col items-center gap-10 px-6">
-            <p className="w-full text-2xl font-bold sm:text-center">
-              Current Project
-            </p>
+        {isLoading ? (
+          <Spinner />
+        ) : (
+          <>
+            {project ? (
+              <div className="flex max-w-xl flex-col items-center gap-10">
+                <p className="w-full text-2xl font-bold sm:text-center">
+                  Current Project
+                </p>
 
-            {/* Project info */}
-            <div className="grow rounded-md border-4 border-blue p-8 shadow-md">
-              <div className="flex grow flex-row items-center justify-start pb-4">
-                <p className="pr-10 text-xl font-bold">Project:</p>
-                <p className="text-xl font-bold text-yellow">{project.name}</p>
-              </div>
-              <div className="flex grow flex-row items-center justify-start pb-5">
-                <p className="pr-10 text-xl font-bold">Team:</p>
-                <p className="text-xl font-bold text-yellow">{project.team}</p>
-              </div>
-              <div className="flex grow flex-row items-center justify-start pb-4">
-                <p className="pr-10 text-xl font-bold">Location:</p>
-                <p className="text-xl font-bold text-yellow">{project.location}</p>
-              </div>
-              <div className="overflow-hidden">
-                <p className="pr-10 text-xl font-bold">Description:</p>
-                <div>
-                  <p className="break-normal text-md">{project.description}</p>
-                </div>
-              </div>
-            </div>
-            {isFirstProject ? (
-              <>
-                <Button text="Get Next Project" className="px-20" />
+                {/* Project info */}
+                <ProjectCard project={project} isFetching={isFetching} />
+                {isFirstProject ? (
+                  <>
+                    <Button
+                      text="Get Next Project"
+                      className="px-20"
+                      onClick={() => {
+                        void computeNext();
+                      }}
+                      disabled={isFetching}
+                    />
 
-                {/* Prizes */}
-                <p className="mt-5">You are judging the following prizes</p>
-                <PrizeList prizes={prizes} />
-              </>
+                    {/* Prizes */}
+                    <p className="mt-5">
+                      This project was submitted for the following prizes
+                    </p>
+                    <PrizeList prizes={relevantPrizes} />
+                  </>
+                ) : (
+                  <VotingList
+                    prizeAssignments={relevantPrizeAssignments}
+                    project={project}
+                    isFetching={isFetching}
+                    onVoteFinish={() => {
+                      void computeNext();
+                    }}
+                  />
+                )}
+              </div>
             ) : (
-              <VotingList prizes={prizes} project={project} compareProjects={compareProjects} />
+              <div className="flex max-w-xl flex-col items-center gap-10">
+                <p className="w-full text-2xl font-bold sm:text-center">
+                  No projects left to judge!
+                </p>
+                <Link href="/">
+                  <Button text="Main Menu" className="px-20" />
+                </Link>
+              </div>
             )}
-          </div>
+          </>
         )}
       </main>
     </>

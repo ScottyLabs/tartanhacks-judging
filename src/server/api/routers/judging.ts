@@ -1,6 +1,5 @@
-import { Prize } from "@prisma/client";
+import type { User } from "next-auth";
 import { z } from "zod";
-import type { HelixUser } from "../../../types/user";
 import cmp from "../../controllers/cmp";
 import { getNext } from "../../controllers/getNext";
 import authMiddleware from "../middleware/authMiddleware";
@@ -10,10 +9,82 @@ import { createTRPCRouter, publicProcedure } from "../trpc";
 const protectedProcedure = publicProcedure.use(authMiddleware);
 
 export const judgingRouter = createTRPCRouter({
-  getNext: protectedProcedure.query(async ({ ctx }) => {
-    const user = ctx?.session?.user as HelixUser;
+  // Get the current project to be judged
+  getCurrent: protectedProcedure.query(async ({ ctx }) => {
+    const user = ctx?.session?.user as User;
+    const judgeIncludeFields = {
+      prizeAssignments: {
+        include: {
+          leadingProject: {
+            include: {
+              judgingInstances: true,
+            },
+          },
+          prize: true,
+        },
+      },
+      ignoredProjects: true,
+      nextProject: {
+        include: {
+          judgingInstances: true,
+        },
+      },
+    };
+
     const judge = await ctx.prisma.judge.findFirst({
-      where: { helixId: user._id },
+      where: { helixId: user.id },
+      include: judgeIncludeFields,
+    });
+
+    if (judge == null) {
+      return null;
+    }
+
+    if (judge.nextProjectId == null || judge.nextProject == null) {
+      // If current project hasn't been assigned yet
+      const project = await getNext(judge, ctx.prisma);
+      if (project == null) {
+        // No more projects to judge!
+        return null;
+      }
+
+      // Set the next project
+      const updatedJudge = await ctx.prisma.judge.update({
+        where: {
+          id: judge.id,
+        },
+        data: {
+          nextProjectId: project.id,
+        },
+        include: judgeIncludeFields,
+      });
+
+      // Add newly assigned project to ignore list
+      await ctx.prisma.ignoreProjects.upsert({
+        where: {
+          judgeId_projectId: {
+            judgeId: updatedJudge.id,
+            projectId: project.id,
+          },
+        },
+        update: {},
+        create: {
+          judgeId: updatedJudge.id,
+          projectId: project.id,
+        },
+      });
+
+      return updatedJudge;
+    }
+
+    return judge;
+  }),
+
+  // Set the next project for this judge
+  computeNext: protectedProcedure.mutation(async ({ ctx }) => {
+    const user = ctx?.session?.user as User;
+    const judge = await ctx.prisma.judge.findFirst({
+      where: { helixId: user.id },
       include: {
         prizeAssignments: {
           include: {
@@ -25,55 +96,134 @@ export const judgingRouter = createTRPCRouter({
           },
         },
         ignoredProjects: true,
+        nextProject: {
+          include: {
+            judgingInstances: true,
+          },
+        },
       },
     });
     if (!judge) {
-      return null;
+      return;
     }
 
-    return await getNext(judge, ctx.prisma);
+    const prizeAssignments = judge.prizeAssignments ?? [];
+    const judgingInstances = judge.nextProject?.judgingInstances ?? [];
+    const projectPrizeIds = new Set(
+      judgingInstances.map((instance) => instance.prizeId)
+    );
+
+    for (const assignment of prizeAssignments) {
+      // If no previous project for a prize assignment and
+      // current project is entered for this prize,
+      // Set this project as the leading project for that prize assignment
+      if (
+        assignment.leadingProjectId == null &&
+        projectPrizeIds.has(assignment.prizeId)
+      ) {
+        await ctx.prisma.judgePrizeAssignment.update({
+          where: {
+            id: assignment.id,
+          },
+          data: {
+            leadingProjectId: judge.nextProjectId,
+          },
+        });
+      }
+    }
+
+    const project = await getNext(judge, ctx.prisma);
+    if (project == null) {
+      return;
+    }
+
+    // Set project as next project
+    await ctx.prisma.judge.update({
+      where: {
+        id: judge.id,
+      },
+      data: {
+        nextProjectId: project.id,
+      },
+    });
+
+    // Add newly assigned project to ignore list
+    await ctx.prisma.ignoreProjects.upsert({
+      where: {
+        judgeId_projectId: {
+          judgeId: judge.id,
+          projectId: project.id,
+        },
+      },
+      update: {},
+      create: {
+        judgeId: judge.id,
+        projectId: project.id,
+      },
+    });
   }),
-  compare: protectedProcedure
+
+  // Perform multiple comparisons at once
+  compareMany: protectedProcedure
     .input(
-      z.object({
-        prizeId: z.string(),
-        winnerId: z.string(),
-        loserId: z.string(),
-      })
+      z.array(
+        z.object({
+          prizeId: z.string(),
+          winnerId: z.string(),
+          loserId: z.string(),
+        })
+      )
     )
-    .query(async ({ ctx, input }) => {
+    .mutation(async ({ ctx, input }) => {
       // Update computation based on current pair-wise comparison
-      const user = ctx?.session?.user as HelixUser;
+      const user = ctx?.session?.user as User;
 
       const judge = await ctx.prisma.judge.findFirst({
-        where: { helixId: user._id },
-      });
-      const prize = await ctx.prisma.prize.findFirst({
-        where: { id: input.prizeId },
-      });
-      const winner = await ctx.prisma.judgingInstance.findFirst({
-        where: { prizeId: input.prizeId, projectId: input.winnerId },
-      });
-      const loser = await ctx.prisma.judgingInstance.findFirst({
-        where: { prizeId: input.prizeId, projectId: input.loserId },
+        where: { helixId: user.id },
       });
 
-      if (!(judge && winner && loser && prize)) {
-        throw "Invalid judge, winner, loser, or prize ID";
+      if (judge == null) {
+        return null;
       }
 
-      await cmp(winner, loser, prize, judge, ctx.prisma);
+      const comparisonInputs = [] as Parameters<typeof cmp>[];
+      for (const { prizeId, winnerId, loserId } of input) {
+        const prize = await ctx.prisma.prize.findFirst({
+          where: { id: prizeId },
+        });
+        const winner = await ctx.prisma.judgingInstance.findFirst({
+          where: { prizeId: prizeId, projectId: winnerId },
+        });
+        const loser = await ctx.prisma.judgingInstance.findFirst({
+          where: { prizeId: prizeId, projectId: loserId },
+        });
 
-      return;
+        if (!(judge && winner && loser && prize)) {
+          throw "Invalid judge, winner, loser, or prize ID";
+        }
+
+        comparisonInputs.push([winner, loser, prize, judge, ctx.prisma]);
+      }
+
+      for (const [winner, loser, prize, judge] of comparisonInputs) {
+        console.log([winner.projectId, loser.projectId, prize.id]);
+        await cmp(winner, loser, prize, judge, ctx.prisma);
+      }
     }),
+
+  // Get the top projects for a specific prize
   getTopProjects: protectedProcedure
-    .input(z.object({ prizeId: z.string() }))
+    .input(z.object({ prizeId: z.string().optional() }))
     .query(async ({ ctx, input }) => {
+      const defaultPrize = await ctx.prisma.prize.findFirst({
+        where: { name: "Scott Krulcik Grand Prize" },
+      });
+
       // Get judging instances with populated projects
       // Winner should have the highest mean score and lowest variance
       const judgments = await ctx.prisma.judgingInstance.findMany({
         where: {
-          prizeId: input.prizeId,
+          prizeId: input.prizeId ?? defaultPrize?.id,
         },
         include: {
           project: true,
@@ -95,4 +245,26 @@ export const judgingRouter = createTRPCRouter({
 
       return judgments;
     }),
+
+  // Get prizes that a judge is judging
+  getJudgingPrizes: protectedProcedure.query(async ({ ctx }) => {
+    const user = ctx?.session?.user as User;
+    const judge = await ctx.prisma.judge.findFirst({
+      where: {
+        helixId: user.id,
+      },
+      include: {
+        prizeAssignments: {
+          include: {
+            prize: true,
+          },
+        },
+      },
+    });
+    const prizes = judge?.prizeAssignments.map(
+      (assignment) => assignment.prize
+    );
+
+    return prizes;
+  }),
 });

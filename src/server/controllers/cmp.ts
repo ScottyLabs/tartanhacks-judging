@@ -24,6 +24,19 @@ export default async function cmp(
       },
     });
 
+    // Save leading project for this JudePrizeAssignment
+    await prisma.judgePrizeAssignment.update({
+      where: {
+        judgeId_prizeId: {
+          judgeId: judge.id,
+          prizeId: prize.id,
+        },
+      },
+      data: {
+        leadingProjectId: winningInstance.projectId,
+      },
+    });
+
     // Get new parameters based on this vote
     const [
       updatedAlpha,
@@ -43,13 +56,13 @@ export default async function cmp(
 
     // Update judge parameters - alpha and beta
     await prisma.judge.update({
-      where: judge,
+      where: { id: judge.id },
       data: { alpha: updatedAlpha, beta: updatedBeta },
     });
 
     // Update winner parameters - mu and sigmaSq
     await prisma.judgingInstance.update({
-      where: winningInstance,
+      where: { id: winningInstance.id },
       data: {
         mu: updatedMuWinner,
         sigma2: updatedSigmaSqWinner,
@@ -59,7 +72,7 @@ export default async function cmp(
 
     // Update loser parameters - mu and sigmaSq
     await prisma.judgingInstance.update({
-      where: losingInstance,
+      where: { id: losingInstance.id },
       data: {
         mu: updatedMuLoser,
         sigma2: updatedSigmaSqLoser,

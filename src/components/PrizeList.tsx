@@ -1,6 +1,6 @@
 import type { Prize } from "@prisma/client";
-import { getSponsorLogo } from "../utils/prizes";
-import PrizeListing from "./PrizeListing";
+import { getSponsorLogoUrl, type Sponsor } from "../utils/sponsors";
+import PrizeCard from "./PrizeCard";
 
 interface Props {
   prizes: Prize[];
@@ -10,12 +10,12 @@ interface Props {
 export default function PrizeList({ prizes }: Props) {
   return (
     <div className="flex flex-col gap-5">
-      {prizes.map((prize, i) => {
+      {prizes.map((prize) => {
         return (
-          <PrizeListing
-            sponsorLogo={getSponsorLogo(prize.provider)}
+          <PrizeCard
+            sponsorLogo={getSponsorLogoUrl(prize.provider as Sponsor)}
             prizeName={prize.name}
-            key={i}
+            key={prize.name}
           />
         );
       })}

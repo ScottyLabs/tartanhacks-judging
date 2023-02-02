@@ -18,7 +18,7 @@ type ProjectNext = Project & {
   judgingInstances: JudgingInstance[];
 };
 type PrizeAssignmentNext = JudgePrizeAssignment & {
-  leadingProject: ProjectNext;
+  leadingProject: ProjectNext | null;
 };
 
 const MIN_VIEWS = 1;
@@ -57,11 +57,11 @@ const getPreferredProjects = async (
       },
     },
   });
-  const busyProjects = busyJudges?.map((bj) => bj.nextProjectId);
-  const unbusyProjects = projects.filter((project) =>
-    busyProjects?.includes(project.id)
+  const busyProjects = new Set(busyJudges?.map((bj) => bj.nextProjectId) ?? []);
+  const availableProjects = projects.filter(
+    (project) => !busyProjects.has(project.id)
   );
-  const candidateProjects = unbusyProjects ? unbusyProjects : projects;
+  const candidateProjects = availableProjects ? availableProjects : projects;
   const getUnderviewedCount = mapReducePartial(
     (ji: JudgingInstance) => (ji.timesJudged < MIN_VIEWS ? 1 : 0),
     (x, y) => x + y,
@@ -73,6 +73,7 @@ const getPreferredProjects = async (
     0,
     candidateProjects
   );
+
   return maxUnderviewedCount > 0
     ? candidateProjects.filter(
         (project) =>
@@ -92,11 +93,15 @@ export const getNext = async (
 
   const getPrizeLeader = (
     pa: PrizeAssignmentNext
-  ): [string, JudgingInstance] => {
-    const leadingJudgingInstance = pa.leadingProject.judgingInstances.find(
-      (ji) => ji.prizeId == pa.prizeId
-    );
-    return [pa.prizeId, leadingJudgingInstance as JudgingInstance];
+  ): [string | null, JudgingInstance | null] => {
+    if (pa.leadingProject != null) {
+      const leadingJudgingInstance = pa.leadingProject.judgingInstances.find(
+        (ji) => ji.prizeId == pa.prizeId
+      );
+      return [pa.prizeId, leadingJudgingInstance as JudgingInstance];
+    } else {
+      return [null, null];
+    }
   };
   const prizeBests = new Map(judge.prizeAssignments.map(getPrizeLeader));
 
@@ -111,8 +116,8 @@ export const getNext = async (
             expectedInformationGain(
               judge.alpha,
               judge.beta,
-              (prizeBests.get(ji.prizeId) as JudgingInstance).mu,
-              (prizeBests.get(ji.prizeId) as JudgingInstance).sigma2,
+              (prizeBests.get(ji.prizeId) as JudgingInstance)?.mu ?? 0,
+              (prizeBests.get(ji.prizeId) as JudgingInstance)?.sigma2 ?? 0,
               ji.mu,
               ji.sigma2
             ),

@@ -1,42 +1,66 @@
-import type { Prize, Project } from "@prisma/client";
-import { useState } from "react";
-import { getSponsorLogo } from "../utils/prizes";
+import type { JudgePrizeAssignment, Prize, Project } from "@prisma/client";
+import { useEffect, useState } from "react";
+import { api } from "../utils/api";
 import Button from "./Button";
 import Modal from "./Modal";
-import PrizeListing from "./PrizeListing";
+import VotingCard from "./VotingCard";
+
+type PopulatedJudgePrizeAssignment = JudgePrizeAssignment & {
+  prize: Prize;
+  leadingProject: Project | null;
+};
 
 interface Props {
-  prizes: Prize[];
+  prizeAssignments: PopulatedJudgePrizeAssignment[];
   project: Project;
-  compareProjects: Project[];
+  isFetching: boolean;
+  onVoteFinish: () => void;
 }
 
-enum Votes {
-  None,
+export enum Vote {
+  NONE = "NONE",
   // vote for this project
-  This,
+  THIS = "THIS",
   // vote for compared project
-  Other,
+  OTHER = "OTHER",
 }
 
 // list multiple prizes with voting options
 export default function VotingList({
-  prizes,
+  prizeAssignments,
   project,
-  compareProjects,
+  isFetching: isDataFetching,
+  onVoteFinish,
 }: Props) {
-  const numPrizes = prizes.length;
+  const numPrizes = prizeAssignments.length;
+  const startVotes = new Array<Vote>(numPrizes).fill(Vote.NONE);
 
-  const startVotes: Votes[] = new Array(numPrizes).fill(Votes.None) as Votes[];
   const [votes, setVotes] = useState(startVotes);
   const [numVotes, setNumVotes] = useState(0);
   const [showModal, setShowModal] = useState(false);
 
-  const updateVotes = (i: number, newVote: Votes) => {
+  useEffect(() => {
+    const numPrizes = prizeAssignments.length;
+    const startVotes = new Array<Vote>(numPrizes).fill(Vote.NONE);
+    setVotes(startVotes);
+  }, [prizeAssignments.length]);
+
+  const { mutate: compareMany, isLoading: isMutationLoading } =
+    api.judging.compareMany.useMutation({
+      onSuccess: () => {
+        onVoteFinish();
+        setNumVotes(0);
+        setVotes(startVotes);
+      },
+    });
+
+  const isFetching = isDataFetching || isMutationLoading;
+
+  const updateVote = (i: number, newVote: Vote) => {
     const curVote = votes[i];
-    if (curVote === Votes.None && newVote !== Votes.None) {
+    if (curVote === Vote.NONE && newVote !== Vote.NONE) {
       setNumVotes(numVotes + 1);
-    } else if (newVote === Votes.None && curVote !== Votes.None) {
+    } else if (newVote === Vote.NONE && curVote !== Vote.NONE) {
       setNumVotes(numVotes - 1);
     }
     setVotes(
@@ -46,20 +70,63 @@ export default function VotingList({
     );
   };
 
+  /**
+   * Submit the currently selected votes
+   */
+  function submitVotes() {
+    // Stage inputs to compare
+    const compareInputs = [];
+    for (const [i, vote] of votes.entries()) {
+      const assignment = prizeAssignments[i];
+      if (assignment == null) {
+        console.error("More votes than prize assignments!");
+        return;
+      }
+
+      if (assignment.leadingProjectId == null) {
+        console.error("Cannot vote without a previous best!");
+        return;
+      }
+
+      const winnerId =
+        vote == Vote.THIS ? project.id : assignment.leadingProjectId;
+      const loserId =
+        vote == Vote.THIS ? assignment.leadingProjectId : project.id;
+      compareInputs.push({ prizeId: assignment?.prizeId, winnerId, loserId });
+    }
+
+    compareMany(compareInputs);
+  }
+
+  async function skipProject() {
+    // TODO: call skip trpc endpoint once it's implemented
+  }
+
   return (
     <>
       {/** Submit or skip button: skips if voted for no prizes, submits if for all prizes */}
-      <Button
-        text={numVotes > 0 ? "Submit votes" : "Skip"}
-        className="h-14 w-60 text-xl disabled:bg-slate-400"
-        disabled={numVotes > 0 && numVotes < numPrizes}
-        onClick={() => {
-          if (numVotes === 0) {
-            // show skip modal
-            setShowModal(true);
-          }
-        }}
-      />
+      {numVotes > 0 ? (
+        <Button
+          text={"Submit votes"}
+          className="h-14 w-60 text-xl disabled:bg-slate-400"
+          disabled={numVotes < numPrizes || isFetching}
+          onClick={() => {
+            submitVotes();
+          }}
+        />
+      ) : (
+        <Button
+          text={"Skip"}
+          className="h-14 w-60 text-xl disabled:bg-slate-400"
+          disabled={isFetching}
+          onClick={() => {
+            if (numVotes === 0) {
+              // show skip modal
+              setShowModal(true);
+            }
+          }}
+        />
+      )}
       {/** Show skip modal */}
       <Modal
         showModal={showModal}
@@ -89,7 +156,7 @@ export default function VotingList({
               type="button"
               onClick={() => {
                 setShowModal(false);
-                // TODO go to next project
+                void skipProject();
               }}
             >
               Yes, I am sure
@@ -101,73 +168,17 @@ export default function VotingList({
         Which project is better?
       </p>
       <div className="flex flex-col gap-5">
-        {prizes.map((prize, i) => {
+        {prizeAssignments.map((prizeAssignment, i) => {
           return (
-            <PrizeListing
-              sponsorLogo={getSponsorLogo(prize.provider)}
-              prizeName={prize.name}
-              key={i}
-            >
-              <div className="mt-3 flex flex-col gap-3">
-                <label className="flex flex-row gap-2">
-                  <input
-                    type="radio"
-                    value={Votes.This}
-                    name={`prize${i}`}
-                    onChange={() => {
-                      updateVotes(i, Votes.This);
-                    }}
-                    checked={votes[i] === Votes.This}
-                    className="text-blue-600 border-gray-300 bg-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:ring-offset-gray-800"
-                  />
-                  <p
-                    className={`select-none text-xl font-bold ${
-                      votes[i] === Votes.This ? "text-voted" : "text-inactive"
-                    }`}
-                  >
-                    {project.name}
-                  </p>
-                </label>
-                <label className="flex flex-row gap-2">
-                  <input
-                    type="radio"
-                    value={Votes.Other}
-                    name={`prize${i}`}
-                    onChange={() => {
-                      updateVotes(i, Votes.Other);
-                    }}
-                    checked={votes[i] === Votes.Other}
-                    className="text-blue-600 border-gray-300 bg-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:ring-offset-gray-800"
-                  />
-
-                  <p
-                    className={`select-none text-xl font-bold ${
-                      votes[i] === Votes.Other ? "text-voted" : "text-inactive"
-                    }`}
-                  >
-                    {compareProjects[i]?.name}
-                  </p>
-                </label>
-                <button
-                  className="w-fit text-lg underline"
-                  onClick={() => {
-                    updateVotes(i, Votes.None);
-                  }}
-                >
-                  Clear
-                </button>
-                <details className="pt-2 text-center">
-                  <summary className="text-md">
-                    {compareProjects[i]?.name} description
-                  </summary>
-                  <div className="pt-2 text-left">
-                    <p className="break-normal">
-                      {compareProjects[i]?.description}
-                    </p>
-                  </div>
-                </details>
-              </div>
-            </PrizeListing>
+            <VotingCard
+              prize={prizeAssignment.prize}
+              votes={votes}
+              updateVotes={updateVote}
+              index={i}
+              project={project}
+              prevProject={prizeAssignment.leadingProject}
+              key={prizeAssignment.prize.name}
+            />
           );
         })}
       </div>
