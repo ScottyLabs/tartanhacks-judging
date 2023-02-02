@@ -56,7 +56,7 @@ export default function JudgingPage() {
         ) : (
           <>
             {project ? (
-              <div className="flex max-w-xl flex-col items-center gap-10 px-6">
+              <div className="flex max-w-xl flex-col items-center gap-10">
                 <p className="w-full text-2xl font-bold sm:text-center">
                   Current Project
                 </p>
@@ -92,7 +92,7 @@ export default function JudgingPage() {
                 )}
               </div>
             ) : (
-              <div className="flex max-w-xl flex-col items-center gap-10 px-6">
+              <div className="flex max-w-xl flex-col items-center gap-10">
                 <p className="w-full text-2xl font-bold sm:text-center">
                   No projects left to judge!
                 </p>
