@@ -5,13 +5,15 @@ import { useEffect, useState } from "react";
 import Button from "../components/Button";
 import Header from "../components/Header";
 import PrizeList from "../components/PrizeList";
+import Spinner from "../components/Spinner";
 import { api } from "../utils/api";
 
 const JUDGING_DEADLINE = DateTime.fromISO("2023-02-04T08:00:00.000");
 
 const Home: NextPage = () => {
   const [timeLeft, setTimeLeft] = useState("00:00:00");
-  const { data: prizeData } = api.judging.getJudgingPrizes.useQuery();
+  const { data: prizeData, isFetching } =
+    api.judging.getJudgingPrizes.useQuery();
 
   const prizes = prizeData ?? [];
 
@@ -35,28 +37,34 @@ const Home: NextPage = () => {
         </div>
 
         {/* Prizes */}
-        {prizes.length > 0 ? (
-          <p className="mt-5">You are judging the following prizes</p>
+        {isFetching ? (
+          <Spinner />
         ) : (
-          <p className="mt-5">
-            You have not been assigned to judge any prizes!
-          </p>
-        )}
-        <PrizeList prizes={prizes} />
+          <>
+            {prizes.length > 0 ? (
+              <p className="mt-5">You are judging the following prizes</p>
+            ) : (
+              <p className="mt-5">
+                You have not been assigned to judge any prizes!
+              </p>
+            )}
+            <PrizeList prizes={prizes} />
 
-        {/* Action buttons */}
-        <div className="mt-10 flex flex-col items-center gap-3">
-          {prizes.length > 0 ? (
-            <>
-              <Link href="/results">
-                <Button text="View Results" className="w-12/12" />
-              </Link>
-              <Link href="/judging">
-                <Button text="Start Judging" className="w-12/12" />
-              </Link>
-            </>
-          ) : null}
-        </div>
+            {/* Action buttons */}
+            <div className="mt-10 flex flex-col items-center gap-3">
+              {prizes.length > 0 ? (
+                <>
+                  <Link href="/results">
+                    <Button text="View Results" className="w-12/12" />
+                  </Link>
+                  <Link href="/judging">
+                    <Button text="Start Judging" className="w-12/12" />
+                  </Link>
+                </>
+              ) : null}
+            </div>
+          </>
+        )}
       </main>
     </>
   );

@@ -3,6 +3,7 @@ import Link from "next/link";
 import Button from "../components/Button";
 import Header from "../components/Header";
 import PrizeList from "../components/PrizeList";
+import Spinner from "../components/Spinner";
 import VotingList from "../components/VotingList";
 import { api } from "../utils/api";
 
@@ -50,12 +51,7 @@ export default function JudgingPage() {
       <Header />
       <main className="flex flex-col items-center gap-5 py-5 px-2 md:px-10">
         {isLoading ? (
-          <div className="flex items-center justify-center">
-            <div
-              className="spinner-border inline-block h-8 w-8 animate-spin rounded-full border-4"
-              role="status"
-            ></div>
-          </div>
+          <Spinner />
         ) : (
           <>
             {project ? (
