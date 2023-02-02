@@ -277,22 +277,9 @@ export const judgingRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       // Get current judge
       const user = ctx?.session?.user as User;
-      const judgeIncludeFields = {
-        ignoredProjects: true,
-        prizeAssignments: {
-          include: {
-            leadingProject: {
-              include: {
-                judgingInstances: true,
-              },
-            },
-          },
-        },
-      };
 
       const judge = await ctx.prisma.judge.findFirst({
         where: { helixId: user.id },
-        include: judgeIncludeFields,
       });
 
       if (judge == null) {
@@ -313,7 +300,5 @@ export const judgingRouter = createTRPCRouter({
           projectId: input.projectId,
         },
       });
-
-      return;
     }),
 });
