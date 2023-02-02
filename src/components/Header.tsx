@@ -17,11 +17,9 @@ export default function Header({ hideAuth = false }: Props) {
             </Link>
           </div>
           {!hideAuth && (
-            <div className="">
-              <a href="#" onClick={() => void signOut()} className="text-white">
-                Sign out
-              </a>
-            </div>
+            <a href="#" onClick={() => void signOut()} className="text-white">
+              Sign out
+            </a>
           )}
         </div>
       </nav>
