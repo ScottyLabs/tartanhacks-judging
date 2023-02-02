@@ -1,4 +1,7 @@
-export default function Spinner() {
+/**
+ * A rotating loading spinner
+ */
+export default function Spinner(): JSX.Element {
   return (
     <div className="flex items-center justify-center">
       <div

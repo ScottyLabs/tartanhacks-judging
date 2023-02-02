@@ -10,7 +10,7 @@ type PopulatedJudgePrizeAssignment = JudgePrizeAssignment & {
   leadingProject: Project | null;
 };
 
-interface VotingListProps {
+interface Props {
   prizeAssignments: PopulatedJudgePrizeAssignment[];
   project: Project;
   isFetching: boolean;
@@ -31,9 +31,9 @@ export default function VotingList({
   project,
   isFetching: isDataFetching,
   onVoteFinish,
-}: VotingListProps) {
+}: Props) {
   const numPrizes = prizeAssignments.length;
-  const startVotes = new Array(numPrizes).fill(Vote.NONE) as Vote[];
+  const startVotes = new Array<Vote>(numPrizes).fill(Vote.NONE);
 
   const [votes, setVotes] = useState(startVotes);
   const [numVotes, setNumVotes] = useState(0);
@@ -41,7 +41,7 @@ export default function VotingList({
 
   useEffect(() => {
     const numPrizes = prizeAssignments.length;
-    const startVotes = new Array(numPrizes).fill(Vote.NONE) as Vote[];
+    const startVotes = new Array<Vote>(numPrizes).fill(Vote.NONE);
     setVotes(startVotes);
   }, [prizeAssignments.length]);
 
@@ -56,7 +56,7 @@ export default function VotingList({
 
   const isFetching = isDataFetching || isMutationLoading;
 
-  const updateVotes = (i: number, newVote: Vote) => {
+  const updateVote = (i: number, newVote: Vote) => {
     const curVote = votes[i];
     if (curVote === Vote.NONE && newVote !== Vote.NONE) {
       setNumVotes(numVotes + 1);
@@ -173,11 +173,11 @@ export default function VotingList({
             <VotingCard
               prize={prizeAssignment.prize}
               votes={votes}
-              updateVotes={updateVotes}
+              updateVotes={updateVote}
               index={i}
               project={project}
               prevProject={prizeAssignment.leadingProject}
-              key={i}
+              key={prizeAssignment.prize.name}
             />
           );
         })}

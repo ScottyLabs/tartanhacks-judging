@@ -8,9 +8,7 @@ import Spinner from "../components/Spinner";
 import VotingList from "../components/VotingList";
 import { api } from "../utils/api";
 
-// TODO: need to selectively hide vote cards if a project was not submitted for that prize
 export default function JudgingPage() {
-  // whether this is the first project being judged
   const {
     isLoading,
     isFetching: isFetchingQuery,

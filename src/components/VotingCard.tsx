@@ -5,7 +5,7 @@ import type { ReactElement } from "react";
 import { getSponsorLogoUrl, type Sponsor } from "../utils/sponsors";
 import { Vote } from "./VotingList";
 
-export interface VotingCardProps {
+interface Props {
   className?: string;
   prize: Prize;
   votes: Vote[];
@@ -26,7 +26,7 @@ export default function VotingCard({
   index,
   project,
   prevProject,
-}: VotingCardProps): ReactElement {
+}: Props): ReactElement {
   const sponsorLogo = getSponsorLogoUrl(prize.provider as Sponsor);
 
   return (

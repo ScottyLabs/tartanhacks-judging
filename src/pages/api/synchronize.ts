@@ -114,7 +114,7 @@ export async function synchronizeProjects() {
       helixId: _id,
       name,
       description,
-      location: location ?? "Table",
+      location: location ?? "Missing table",
       team: team?.name ?? "Missing team name",
     })
   );
@@ -152,6 +152,7 @@ export async function synchronizeProjects() {
   );
 
   // TODO: remove
+  // Creates instances where a project might not be submitted for a specific prize
   const projectBlacklist = [
     "cldmaig570008tuis0wq91op3",
     "cldmaig57000atuisfi36krpw",

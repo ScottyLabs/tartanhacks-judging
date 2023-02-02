@@ -7,8 +7,9 @@ import Header from "../components/Header";
 import PrizeList from "../components/PrizeList";
 import Spinner from "../components/Spinner";
 import { api } from "../utils/api";
+import { env } from "../env/client.mjs";
 
-const JUDGING_DEADLINE = DateTime.fromISO("2023-02-04T08:00:00.000");
+const JUDGING_DEADLINE = DateTime.fromISO(env.NEXT_PUBLIC_JUDGING_DEADLINE);
 
 const Home: NextPage = () => {
   const [timeLeft, setTimeLeft] = useState("00:00:00");
