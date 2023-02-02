@@ -46,11 +46,15 @@ const Home: NextPage = () => {
 
         {/* Action buttons */}
         <div className="mt-10 flex flex-col items-center gap-3">
-          <Button text="View Current Results" className="w-12/12" />
           {prizes.length > 0 ? (
-            <Link href="/judging">
-              <Button text="Start Judging" className="w-12/12" />
-            </Link>
+            <>
+              <Link href="/results">
+                <Button text="View Results" className="w-12/12" />
+              </Link>
+              <Link href="/judging">
+                <Button text="Start Judging" className="w-12/12" />
+              </Link>
+            </>
           ) : null}
         </div>
       </main>
