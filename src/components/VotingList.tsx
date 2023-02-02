@@ -1,5 +1,5 @@
 import type { JudgePrizeAssignment, Prize, Project } from "@prisma/client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { api } from "../utils/api";
 import Button from "./Button";
 import Modal from "./Modal";
@@ -33,11 +33,17 @@ export default function VotingList({
   onVoteFinish,
 }: VotingListProps) {
   const numPrizes = prizeAssignments.length;
-  const startVotes: Vote[] = new Array(numPrizes).fill(Vote.NONE) as Vote[];
+  const startVotes = new Array(numPrizes).fill(Vote.NONE) as Vote[];
 
   const [votes, setVotes] = useState(startVotes);
   const [numVotes, setNumVotes] = useState(0);
   const [showModal, setShowModal] = useState(false);
+
+  useEffect(() => {
+    const numPrizes = prizeAssignments.length;
+    const startVotes = new Array(numPrizes).fill(Vote.NONE) as Vote[];
+    setVotes(startVotes);
+  }, [prizeAssignments.length]);
 
   const { mutate: compareMany, isLoading: isMutationLoading } =
     api.judging.compareMany.useMutation({
