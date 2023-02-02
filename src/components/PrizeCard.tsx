@@ -2,7 +2,7 @@ import clsx from "clsx";
 import Image from "next/image";
 import type { ReactElement } from "react";
 
-export interface PrizeCardProps {
+interface Props {
   className?: string;
   prizeName: string;
   sponsorLogo: string;
@@ -18,7 +18,7 @@ export default function PrizeCard({
   prizeName,
   sponsorLogo,
   prizeDescription,
-}: PrizeCardProps): ReactElement {
+}: Props): ReactElement {
   return (
     <div
       className={clsx(
