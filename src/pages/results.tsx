@@ -55,7 +55,7 @@ const Results: NextPage = () => {
           <div className="text-xl font-bold">Variance</div>
         </div>
         <div className="mx-auto grid w-10/12 grid-cols-3 gap-3">
-          {judgments.map((judgment, i) => (
+          {judgments.map((judgment) => (
             <>
               <div>{judgment.project.name}</div>
               <div>{judgment.mu.toFixed(3)}</div>

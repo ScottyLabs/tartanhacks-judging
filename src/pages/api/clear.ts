@@ -1,6 +1,10 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { prisma } from "../../server/db";
-import { initJudgePrizeAssignments, synchronizeProjects } from "./synchronize";
+import {
+  initJudgePrizeAssignments,
+  synchronizeJudges,
+  synchronizeProjects,
+} from "./synchronize";
 
 /**
  * TODO: remove
@@ -11,6 +15,9 @@ export default async function handler(
   res: NextApiResponse
 ) {
   try {
+    await prisma.judge.deleteMany();
+    await synchronizeJudges();
+
     await prisma.judgePrizeAssignment.deleteMany({});
     await initJudgePrizeAssignments();
 

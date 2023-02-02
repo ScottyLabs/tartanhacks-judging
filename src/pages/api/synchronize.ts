@@ -52,7 +52,7 @@ async function fetchData<T>(path: string, method: string): Promise<T> {
 /**
  * Synchronize judges with helix
  */
-async function synchronizeJudges() {
+export async function synchronizeJudges() {
   const helixJudges = await fetchData<HelixUser[]>("/judges", "GET");
 
   const judges = helixJudges.map((judge) => ({
