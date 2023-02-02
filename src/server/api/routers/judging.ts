@@ -267,4 +267,38 @@ export const judgingRouter = createTRPCRouter({
 
     return prizes;
   }),
+
+  skipProject: protectedProcedure
+    .input(
+      z.object({
+        projectId: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      // Get current judge
+      const user = ctx?.session?.user as User;
+
+      const judge = await ctx.prisma.judge.findFirst({
+        where: { helixId: user.id },
+      });
+
+      if (judge == null) {
+        return;
+      }
+
+      // Mark project as ignored for current judge
+      await ctx.prisma.ignoreProjects.upsert({
+        where: {
+          judgeId_projectId: {
+            judgeId: judge.id,
+            projectId: input.projectId,
+          },
+        },
+        update: {},
+        create: {
+          judgeId: judge.id,
+          projectId: input.projectId,
+        },
+      });
+    }),
 });
