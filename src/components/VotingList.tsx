@@ -45,7 +45,7 @@ export default function VotingList({
     setVotes(startVotes);
   }, [prizeAssignments.length]);
 
-  const { mutate: compareMany, isLoading: isMutationLoading } =
+  const { mutate: compareMany, isLoading: isCompareLoading } =
     api.judging.compareMany.useMutation({
       onSuccess: () => {
         onVoteFinish();
@@ -54,7 +54,13 @@ export default function VotingList({
       },
     });
 
-  const isFetching = isDataFetching || isMutationLoading;
+  const {mutate: skipProject, isLoading: isSkipLoading} = api.judging.skipProject.useMutation({
+    onSuccess: () => {
+      onVoteFinish();
+    }
+  })
+
+  const isFetching = isDataFetching || isCompareLoading || isSkipLoading;
 
   const updateVote = (i: number, newVote: Vote) => {
     const curVote = votes[i];
@@ -96,10 +102,6 @@ export default function VotingList({
     }
 
     compareMany(compareInputs);
-  }
-
-  async function skipProject() {
-    // TODO: call skip trpc endpoint once it's implemented
   }
 
   return (
@@ -156,7 +158,7 @@ export default function VotingList({
               type="button"
               onClick={() => {
                 setShowModal(false);
-                void skipProject();
+                void skipProject({ projectId: project.id });
               }}
             >
               Yes, I am sure

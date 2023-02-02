@@ -275,6 +275,7 @@ export const judgingRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
+      // Get current judge
       const user = ctx?.session?.user as User;
       const judgeIncludeFields = {
         ignoredProjects: true,
@@ -295,9 +296,10 @@ export const judgingRouter = createTRPCRouter({
       });
 
       if (judge == null) {
-        return null;
+        return;
       }
 
+      // Mark project as ignored for current judge
       await ctx.prisma.ignoreProjects.upsert({
         where: {
           judgeId_projectId: {
@@ -312,7 +314,6 @@ export const judgingRouter = createTRPCRouter({
         },
       });
 
-      const nextProject = getNext(judge, ctx.prisma);
-      return nextProject;
+      return;
     }),
 });
