@@ -134,6 +134,16 @@ export const judgingRouter = createTRPCRouter({
 
     const project = await getNext(judge, ctx.prisma);
     if (project == null) {
+      // No more projects to assign
+      // Remove next project
+      await ctx.prisma.judge.update({
+        where: {
+          id: judge.id,
+        },
+        data: {
+          nextProjectId: null,
+        },
+      });
       return;
     }
 
@@ -206,7 +216,6 @@ export const judgingRouter = createTRPCRouter({
       }
 
       for (const [winner, loser, prize, judge] of comparisonInputs) {
-        console.log([winner.projectId, loser.projectId, prize.id]);
         await cmp(winner, loser, prize, judge, ctx.prisma);
       }
     }),
