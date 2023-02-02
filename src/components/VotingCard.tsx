@@ -79,7 +79,6 @@ export default function VotingCard({
             checked={votes[index] === Vote.OTHER}
             className="text-blue-600 border-gray-300 bg-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:ring-offset-gray-800"
           />
-          {/* TODO: handle case where prev project is null */}
           <p
             className={`select-none text-xl font-bold ${
               votes[index] === Vote.OTHER ? "text-voted" : "text-inactive"
