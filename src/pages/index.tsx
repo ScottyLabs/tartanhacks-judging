@@ -59,9 +59,9 @@ const Home: NextPage<Props> = ({ judgingDeadline }) => {
             <div className="mt-10 flex flex-col items-center gap-3">
               {prizes.length > 0 ? (
                 <>
-                  <Link href="/results">
+                  {/* <Link href="/results">
                     <Button text="View Results" className="w-12/12" />
-                  </Link>
+                  </Link> */}
                   <Link href="/judging">
                     <Button text="Start Judging" className="w-12/12" />
                   </Link>
