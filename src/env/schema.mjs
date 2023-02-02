@@ -10,6 +10,7 @@ export const serverSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]),
   HELIX_BASE_URL: z.string().url(),
   HELIX_ADMIN_TOKEN: z.string(),
+  JUDGING_DEADLINE: z.string(),
 });
 
 /**
@@ -19,5 +20,4 @@ export const serverSchema = z.object({
  */
 export const clientSchema = z.object({
   // NEXT_PUBLIC_CLIENTVAR: z.string(),
-  NEXT_PUBLIC_JUDGING_DEADLINE: z.string(),
 });

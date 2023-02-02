@@ -7,11 +7,15 @@ import Header from "../components/Header";
 import PrizeList from "../components/PrizeList";
 import Spinner from "../components/Spinner";
 import { api } from "../utils/api";
-import { env } from "../env/client.mjs";
+import { env } from "../env/server.mjs";
 
-const JUDGING_DEADLINE = DateTime.fromISO(env.NEXT_PUBLIC_JUDGING_DEADLINE);
+interface Props {
+  judgingDeadline: string;
+}
 
-const Home: NextPage = () => {
+const Home: NextPage<Props> = ({ judgingDeadline }) => {
+  const JUDGING_DEADLINE = DateTime.fromISO(judgingDeadline);
+
   const [timeLeft, setTimeLeft] = useState("00:00:00");
   const { data: prizeData, isFetching } =
     api.judging.getJudgingPrizes.useQuery();
@@ -70,5 +74,13 @@ const Home: NextPage = () => {
     </>
   );
 };
+
+export function getStaticProps() {
+  return {
+    props: {
+      judgingDeadline: env.JUDGING_DEADLINE,
+    },
+  };
+}
 
 export default Home;
