@@ -49,6 +49,9 @@ const Results: NextPage = () => {
             </select>
           </div>
         </div>
+        <div className="mx-auto text-2xl font-bold text-yellow">
+          {judgments.length} Projects
+        </div>
         <div className="mx-auto grid w-10/12 grid-cols-3 gap-3">
           <div className="text-xl font-bold">Project Name</div>
           <div className="text-xl font-bold">Mean</div>
