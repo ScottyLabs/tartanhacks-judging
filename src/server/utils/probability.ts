@@ -1,6 +1,6 @@
 /**
- * Returns true or false with a probability of 0.5
+ * Returns true or false with the specified probability (0.5 by default)
  */
-export function flipCoin(): boolean {
-  return Math.random() >= 0.5;
+export function flipCoin(probability = 0.5): boolean {
+  return Math.random() >= probability;
 }

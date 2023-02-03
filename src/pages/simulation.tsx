@@ -1,4 +1,5 @@
 import { type NextPage } from "next";
+import Link from "next/link";
 import Button from "../components/Button";
 import Header from "../components/Header";
 import Spinner from "../components/Spinner";
@@ -32,6 +33,13 @@ const Results: NextPage = () => {
           }}
           disabled={isLoading}
         />
+        <Link href="/results">
+          <Button
+            text="View Results"
+            className="w-12/12"
+            disabled={isLoading}
+          />
+        </Link>
         {isLoading ? <Spinner /> : null}
       </main>
     </>

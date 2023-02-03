@@ -1,9 +1,16 @@
 import type { Judge, PrismaClient, Prize, Project } from "@prisma/client";
 import { flipCoin } from "../utils/probability";
+import {
+  compareMany,
+  type Comparison,
+  computeNext,
+  getCurrent,
+} from "./judging";
 
-const JUDGE_COUNT = 50;
+const JUDGE_COUNT = 10;
 const PRIZE_COUNT = 10;
-const PROJECT_COUNT = 100;
+const PROJECT_COUNT = 10;
+const NUM_ROUNDS = 1;
 
 /**
  * Clear the database
@@ -24,7 +31,7 @@ async function clearEntities(prisma: PrismaClient) {
  * Populate database with simulation entities
  */
 async function populateEntities(prisma: PrismaClient) {
-  for (let i = 0; i < PRIZE_COUNT; i++) {
+  for (let i = 1; i <= PRIZE_COUNT; i++) {
     const prizeName = `Prize ${i}`;
     await prisma.prize.create({
       data: {
@@ -35,7 +42,7 @@ async function populateEntities(prisma: PrismaClient) {
     });
   }
 
-  for (let i = 0; i < JUDGE_COUNT; i++) {
+  for (let i = 1; i <= JUDGE_COUNT; i++) {
     const judgeName = `Judge ${i}`;
     await prisma.judge.create({
       data: {
@@ -45,7 +52,7 @@ async function populateEntities(prisma: PrismaClient) {
     });
   }
 
-  for (let i = 0; i < PROJECT_COUNT; i++) {
+  for (let i = 1; i <= PROJECT_COUNT; i++) {
     const projectName = `Project ${i}`;
     const teamName = `Team ${i}`;
     const location = `Table ${i}`;
@@ -136,10 +143,74 @@ export async function prepareSimulation(prisma: PrismaClient) {
 }
 
 /**
+ * Return the index associated with a project
+ */
+function getProjectNumber(project: Project): number {
+  return parseInt(project.name.slice("Project ".length));
+}
+
+/**
  * Start the simulation
  */
 export async function startSimulation(prisma: PrismaClient) {
-  const projects = await prisma.project.findMany();
-  const prizes = await prisma.prize.findMany();
   const judges = await prisma.judge.findMany();
+
+  // Compute next for each judge
+  for (const judge of judges) {
+    await getCurrent(prisma, judge.helixId);
+    await computeNext(prisma, judge.helixId);
+  }
+
+  let judgments = 0;
+
+  for (let round = 0; round < NUM_ROUNDS; round++) {
+    for (const judge of judges) {
+      const current = await getCurrent(prisma, judge.helixId);
+
+      if (current == null || current.nextProject == null) {
+        // No next project
+        console.log("No next project");
+        break;
+      }
+
+      const project = current.nextProject;
+      const projectPrizeIds = new Set(
+        project.judgingInstances.map((instance) => instance.prizeId)
+      );
+      const relevantPrizes = current.prizeAssignments.filter((assignment) =>
+        projectPrizeIds.has(assignment.prizeId)
+      );
+
+      const comparisons = [] as Comparison[];
+      for (const assignment of relevantPrizes) {
+        if (
+          assignment.leadingProject == null ||
+          assignment.leadingProjectId == null
+        ) {
+          // No leading project
+          break;
+        }
+        const prevIndex = getProjectNumber(assignment.leadingProject);
+        const currIndex = getProjectNumber(project);
+
+        const p = prevIndex / (prevIndex + currIndex);
+        const win = flipCoin(p);
+        comparisons.push({
+          prizeId: assignment.prizeId,
+          winnerId: win ? project.id : assignment.leadingProjectId,
+          loserId: win ? assignment.leadingProjectId : project.id,
+        });
+        judgments++;
+      }
+
+      await compareMany(prisma, judge.helixId, comparisons);
+      await computeNext(prisma, judge.helixId);
+    }
+  }
+
+  console.log("Judgments made:", judgments);
 }
+
+/**
+ * P(i vs j) = i / i + j
+ */

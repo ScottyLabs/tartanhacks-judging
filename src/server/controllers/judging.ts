@@ -1,7 +1,8 @@
 import type { PrismaClient } from "@prisma/client";
+import cmp from "./cmp";
 import { getNext } from "./getNext";
 
-interface Comparison {
+export interface Comparison {
   prizeId: string;
   winnerId: string;
   loserId: string;
@@ -202,7 +203,7 @@ export async function compareMany(
     });
 
     if (!(judge && winner && loser && prize)) {
-      throw "Invalid judge, winner, loser, or prize ID";
+      throw new Error("Invalid judge, winner, loser, or prize ID");
     }
 
     comparisonInputs.push([winner, loser, prize, judge, prisma]);
