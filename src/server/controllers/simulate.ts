@@ -135,4 +135,11 @@ export async function prepareSimulation(prisma: PrismaClient) {
   await prepareRelations(prisma);
 }
 
-export async function startSimulation(prisma: PrismaClient) {}
+/**
+ * Start the simulation
+ */
+export async function startSimulation(prisma: PrismaClient) {
+  const projects = await prisma.project.findMany();
+  const prizes = await prisma.prize.findMany();
+  const judges = await prisma.judge.findMany();
+}
