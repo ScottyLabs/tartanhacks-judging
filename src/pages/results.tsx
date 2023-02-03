@@ -1,6 +1,7 @@
 import { type NextPage } from "next";
 import { useState } from "react";
 import Header from "../components/Header";
+import ResultTable from "../components/ResultTable";
 import { api } from "../utils/api";
 
 const Results: NextPage = () => {
@@ -49,20 +50,7 @@ const Results: NextPage = () => {
             </select>
           </div>
         </div>
-        <div className="mx-auto grid w-10/12 grid-cols-3 gap-3">
-          <div className="text-xl font-bold">Project Name</div>
-          <div className="text-xl font-bold">Mean</div>
-          <div className="text-xl font-bold">Variance</div>
-        </div>
-        <div className="mx-auto grid w-10/12 grid-cols-3 gap-3">
-          {judgments.map((judgment) => (
-            <>
-              <div>{judgment.project.name}</div>
-              <div>{judgment.mu.toFixed(3)}</div>
-              <div>{judgment.sigma2.toFixed(3)}</div>
-            </>
-          ))}
-        </div>
+        <ResultTable projects={judgments} />
       </main>
     </>
   );
