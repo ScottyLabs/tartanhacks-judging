@@ -7,10 +7,11 @@ import {
   getCurrent,
 } from "./judging";
 
-const JUDGE_COUNT = 10;
+const JUDGE_COUNT = 25;
 const PRIZE_COUNT = 10;
-const PROJECT_COUNT = 10;
-const NUM_ROUNDS = 1;
+const PROJECT_COUNT = 100;
+const NUM_ROUNDS = 15;
+const GRAND_PRIZE_NAME = "Grand Prize";
 
 /**
  * Clear the database
@@ -31,6 +32,13 @@ async function clearEntities(prisma: PrismaClient) {
  * Populate database with simulation entities
  */
 async function populateEntities(prisma: PrismaClient) {
+  await prisma.prize.create({
+    data: {
+      helixId: GRAND_PRIZE_NAME,
+      name: GRAND_PRIZE_NAME,
+      description: GRAND_PRIZE_NAME,
+    },
+  });
   for (let i = 1; i <= PRIZE_COUNT; i++) {
     const prizeName = `Prize ${i}`;
     await prisma.prize.create({
@@ -77,6 +85,14 @@ async function createJudgingInstances(
   projects: Project[],
   prizes: Prize[]
 ) {
+  const grandPrize = await prisma.prize.findFirst({
+    where: { name: GRAND_PRIZE_NAME },
+  });
+
+  if (grandPrize == null) {
+    return;
+  }
+
   // Create judging instances
   for (const project of projects) {
     const projectPrizes = [];
@@ -85,8 +101,9 @@ async function createJudgingInstances(
         projectPrizes.push(prize.id);
       }
     }
+    projectPrizes.push(grandPrize.id);
 
-    const judgingInstances = projectPrizes.map((prizeId) => ({
+    const judgingInstances = [...new Set(projectPrizes)].map((prizeId) => ({
       prizeId: prizeId,
       projectId: project.id,
     }));
@@ -150,9 +167,52 @@ function getProjectNumber(project: Project): number {
 }
 
 /**
- * Start the simulation
+ * Return true if current wins
+ * Always makes the larger index win
  */
-export async function startSimulation(prisma: PrismaClient) {
+function compareProjectAscending(previous: number, current: number): boolean {
+  return previous < current;
+}
+
+/**
+ * Returns true if current wins
+ * Imposes an underlying ascending ordering with a weighted probability of an adversarial (opposite) decision
+ */
+function compareProjectAdversarialWeighted(
+  previous: number,
+  current: number
+): boolean {
+  const pAdversarial = 0.5 - Math.abs(previous - current) / 200;
+  if (flipCoin(pAdversarial)) {
+    return compareProjectAscending(current, previous);
+  } else {
+    return compareProjectAscending(previous, current);
+  }
+}
+
+/**
+ * Returns true if current wins
+ * Imposes an underlying ascending ordering with `pAdversarial` probability of an adversarial (opposite) decision
+ */
+function compareProjectAdversarialUniform(
+  previous: number,
+  current: number,
+  pAdversarial = 0.1
+): boolean {
+  if (flipCoin(pAdversarial)) {
+    return compareProjectAscending(current, previous);
+  } else {
+    return compareProjectAscending(previous, current);
+  }
+}
+
+/**
+ * Run the simulation with the specified comparison function
+ */
+async function runSimulation(
+  prisma: PrismaClient,
+  comparisonFn = compareProjectAscending
+) {
   const judges = await prisma.judge.findMany();
 
   // Compute next for each judge
@@ -193,8 +253,8 @@ export async function startSimulation(prisma: PrismaClient) {
         const prevIndex = getProjectNumber(assignment.leadingProject);
         const currIndex = getProjectNumber(project);
 
-        const p = prevIndex / (prevIndex + currIndex);
-        const win = flipCoin(p);
+        // const p = prevIndex / (prevIndex + currIndex);
+        const win = comparisonFn(prevIndex, currIndex);
         comparisons.push({
           prizeId: assignment.prizeId,
           winnerId: win ? project.id : assignment.leadingProjectId,
@@ -212,5 +272,8 @@ export async function startSimulation(prisma: PrismaClient) {
 }
 
 /**
- * P(i vs j) = i / i + j
+ * Start the simulation
  */
+export async function startSimulation(prisma: PrismaClient) {
+  await runSimulation(prisma, compareProjectAdversarialWeighted);
+}
