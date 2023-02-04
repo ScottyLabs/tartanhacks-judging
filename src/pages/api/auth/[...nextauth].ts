@@ -76,10 +76,6 @@ export const authOptions: AuthOptions = {
       }
       return session;
     },
-    signIn: ({ user }): boolean => {
-      const jUser = user as JudgingUser;
-      return jUser?.admin || jUser?.company != null;
-    },
   },
   session: {
     strategy: "jwt",

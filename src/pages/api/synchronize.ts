@@ -175,7 +175,7 @@ export async function synchronizeProjects() {
 const exclusivePrizes = ["Sandia National Labs Award", "Best use of Algorand"];
 
 const partialPrizes = {
-  "Most Disruptive: Product": [""],
+  "Most Disruptive: Product": ["cldqkuvz9001ims085tadsmjl"],
 };
 
 /**
