@@ -7,6 +7,8 @@ import { type HelixUser } from "../../../types/user.js";
 
 export interface JudgingUser extends User {
   judge: boolean;
+  admin: boolean;
+  company: string;
 }
 
 export const authOptions: AuthOptions = {
@@ -73,7 +75,8 @@ export const authOptions: AuthOptions = {
       return session;
     },
     signIn: ({ user }): boolean => {
-      return (user as JudgingUser)?.judge ?? false;
+      const jUser = user as JudgingUser;
+      return jUser?.admin || jUser?.company != null;
     },
   },
   session: {
