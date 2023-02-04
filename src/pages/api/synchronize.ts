@@ -1,3 +1,4 @@
+import type { Prize } from "@prisma/client";
 import type { NextApiRequest, NextApiResponse } from "next";
 import { env } from "../../env/server.mjs";
 import { prisma } from "../../server/db";
@@ -26,6 +27,8 @@ interface HelixProject {
   team: HelixTeam;
   prizes: HelixPrize[];
 }
+
+const GRAND_PRIZE_NAME = "Scott Krulcik Grand Prize";
 
 /**
  * Pull data from a Helix endpoint
@@ -144,24 +147,12 @@ export async function synchronizeProjects() {
     prizeMapping.set(prize.helixId, prize.id);
   }
 
-  let prizeRelations = helixProjects.flatMap(({ _id, prizes: projectPrizes }) =>
-    projectPrizes.map((prize) => ({
-      prizeId: prizeMapping.get(prize._id) as string,
-      projectId: projectMapping.get(_id) as string,
-    }))
-  );
-
-  // TODO: remove
-  // Creates instances where a project might not be submitted for a specific prize
-  const projectBlacklist = [
-    "cldmaig570008tuis0wq91op3",
-    "cldmaig57000atuisfi36krpw",
-    "cldmaig57000ctuis34mtv3yo",
-  ];
-  prizeRelations = prizeRelations.filter(
-    (relation) =>
-      relation.prizeId != "cldmaifw50006tuis9p0wopl4" ||
-      !projectBlacklist.includes(relation.projectId)
+  const prizeRelations = helixProjects.flatMap(
+    ({ _id, prizes: projectPrizes }) =>
+      projectPrizes.map((prize) => ({
+        prizeId: prizeMapping.get(prize._id) as string,
+        projectId: projectMapping.get(_id) as string,
+      }))
   );
 
   // Upsert judging instances
@@ -181,17 +172,79 @@ export async function synchronizeProjects() {
   );
 }
 
+const exclusivePrizes = ["Sandia National Labs Award", "Best use of Algorand"];
+
+const partialPrizes = {
+  "Most Disruptive: Product": [""],
+};
+
+/**
+ * Get the mapping of partial judge ids to their prizes
+ */
+function getPartialPrizeJudgeMap() {
+  // Set prizes for each partial judge
+  const partialJudgeIds = new Set(Object.values(partialPrizes).flat());
+  const partialJudgeMap = new Map<string, string[]>();
+  const partialPrizeNames = Object.keys(
+    partialPrizes
+  ) as (keyof typeof partialPrizes)[];
+  for (const id of partialJudgeIds) {
+    const prizes = partialPrizeNames.filter((prizeName) =>
+      partialPrizes[prizeName].includes(id)
+    );
+    partialJudgeMap.set(id, prizes);
+  }
+
+  return partialJudgeMap;
+}
+
 /**
  * Assign judges to projects
  */
 export async function initJudgePrizeAssignments() {
   const judges = await prisma.judge.findMany({});
-  const prizes = await prisma.prize.findMany({});
+  const allPrizes = await prisma.prize.findMany({});
+  const grandPrize = await prisma.prize.findFirst({
+    where: { name: GRAND_PRIZE_NAME },
+  });
 
-  // Temporarily assign all judges to all prizes
-  // TODO: figure out what sponsors are judging their own prizes
+  if (grandPrize == null) {
+    throw new Error("Could not find Grand Prize!");
+  }
+
+  // Mapping of partial judges to their prizes
+  const partialJudgeMap = getPartialPrizeJudgeMap();
+
   const assignments = [] as { judgeId: string; prizeId: string }[];
   for (const judge of judges) {
+    let prizes = [] as Prize[];
+    if (judge.company != null) {
+      // Assign judges to their prizes
+      prizes = await prisma.prize.findMany({
+        where: {
+          provider: judge.company,
+        },
+      });
+      prizes.push(grandPrize);
+    } else if (partialJudgeMap.has(judge.id)) {
+      // Assign partial judges
+      const prizeNames = partialJudgeMap.get(judge.id) ?? [];
+      prizes = await prisma.prize.findMany({
+        where: {
+          name: {
+            in: prizeNames,
+          },
+        },
+      });
+      prizes.push(grandPrize);
+    } else {
+      // Assign general judges to all prizes except to exclusive
+      prizes = allPrizes.filter(
+        (prize) => !exclusivePrizes.includes(prize.name)
+      );
+    }
+
+    // Create assignments for each judge
     for (const prize of prizes) {
       const assignment = {
         judgeId: judge.id,

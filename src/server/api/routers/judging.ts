@@ -267,6 +267,18 @@ export const judgingRouter = createTRPCRouter({
           include: {
             prize: true,
           },
+          orderBy: [
+            {
+              prize: {
+                provider: "asc",
+              },
+            },
+            {
+              prize: {
+                name: "asc",
+              },
+            },
+          ],
         },
       },
     });

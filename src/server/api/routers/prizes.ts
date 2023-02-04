@@ -9,7 +9,13 @@ export const prizesRouter = createTRPCRouter({
    * Get all prizes for the event
    */
   getPrizes: protectedProcedure.query(async ({ ctx }) => {
-    const prizes = await ctx.prisma.prize.findMany({});
+    const prizes = await ctx.prisma.prize.findMany({
+      orderBy: [
+        {
+          provider: "asc",
+        },
+      ],
+    });
     return prizes;
   }),
 });
