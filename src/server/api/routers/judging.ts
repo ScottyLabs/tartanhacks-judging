@@ -260,7 +260,7 @@ export const judgingRouter = createTRPCRouter({
     const user = ctx?.session?.user as User;
     const judge = await ctx.prisma.judge.findFirst({
       where: {
-        email: user.email,
+        email: user.email as string,
       },
       include: {
         prizeAssignments: {
@@ -283,9 +283,8 @@ export const judgingRouter = createTRPCRouter({
       },
     });
 
-    const prizes = judge?.prizeAssignments.map(
-      (assignment) => assignment.prize
-    );
+    const prizes =
+      judge?.prizeAssignments.map((assignment) => assignment.prize) ?? [];
 
     return prizes;
   }),
