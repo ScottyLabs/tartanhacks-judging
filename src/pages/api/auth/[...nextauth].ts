@@ -53,7 +53,7 @@ export const authOptions: AuthOptions = {
             email: helixUser.email,
             judge: helixUser.judge,
             admin: helixUser.admin,
-            company: helixUser.company,
+            company: helixUser.company?.name,
           };
           return user;
         }

@@ -1,7 +1,9 @@
 export interface HelixUser {
   admin: boolean;
   judge: boolean;
-  company?: string;
+  company?: {
+    name: string;
+  };
   status: string;
   _id: string;
   email: string;

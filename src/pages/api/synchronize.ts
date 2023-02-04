@@ -61,7 +61,7 @@ export async function synchronizeJudges() {
   const judges = helixJudges.map((judge) => ({
     helixId: judge._id,
     email: judge.email,
-    company: judge.company,
+    company: judge.company?.name,
   }));
 
   // Upsert users
