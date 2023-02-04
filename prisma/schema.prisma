@@ -128,7 +128,7 @@ model JudgePrizeAssignment {
 
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
-    Judge     Judge    @relation(fields: [judgeId], references: [id])
+    judge     Judge    @relation(fields: [judgeId], references: [id])
 
     @@unique([judgeId, prizeId])
 }
