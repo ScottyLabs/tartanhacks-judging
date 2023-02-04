@@ -12,7 +12,7 @@ export const prizesRouter = createTRPCRouter({
     const prizes = await ctx.prisma.prize.findMany({
       orderBy: [
         {
-          provider: "desc",
+          provider: "asc",
         },
       ],
     });
