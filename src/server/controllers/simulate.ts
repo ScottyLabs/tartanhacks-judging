@@ -275,5 +275,5 @@ async function runSimulation(
  * Start the simulation
  */
 export async function startSimulation(prisma: PrismaClient) {
-  await runSimulation(prisma, compareProjectAdversarialWeighted);
+  await runSimulation(prisma, compareProjectAscending);
 }
