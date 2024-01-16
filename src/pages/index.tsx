@@ -25,11 +25,16 @@ const Home: NextPage<Props> = ({ judgingDeadline }) => {
   useEffect(() => {
     const intervalId = setInterval(() => {
       const diff = JUDGING_DEADLINE.diffNow();
-      setTimeLeft(diff.toFormat("hh:mm:ss"));
+      if (diff.milliseconds < 0) {
+        setTimeLeft('Time\'s Up!')
+        clearInterval(intervalId)
+      } else {
+        setTimeLeft(diff.toFormat("hh:mm:ss"));
+      }
     }, 1000);
 
     return () => clearInterval(intervalId);
-  }, [timeLeft, setTimeLeft]);
+  }, [timeLeft, setTimeLeft, JUDGING_DEADLINE]);
 
   return (
     <>
