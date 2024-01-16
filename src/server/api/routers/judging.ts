@@ -300,7 +300,7 @@ export const judgingRouter = createTRPCRouter({
       const user = ctx?.session?.user as User;
 
       const judge = await ctx.prisma.judge.findFirst({
-        where: { helixId: user.id },
+        where: { email: user.email as string },
         include: {
           prizeAssignments: {
             include: {
