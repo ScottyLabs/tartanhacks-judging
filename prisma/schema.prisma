@@ -16,6 +16,7 @@ model Judge {
     helixId String
     company String?
     email   String
+    admin   Boolean @default(false)
 
     // Alpha and beta prior from gavel (https://github.com/ScottyLabs/gavel/blob/cead49dc88e55a6e2feafd6389e7367d780442f7/gavel/crowd_bt.py#L19-L20)
     alpha Float @default(10)

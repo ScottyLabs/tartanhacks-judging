@@ -10,4 +10,22 @@ const authMiddleware = middleware(async ({ ctx, next }) => {
   });
 });
 
+const adminMiddleware = middleware(async ({ ctx, next }) => {
+  if (!ctx.session?.user?.email) {
+    throw new TRPCError({ code: "UNAUTHORIZED" });
+  }
+  const user = await ctx.prisma.judge.findFirst({
+    where: {
+      email: ctx.session?.user?.email,
+    },
+  });
+  if (!(user?.admin)) {
+    throw new TRPCError({ code: "UNAUTHORIZED" });
+  }
+  return next({
+    ctx,
+  });
+});
+
 export default authMiddleware;
+export { adminMiddleware };

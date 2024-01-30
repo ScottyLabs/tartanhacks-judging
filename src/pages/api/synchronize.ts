@@ -172,6 +172,7 @@ export async function synchronizeProjects() {
   );
 }
 
+// TODO update
 const exclusivePrizes = ["Sandia National Labs Award", "Best use of Algorand"];
 
 const partialPrizes = {

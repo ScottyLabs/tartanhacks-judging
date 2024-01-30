@@ -2,11 +2,13 @@ import type { User } from "next-auth";
 import { z } from "zod";
 import cmp from "../../controllers/cmp";
 import { getNext } from "../../controllers/getNext";
-import authMiddleware from "../middleware/authMiddleware";
+import authMiddleware, { adminMiddleware } from "../middleware/authMiddleware";
 
 import { createTRPCRouter, publicProcedure } from "../trpc";
+import { TRPCError } from "@trpc/server";
 
 const protectedProcedure = publicProcedure.use(authMiddleware);
+const adminProcedure = protectedProcedure.use(adminMiddleware);
 
 export const judgingRouter = createTRPCRouter({
   // Get the current project to be judged
@@ -350,5 +352,55 @@ export const judgingRouter = createTRPCRouter({
           nextProjectId: project.id,
         },
       });
+    }),
+
+  assignTables: adminProcedure
+    .input(
+      z.object({
+        numTables: z.number().int().min(1),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const projects = (await ctx.prisma.project.findMany()).sort((a, b) =>
+        a.id.localeCompare(b.id)
+      );
+      const numProjects = projects.length;
+      const { numTables } = input;
+      if (numProjects > numTables) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Not enough tables for all projects",
+        });
+      }
+
+      const odds = [...Array(Math.ceil(numTables / 2)).keys()].map(
+        (i) => i * 2 + 1
+      );
+      const evens = [...Array(Math.floor(numTables / 2)).keys()].map(
+        (i) => (i + 1) * 2
+      );
+      const tables = [...odds, ...evens].map((i) => `Table ${i}`);
+
+      const tableAssignments = projects.map((project, i) => {
+        return {
+          projectId: project.id,
+          table: tables[i % numTables]!,
+        };
+      });
+
+      await ctx.prisma.$transaction(
+        tableAssignments.map((assignment) => {
+          return ctx.prisma.project.update({
+            where: {
+              id: assignment.projectId,
+            },
+            data: {
+              location: assignment.table,
+            },
+          });
+        })
+      );
+
+      return ctx.prisma.project.findMany();
     }),
 });
