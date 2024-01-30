@@ -6,7 +6,7 @@ module.exports = {
   ],
   theme: {
     extend: {
-      // TH 2023 colors
+      // TH 2023-24 colors
       colors: {
         purple: "#4200ff",
         blue: "#6e9afd",
@@ -14,6 +14,7 @@ module.exports = {
         beige: "#f7f1e2",
         inactive: "#000000",
         voted: "#2e8540",
+        black: "#1b1818"
       },
     },
   },

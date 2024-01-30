@@ -9,7 +9,7 @@ interface Props {
 export default function Header({ hideAuth = false }: Props) {
   return (
     <header>
-      <nav className="navbar navbar-expand-lg bg-gradient-to-b from-blue to-purple py-2 shadow-md">
+      <nav className="navbar navbar-expand-lg bg-black py-2 shadow-md">
         <div className="mx-auto flex max-w-screen-xl items-center justify-between px-2">
           <div id="mobile-menu-2">
             <Link href="/">
