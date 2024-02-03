@@ -35,6 +35,7 @@ const getPreferredProjects = async (
       id: {
         notIn: ignoredIds,
       },
+      isCheckedIn: true,
     },
     include: {
       judgingInstances: {
