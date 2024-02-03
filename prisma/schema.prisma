@@ -52,12 +52,13 @@ model Prize {
 
 // Projects are compared against each other by judges
 model Project {
-    id          String @id @default(cuid()) @map("_id")
+    id          String  @id @default(cuid()) @map("_id")
     helixId     String
     name        String
     description String
     location    String
     team        String
+    isCheckedIn Boolean @default(false) // Has the user checked in to the expo yet so we can send judges their way
 
     leadingPrizes    JudgePrizeAssignment[]
     incomingJudges   Judge[]
