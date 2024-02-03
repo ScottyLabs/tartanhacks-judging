@@ -172,12 +172,22 @@ export async function synchronizeProjects() {
   );
 }
 
-// TODO update
-const exclusivePrizes = ["Sandia National Labs Award", "Best use of Algorand"];
+// TODO: These prizes are only judges by
+const exclusivePrizes = [
+  "PLS Logistics Prize",
+  // "GSA Campus Experience Prize",
+  // "Project Olympus Spark Grant",
+];
 
 const partialPrizes = {
-  "Most Disruptive: Product": ["cldqkuvz9001ims085tadsmjl"],
+  "GSA Campus Experience Prize": ["cls6iu27j001ql608hqhsy3qk"],
+  "Project Olympus Spark Grant": [
+    "cls6iu27j001sl608valjzecb", // Matthew Katsaros
+    "cls6iu27j001ul608l2nwl2ia", // Kit Needham
+  ],
 };
+
+const ignorePrizes = ["Ripple XRP Ledger Prize"];
 
 /**
  * Get the mapping of partial judge ids to their prizes
@@ -247,6 +257,11 @@ export async function initJudgePrizeAssignments() {
 
     // Create assignments for each judge
     for (const prize of prizes) {
+      // We're not judging prizes in ignorePrizes
+      if (prize.name in ignorePrizes) {
+        continue;
+      }
+
       const assignment = {
         judgeId: judge.id,
         prizeId: prize.id,
