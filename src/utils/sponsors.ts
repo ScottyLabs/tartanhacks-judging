@@ -5,6 +5,9 @@ const sponsorLogoMapping = {
   "Design for America": "/sponsors/dfa.png",
   "Google Cloud": "/sponsors/gcp.png",
   "Wolfram Language": "/sponsors/wolfram.png",
+  PLS: "/sponsors/pls.png",
+  GSA: "/sponsors/gsa.png",
+  "Project Olympus": "/sponsors/project_olympus.png",
 } as const;
 
 export type Sponsor = keyof typeof sponsorLogoMapping;
