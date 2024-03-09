@@ -79,7 +79,7 @@ const Home: NextPage<Props> = ({ judgingDeadline }) => {
   );
 };
 
-export async function getServerSideProps() {
+export async function getStaticProps() {
   const settings = await prisma?.settings.findFirst();
   return {
     props: {
