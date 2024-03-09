@@ -25,8 +25,8 @@ const Home: NextPage<Props> = ({ judgingDeadline }) => {
     const intervalId = setInterval(() => {
       const diff = JUDGING_DEADLINE.diffNow();
       if (diff.milliseconds < 0) {
-        setTimeLeft('Time\'s Up!')
-        clearInterval(intervalId)
+        setTimeLeft("Time's Up!");
+        clearInterval(intervalId);
       } else {
         setTimeLeft(diff.toFormat("hh:mm:ss"));
       }
@@ -83,7 +83,7 @@ export async function getServerSideProps() {
   const settings = await prisma?.settings.findFirst();
   return {
     props: {
-      judgingDeadline: settings?.judgingDeadline
+      judgingDeadline: settings?.judgingDeadline,
     },
   };
 }
