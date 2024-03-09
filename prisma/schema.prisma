@@ -31,16 +31,16 @@ model User {
   type       UserType
   externalId String?
   isAdmin    Boolean  @default(false)
-  token      String
-  Judge      Judge[]
-  Project    Project? @relation(fields: [projectId], references: [id])
+  project    Project? @relation(fields: [projectId], references: [id])
   projectId  String?
+
+  judge Judge?
 }
 
 // Judges compare different projects and have some associated priors (alpha, beta)
 model Judge {
   id     String @id @default(cuid()) @map("_id")
-  userId String
+  userId String @unique
   user   User   @relation(fields: [userId], references: [id])
 
   // Alpha and beta prior from gavel (https://github.com/ScottyLabs/gavel/blob/cead49dc88e55a6e2feafd6389e7367d780442f7/gavel/crowd_bt.py#L19-L20)
