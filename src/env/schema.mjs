@@ -12,6 +12,12 @@ export const serverSchema = z.object({
   HELIX_ADMIN_TOKEN: z.string(),
   ADMIN_EMAIL: z.string().email(),
   JWT_SECRET: z.string(),
+  EMAIL_CONTACT: z.string(),
+  EMAIL_HOST: z.string(),
+  EMAIL_PORT: z.string(),
+  EMAIL_TLS: z.string(),
+  EMAIL_USER: z.string(),
+  EMAIL_PASS: z.string(),
 });
 
 /**

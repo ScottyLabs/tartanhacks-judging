@@ -1,17 +1,19 @@
-import { PrismaClient, UserType } from '@prisma/client';
-import { generateJWT } from '../src/utils/auth';
-const prisma = new PrismaClient();
+import { PrismaClient, UserType } from "@prisma/client";
+import { generateJWT } from "../src/utils/auth";
+import { sendPlaintextEmail } from "../src/server/utils/email";
+import { env } from "../src/env/server.mjs";
 
+const prisma = new PrismaClient();
 
 async function main() {
   // Check if an admin user already exists
   const adminUser = await prisma.user.findFirst({
-    where: { isAdmin: true},
+    where: { isAdmin: true },
   });
 
   if (!adminUser) {
-    const jwtSecret = process.env.JWT_SECRET as string;
-    const email = process.env.ADMIN_EMAIL as string
+    const jwtSecret = env.JWT_SECRET;
+    const email = env.ADMIN_EMAIL;
     const token = generateJWT(email, jwtSecret);
     // Create a new admin user if it doesn't exist
     await prisma.user.create({
@@ -21,9 +23,14 @@ async function main() {
         isAdmin: true,
       },
     });
+    await sendPlaintextEmail(
+      [email],
+      "Admin user created",
+      `Your admin token is: ${token}`
+    );
     console.log(`Admin user created, token: ${token}`);
   } else {
-    console.log('Admin user already exists');
+    console.log("Admin user already exists");
   }
 }
 
