@@ -34,7 +34,9 @@ export const judgingRouter = createTRPCRouter({
     };
 
     const judge = await ctx.prisma.judge.findFirst({
-      where: { email: user.email as string },
+      where: { user: {
+        email: user.email as string
+      } },
       include: judgeIncludeFields,
     });
 
@@ -86,7 +88,9 @@ export const judgingRouter = createTRPCRouter({
   computeNext: protectedProcedure.mutation(async ({ ctx }) => {
     const user = ctx?.session?.user as User;
     const judge = await ctx.prisma.judge.findFirst({
-      where: { email: user.email as string },
+      where: {user: {
+        email: user.email as string
+      }},
       include: {
         prizeAssignments: {
           include: {
@@ -191,7 +195,9 @@ export const judgingRouter = createTRPCRouter({
       const user = ctx?.session?.user as User;
 
       const judge = await ctx.prisma.judge.findFirst({
-        where: { email: user.email as string },
+        where: {user: {
+          email: user.email as string
+        }},
       });
 
       if (judge == null) {
@@ -262,7 +268,9 @@ export const judgingRouter = createTRPCRouter({
     const user = ctx?.session?.user as User;
     const judge = await ctx.prisma.judge.findFirst({
       where: {
-        email: user.email as string,
+        user: {
+          email: user.email as string,
+        }
       },
       include: {
         prizeAssignments: {
@@ -272,7 +280,7 @@ export const judgingRouter = createTRPCRouter({
           orderBy: [
             {
               prize: {
-                provider: "asc",
+                providerIconUrl: "asc",
               },
             },
             {
@@ -302,7 +310,9 @@ export const judgingRouter = createTRPCRouter({
       const user = ctx?.session?.user as User;
 
       const judge = await ctx.prisma.judge.findFirst({
-        where: { email: user.email as string },
+        where: {user: {
+          email: user.email as string
+        }},
         include: {
           prizeAssignments: {
             include: {
