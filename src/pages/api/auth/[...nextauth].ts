@@ -5,11 +5,16 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { env } from "../../../env/server.mjs";
 import { type HelixUser } from "../../../types/user.js";
 
+import { prisma } from "../../../server/db.js";
+
 export interface JudgingUser extends User {
   judge: boolean;
   admin: boolean;
   company?: string;
 }
+
+const settings = await prisma.settings.findFirst();
+const isExternalAuthEnabled = settings?.authMode;
 
 export const authOptions: AuthOptions = {
   // Configure one or more authentication providers
