@@ -27,7 +27,7 @@ export default function VotingCard({
   project,
   prevProject,
 }: Props): ReactElement {
-  const sponsorLogo = getSponsorLogoUrl(prize.provider as Sponsor);
+  const sponsorLogo = getSponsorLogoUrl(prize.providerIconUrl as Sponsor);
 
   return (
     <div
