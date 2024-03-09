@@ -12,8 +12,8 @@ async function main() {
   });
 
   if (!adminUser) {
-    const jwtSecret = process.env.JWT_SECRET as string;
-    const email = process.env.ADMIN_EMAIL as string;
+    const jwtSecret = env.JWT_SECRET;
+    const email = env.ADMIN_EMAIL;
     const token = generateJWT(email, jwtSecret);
     // Create a new admin user if it doesn't exist
     await prisma.user.create({
