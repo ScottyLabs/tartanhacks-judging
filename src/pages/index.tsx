@@ -7,7 +7,6 @@ import Header from "../components/Header";
 import PrizeList from "../components/PrizeList";
 import Spinner from "../components/Spinner";
 import { api } from "../utils/api";
-import { env } from "../env/server.mjs";
 
 interface Props {
   judgingDeadline: string;
@@ -80,10 +79,11 @@ const Home: NextPage<Props> = ({ judgingDeadline }) => {
   );
 };
 
-export function getStaticProps() {
+export async function getStaticProps() {
+  const settings = await prisma?.settings.findFirst();
   return {
     props: {
-      judgingDeadline: env.JUDGING_DEADLINE,
+      judgingDeadline: settings?.judgingDeadline
     },
   };
 }
