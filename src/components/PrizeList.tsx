@@ -13,7 +13,7 @@ export default function PrizeList({ prizes }: Props) {
       {prizes.map((prize) => {
         return (
           <PrizeCard
-            sponsorLogo={getSponsorLogoUrl(prize.provider as Sponsor)}
+            sponsorLogo={getSponsorLogoUrl(prize.providerIconUrl as Sponsor)}
             prizeName={prize.name}
             key={prize.name}
           />

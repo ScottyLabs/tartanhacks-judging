@@ -26,7 +26,7 @@ export default function ProjectCard({
       </div>
       <div className="flex grow flex-row items-center justify-between pb-5">
         <p className="pr-5 text-lg font-bold">Team:</p>
-        <p className="text-xl font-bold text-yellow">{project.team}</p>
+        <p className="text-xl font-bold text-yellow">{project.teamName}</p>
       </div>
       <div className="flex grow flex-row items-center justify-between pb-4">
         <p className="pr-5 text-lg font-bold">Location:</p>
