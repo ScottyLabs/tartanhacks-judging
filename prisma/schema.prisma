@@ -10,14 +10,21 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum AuthMode {
+  LOCAL
+  SYNC
+}
+
 model Settings {
   id              String    @id @default(cuid()) @map("_id")
   authUrl         String?
+  authMode        AuthMode  @default(LOCAL)
+
   judgingDeadline DateTime?
   minVisits       Int
   sigmaInit       Float
   getTeamUrl      String?
-  serviceToken    String
+  serviceToken    String?
 }
 
 enum UserType {
