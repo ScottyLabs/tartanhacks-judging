@@ -4,8 +4,9 @@ import type { JWT } from "next-auth/jwt/types.js";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { env } from "../../../env/server.mjs";
 import { type HelixUser } from "../../../types/user.js";
+import { decodeJWT } from "../../../utils/auth";
 
-import { prisma } from "../../../server/db.js";
+import { prisma } from "../../../server/db";
 import { AuthMode, UserType } from "@prisma/client";
 
 export interface JudgingUser extends User {
@@ -89,16 +90,43 @@ const credentialsProvider = isExternalAuthEnabled
     })
   : CredentialsProvider({
       id: "credentials",
-      name: "Email",
       credentials: {
-        magicLinkToken: {
+        magicToken: {
           label: "Magic Link Token",
           type: "text",
         },
       },
-      authorize(credentials) {
-        console.log(credentials?.magicLinkToken);
-        return null;
+      async authorize(credentials) {
+        console.log(credentials);
+        const magicToken = credentials?.magicToken;
+
+        if (!magicToken) {
+          return null;
+        }
+
+        const decodedToken = decodeJWT(magicToken, env.JWT_SECRET);
+        const email = decodedToken.email;
+
+        if (!email) {
+          return null;
+        }
+
+        const prismaUser = await prisma.user.findFirst({
+          where: {
+            email: email,
+          },
+        });
+        if (!prismaUser) {
+          return null;
+        }
+        const user: JudgingUser = {
+          id: prismaUser.id,
+          email: email,
+          userType: prismaUser.type,
+          isAdmin: prismaUser.isAdmin,
+        };
+
+        return user;
       },
     });
 
