@@ -7,6 +7,7 @@ import Header from "../components/Header";
 import PrizeList from "../components/PrizeList";
 import Spinner from "../components/Spinner";
 import { api } from "../utils/api";
+import { prisma } from "../../src/server/db";
 
 interface Props {
   judgingDeadline: string;
