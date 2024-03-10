@@ -16,7 +16,16 @@ const Login: NextPage<Props> = ({ csrfToken }) => {
   useEffect(() => {
     if (magicToken) {
       console.log(magicToken);
-      void signIn("credentials", { magicToken, redirect: false });
+      signIn("credentials", { magicToken, redirect: false })
+        .then((res) => {
+          if (res?.ok) {
+            console.log("Sign in successful");
+            void router.push("/");
+          }
+        })
+        .catch((err) => {
+          console.log(err);
+        });
     }
   }, [magicToken]);
 

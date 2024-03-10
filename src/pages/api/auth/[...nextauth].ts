@@ -101,6 +101,7 @@ const credentialsProvider = isExternalAuthEnabled
         const magicToken = credentials?.magicToken;
 
         if (!magicToken) {
+          console.log("No magic token");
           return null;
         }
 
@@ -108,6 +109,7 @@ const credentialsProvider = isExternalAuthEnabled
         const email = decodedToken.email;
 
         if (!email) {
+          console.log("No email in token");
           return null;
         }
 
@@ -117,6 +119,7 @@ const credentialsProvider = isExternalAuthEnabled
           },
         });
         if (!prismaUser) {
+          console.log("No user found with email: " + email);
           return null;
         }
         const user: JudgingUser = {
@@ -125,7 +128,7 @@ const credentialsProvider = isExternalAuthEnabled
           userType: prismaUser.type,
           isAdmin: prismaUser.isAdmin,
         };
-
+        console.log(user);
         return user;
       },
     });
