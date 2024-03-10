@@ -6,20 +6,18 @@ import { env } from "../../../env/server.mjs";
 import { type HelixUser } from "../../../types/user.js";
 
 import { prisma } from "../../../server/db.js";
+import { AuthMode, UserType } from "@prisma/client";
 
 export interface JudgingUser extends User {
-  judge: boolean;
-  admin: boolean;
-  company?: string;
+  userType: UserType;
+  isAdmin: boolean;
 }
 
 const settings = await prisma.settings.findFirst();
-const isExternalAuthEnabled = settings?.authMode;
+const isExternalAuthEnabled = settings?.authMode == AuthMode.SYNC;
 
-export const authOptions: AuthOptions = {
-  // Configure one or more authentication providers
-  providers: [
-    CredentialsProvider({
+const credentialsProvider = isExternalAuthEnabled
+  ? CredentialsProvider({
       id: "credentials",
       name: "Email",
       credentials: {
@@ -38,10 +36,22 @@ export const authOptions: AuthOptions = {
         // You can also use the `req` object to obtain additional parameters
         // (i.e., the request IP address)
 
-        const authResponse = await fetch(`${env.HELIX_BASE_URL}/auth/login`, {
+        const authURL = settings?.authUrl;
+
+        if (!authURL) {
+          throw new Error("Auth URL not set");
+        }
+
+        const email = credentials?.username;
+
+        if (!email) {
+          return null;
+        }
+
+        const authResponse = await fetch(authURL, {
           method: "POST",
           body: JSON.stringify({
-            email: credentials?.username,
+            email: email,
             password: credentials?.password,
           }),
           headers: { "Content-Type": "application/json" },
@@ -53,20 +63,48 @@ export const authOptions: AuthOptions = {
 
         const helixUser = (await authResponse.json()) as HelixUser | null;
         if (helixUser) {
+          const prismaUser = await prisma.user.upsert({
+            where: { email: email },
+            create: {
+              email: email,
+              type: helixUser.userType,
+              isAdmin: helixUser.isAdmin,
+            },
+            update: {
+              type: helixUser.userType,
+              isAdmin: helixUser.isAdmin,
+            },
+          });
           const user: JudgingUser = {
-            id: helixUser._id,
-            email: helixUser.email,
-            judge: helixUser.judge,
-            admin: helixUser.admin,
-            company: helixUser.company?.name,
+            id: prismaUser.id,
+            email: email,
+            userType: helixUser.userType,
+            isAdmin: helixUser.isAdmin,
           };
           return user;
         }
         // Return null if user data could not be retrieved
         return null;
       },
-    }),
-  ],
+    })
+  : CredentialsProvider({
+      id: "credentials",
+      name: "Email",
+      credentials: {
+        magicLinkToken: {
+          label: "Magic Link Token",
+          type: "text",
+        },
+      },
+      authorize(credentials) {
+        console.log(credentials?.magicLinkToken);
+        return null;
+      },
+    });
+
+export const authOptions: AuthOptions = {
+  // Configure one or more authentication providers
+  providers: [credentialsProvider],
   callbacks: {
     jwt: ({ token, user }) => {
       if (user) {
