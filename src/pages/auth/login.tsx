@@ -1,8 +1,8 @@
 import { type GetServerSideProps, type NextPage } from "next";
-import { getCsrfToken } from "next-auth/react";
+import { getCsrfToken, signIn } from "next-auth/react";
 import { useRouter } from "next/router";
 import Header from "../../components/Header";
-
+import { useEffect } from "react";
 interface Props {
   csrfToken?: string;
 }
@@ -10,6 +10,16 @@ interface Props {
 const Login: NextPage<Props> = ({ csrfToken }) => {
   const router = useRouter();
   const signInError = router.query.error;
+
+  const { magicToken } = router.query;
+
+  useEffect(() => {
+    if (magicToken) {
+      console.log(magicToken);
+      void signIn("credentials", { magicToken, redirect: false });
+    }
+  }, [magicToken]);
+
   return (
     <div className="flex min-h-screen flex-col">
       <Header hideAuth />
