@@ -18,6 +18,7 @@ export const serverSchema = z.object({
   EMAIL_TLS: z.string(),
   EMAIL_USER: z.string(),
   EMAIL_PASS: z.string(),
+  VERCEL_URL: z.string(),
 });
 
 /**
