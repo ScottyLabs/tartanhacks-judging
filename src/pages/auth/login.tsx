@@ -12,7 +12,7 @@ interface Props {
 
 const Login: NextPage<Props> = ({ csrfToken, isUsingLocalAuth }) => {
   const router = useRouter();
-  const signInError = router.query.error;
+  const signInError = router.query.error as string;
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(signInError);
@@ -31,7 +31,6 @@ const Login: NextPage<Props> = ({ csrfToken, isUsingLocalAuth }) => {
   }
   useEffect(() => {
     if (isUsingLocalAuth && magicToken) {
-      console.log(magicToken);
       signIn("localAuthWithMagicToken", { magicToken, redirect: false })
         .then((res) => {
           if (res?.ok) {
@@ -48,6 +47,15 @@ const Login: NextPage<Props> = ({ csrfToken, isUsingLocalAuth }) => {
         });
     }
   }, [magicToken]);
+
+  function getErrorMessage(error: string) {
+    switch (error) {
+      case "CredentialsSignin":
+        return "Invalid email or password";
+      case "jwt malformed":
+        return "Invalid magic link. Please request a new one.";
+    }
+  }
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -89,7 +97,7 @@ const Login: NextPage<Props> = ({ csrfToken, isUsingLocalAuth }) => {
               className="mt-6 w-full rounded-lg bg-red-100 py-2 text-center text-base text-red-700"
               role="alert"
             >
-              {error}
+              {getErrorMessage(error)}
             </div>
           )}
         </form>
