@@ -1,4 +1,4 @@
-import { UserType } from "@prisma/client";
+import type { UserType } from "@prisma/client";
 
 export interface HelixUser {
   userType: UserType;

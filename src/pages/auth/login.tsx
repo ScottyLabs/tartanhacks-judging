@@ -4,19 +4,31 @@ import { useRouter } from "next/router";
 import Header from "../../components/Header";
 import { useEffect, useState } from "react";
 import { AuthMode } from "@prisma/client";
+import { prisma } from "../../server/db";
 interface Props {
   csrfToken?: string;
   isUsingLocalAuth: boolean;
 }
 
 const Login: NextPage<Props> = ({ csrfToken, isUsingLocalAuth }) => {
-  const [isLoading, setIsLoading] = useState(false);
-
   const router = useRouter();
   const signInError = router.query.error;
 
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(signInError);
+
   const { magicToken } = router.query;
 
+  async function clearQueryParams() {
+    await router.replace(
+      {
+        pathname: router.pathname,
+        query: {},
+      },
+      undefined,
+      { shallow: true }
+    );
+  }
   useEffect(() => {
     if (isUsingLocalAuth && magicToken) {
       console.log(magicToken);
@@ -24,9 +36,14 @@ const Login: NextPage<Props> = ({ csrfToken, isUsingLocalAuth }) => {
         .then((res) => {
           if (res?.ok) {
             void router.push("/");
+          } else if (res?.status === 401) {
+            setError("Invalid magic link");
+            void clearQueryParams();
+            console.log(res);
           }
         })
         .catch((err) => {
+          setError(err as string);
           console.log(err);
         });
     }
@@ -67,12 +84,12 @@ const Login: NextPage<Props> = ({ csrfToken, isUsingLocalAuth }) => {
           >
             LOGIN
           </button>
-          {signInError === "CredentialsSignin" && (
+          {error && (
             <div
               className="mt-6 w-full rounded-lg bg-red-100 py-2 text-center text-base text-red-700"
               role="alert"
             >
-              Incorrect email or password.
+              {error}
             </div>
           )}
         </form>
