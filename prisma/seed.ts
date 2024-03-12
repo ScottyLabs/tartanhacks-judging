@@ -1,6 +1,6 @@
 import { PrismaClient, UserType } from "@prisma/client";
 import { generateJWT } from "../src/utils/auth";
-import { sendPlaintextEmail } from "../src/server/utils/email";
+import { sendMagicLinkEmail } from "../src/server/utils/email";
 import { env } from "../src/env/server.mjs";
 
 const prisma = new PrismaClient();
@@ -23,11 +23,7 @@ async function main() {
         isAdmin: true,
       },
     });
-    await sendPlaintextEmail(
-      [email],
-      "Admin user created",
-      `Your admin token is: ${token}`
-    );
+    await sendMagicLinkEmail(email);
     console.log(`Admin user created, token: ${token}`);
   } else {
     console.log("Admin user already exists");

@@ -1,5 +1,7 @@
-import nodemailer, { Transporter } from "nodemailer";
+import type { Transporter } from "nodemailer";
+import nodemailer from "nodemailer";
 import { env } from "../../env/server.mjs";
+import { generateJWT } from "../../utils/auth";
 /**
  * Send a plaintext email to recipients
  * @param recipients List of recipient emails
@@ -26,6 +28,18 @@ export const sendPlaintextEmail = async (
     console.error("Could not send email");
     throw err;
   }
+};
+
+export const sendMagicLinkEmail = async (
+  recipientEmail: string
+): Promise<void> => {
+  const token = generateJWT(recipientEmail, env.JWT_SECRET);
+  const magicLink = `${env.VERCEL_URL}/auth/login?magicToken=${token}`;
+  const subject = "Login to the Judging System"; //TODO: add event name here
+
+  const text = `Click this link to login to the Judging System: ${magicLink}`;
+
+  await sendPlaintextEmail([recipientEmail], subject, text);
 };
 
 /**
