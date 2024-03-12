@@ -19,7 +19,7 @@ const isExternalAuthEnabled = settings?.authMode == AuthMode.SYNC;
 
 const credentialsProvider = isExternalAuthEnabled
   ? CredentialsProvider({
-      id: "credentials",
+      id: "externalAuthWithCredentials",
       name: "Email",
       credentials: {
         username: {
@@ -89,7 +89,7 @@ const credentialsProvider = isExternalAuthEnabled
       },
     })
   : CredentialsProvider({
-      id: "credentials",
+      id: "localAuthWithMagicToken",
       credentials: {
         magicToken: {
           label: "Magic Link Token",

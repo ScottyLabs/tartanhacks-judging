@@ -2,24 +2,27 @@ import { type GetServerSideProps, type NextPage } from "next";
 import { getCsrfToken, signIn } from "next-auth/react";
 import { useRouter } from "next/router";
 import Header from "../../components/Header";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { AuthMode } from "@prisma/client";
 interface Props {
   csrfToken?: string;
+  isUsingLocalAuth: boolean;
 }
 
-const Login: NextPage<Props> = ({ csrfToken }) => {
+const Login: NextPage<Props> = ({ csrfToken, isUsingLocalAuth }) => {
+  const [isLoading, setIsLoading] = useState(false);
+
   const router = useRouter();
   const signInError = router.query.error;
 
   const { magicToken } = router.query;
 
   useEffect(() => {
-    if (magicToken) {
+    if (isUsingLocalAuth && magicToken) {
       console.log(magicToken);
-      signIn("credentials", { magicToken, redirect: false })
+      signIn("localAuthWithMagicToken", { magicToken, redirect: false })
         .then((res) => {
           if (res?.ok) {
-            console.log("Sign in successful");
             void router.push("/");
           }
         })
@@ -81,9 +84,18 @@ const Login: NextPage<Props> = ({ csrfToken }) => {
 export const getServerSideProps: GetServerSideProps<Props> = async (
   context
 ) => {
+  const settings = await prisma?.settings.findFirst();
+
+  if (!settings) {
+    throw new Error("Settings not found");
+  }
+
+  const isUsingLocalAuth = settings.authMode === AuthMode.LOCAL;
+
   return {
     props: {
       csrfToken: await getCsrfToken(context),
+      isUsingLocalAuth: isUsingLocalAuth,
     },
   };
 };
