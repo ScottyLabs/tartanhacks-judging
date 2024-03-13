@@ -1,50 +1,33 @@
-// import { withAuth, default as loggedIn } from "next-auth/middleware";
-// import { UserType } from "@prisma/client";
-// import type { NextRequest } from "next/server";
+import { UserType } from "@prisma/client";
+import { withAuth } from "next-auth/middleware";
 
-// const adminOnly = withAuth(
-//   // `withAuth` augments your `Request` with the user's token.
-//   function middleware(req) {
-//     console.log(req.nextauth.token);
-//   },
-//   {
-//     callbacks: {
-//       authorized: ({ token }) => {
-//         return token?.isAdmin as boolean;
-//       },
-//     },
-//   }
-// );
+export default withAuth(
+  // `withAuth` augments your `Request` with the user's token.
+  function middleware(req) {
+    console.log(req.nextauth.token);
+  },
+  {
+    callbacks: {
+      authorized: ({ token, req }) => {
+        if (!token) {
+          return false;
+        }
 
-// const judgeOnly = withAuth(
-//   // `withAuth` augments your `Request` with the user's token.
-//   function middleware(req) {
-//     console.log(req.nextauth.token);
-//   },
-//   {
-//     callbacks: {
-//       authorized: ({ token }) => {
-//         return token?.userType == UserType.JUDGE;
-//       },
-//     },
-//   }
-// );
+        if (req.nextUrl.pathname.startsWith("/admin")) {
+          return token.isAdmin;
+        } else if (req.nextUrl.pathname.startsWith("/judge")) {
+          return token.userType == UserType.JUDGE;
+        }
 
-// const judgeOnlyRoutes = ["/judging"];
-// const adminOnlyRoutes = ["/admin", "/results"];
-// const loggedInOnlyRoutes = ["/"];
+        return true;
+      },
+    },
+    pages: {
+      signIn: "/auth/login",
+    },
+  }
+);
 
-// export function middleware(request: NextRequest) {
-//   if (request.nextUrl.pathname in judgeOnlyRoutes) {
-//     // This logic is only applied to /about
-//     return judgeOnly;
-//   } else if (request.nextUrl.pathname in adminOnlyRoutes) {
-//     return adminOnly;
-//   } else if (request.nextUrl.pathname in loggedInOnlyRoutes) {
-//     return loggedIn;
-//   }
-// }
-
-export { default } from "next-auth/middleware";
-
-export const config = { matcher: ["/", "/results", "/judging"] };
+export const config = {
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico|auth).*)"],
+};
