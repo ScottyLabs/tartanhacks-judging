@@ -25,11 +25,21 @@ export const settingsRouter = createTRPCRouter({
     .input(
       z
         .object({
-          authMode: z.enum(["LOCAL", "SYNC"]),
+          authMode: z.enum(["LOCAL", "SYNC"], {
+            invalid_type_error: "Invalid auth mode",
+          }),
           authUrl: z.string(),
-          judgingDeadline: z.string().datetime(),
-          minVisits: z.number().nonnegative(),
-          sigmaInit: z.number().positive(),
+          judgingDeadline: z.string().datetime({
+            message: "Invalid deadline",
+          }).refine(date => date > new Date().toISOString(), {
+            message: "Deadline must be in the future",
+          }),
+          minVisits: z.number().nonnegative({
+            message: "Minimum visits must be a non-negative number",
+          }),
+          sigmaInit: z.number().positive({
+            message: "Initial sigma must be a positive number",
+          }),
           getTeamUrl: z.string(),
           serviceToken: z.string(),
         })
@@ -37,7 +47,10 @@ export const settingsRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       return await ctx.prisma?.settings.updateMany({
-        data: input,
+        data: {
+          ...input,
+          judgingDeadline: input.judgingDeadline ? new Date(input.judgingDeadline) : undefined,
+        },
       });
     }),
 });
