@@ -6,6 +6,8 @@ import { useEffect, useState } from "react";
 import { AuthMode } from "@prisma/client";
 import { prisma } from "../../server/db";
 import Spinner from "../../components/Spinner";
+import { api } from "../../utils/api";
+
 interface Props {
   csrfToken?: string;
   isUsingLocalAuth: boolean;
@@ -45,8 +47,10 @@ const Login: NextPage<Props> = ({ csrfToken, isUsingLocalAuth }) => {
             void clearQueryParams();
             console.log(res);
           }
+          setIsLoading(false);
         })
         .catch((err) => {
+          setIsLoading(false);
           setError(err as string);
           console.log(err);
         });
@@ -60,10 +64,20 @@ const Login: NextPage<Props> = ({ csrfToken, isUsingLocalAuth }) => {
       case "jwt malformed":
         return "Invalid magic link. Please request a new one.";
       default:
-        return "An error occurred. Please contact tech@scottylabs.org";
+        return error;
     }
   }
 
+  const { mutate: sendMagicLink, isLoading: isMagicLinkLoading } =
+    api.auth.sendMagicLink.useMutation({
+      onSuccess: () => {
+        alert("Check your email for a magic link");
+      },
+      onError: (err) => {
+        console.log(err);
+        setError(err.message);
+      },
+    });
   async function handleExternalLogin(email: string, password: string) {
     setIsLoading(true);
     const res = await signIn("externalAuthWithCredentials", {
@@ -118,7 +132,11 @@ const Login: NextPage<Props> = ({ csrfToken, isUsingLocalAuth }) => {
             <button
               type="submit"
               className="w-full rounded-lg bg-purple px-3 py-2 text-white drop-shadow-2xl transition-transform hover:translate-y-[-3px]"
-              onClick={() => void handleExternalLogin(email, password)}
+              onClick={() => {
+                isUsingLocalAuth
+                  ? sendMagicLink({ email })
+                  : void handleExternalLogin(email, password);
+              }}
               disabled={isLoading}
             >
               LOG IN
