@@ -50,8 +50,8 @@ export default function LocalLogin() {
 
   function getErrorMessage(error: string) {
     switch (error) {
-      case "CredentialsSignin":
-        return "Invalid email or password";
+      case "jwt expired":
+        return "This magic link has expired. Please enter your e-mail to request a new one.";
       case "jwt malformed":
         return "Invalid magic link. Please request a new one.";
       default:
