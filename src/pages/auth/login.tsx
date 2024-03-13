@@ -13,6 +13,7 @@ interface Props {
   isUsingLocalAuth: boolean;
 }
 
+// TODO: refactor this into two components for readability - one for isUsingLocalAuth, i.e. magic links, and one for not
 const Login: NextPage<Props> = ({ csrfToken, isUsingLocalAuth }) => {
   const router = useRouter();
   const signInError = router.query.error as string;
@@ -95,10 +96,10 @@ const Login: NextPage<Props> = ({ csrfToken, isUsingLocalAuth }) => {
     if (res?.ok) {
       void router.push("/");
     } else {
+      setIsLoading(false);
       setError(res?.error as string);
       console.log(res);
     }
-    setIsLoading(false);
   }
 
   return (
