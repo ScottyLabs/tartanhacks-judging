@@ -1,6 +1,5 @@
 import NextAuth, { type User, type AuthOptions } from "next-auth";
 import type { Session } from "next-auth";
-import type { JWT } from "next-auth/jwt/types.js";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { env } from "../../../env/server.mjs";
 import { type HelixUser } from "../../../types/user.js";
@@ -8,6 +7,19 @@ import { decodeJWT } from "../../../utils/auth";
 
 import { prisma } from "../../../server/db";
 import { AuthMode, UserType } from "@prisma/client";
+
+import { JWT } from "next-auth/jwt";
+
+declare module "next-auth/jwt" {
+  /** Returned by the `jwt` callback and `getToken`, when using JWT sessions */
+  interface JWT {
+    /** OpenID ID Token */
+    idToken?: string;
+    email: string;
+    userType: UserType;
+    isAdmin: boolean;
+  }
+}
 
 export interface JudgingUser extends User {
   userType: UserType;
@@ -128,7 +140,6 @@ const credentialsProvider = isExternalAuthEnabled
           userType: prismaUser.type,
           isAdmin: prismaUser.isAdmin,
         };
-        console.log(user);
         return user;
       },
     });
@@ -137,11 +148,20 @@ export const authOptions: AuthOptions = {
   // Configure one or more authentication providers
   providers: [credentialsProvider],
   callbacks: {
-    jwt: ({ token, user }) => {
+    jwt: async ({ token, user }) => {
       if (user) {
         token.id = user.id;
-        token.email = user.email;
+        token.email = user.email as string;
+        const prismaUser = await prisma.user.findFirst({
+          where: {
+            email: token.email,
+          },
+        });
+
+        token.isAdmin = prismaUser?.isAdmin as boolean;
+        token.userType = prismaUser?.type ?? UserType.PARTICIPANT;
       }
+
       return token;
     },
     session: ({ session, token }: { session: Session; token: JWT }) => {
