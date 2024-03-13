@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { api } from "../utils/api";
+import Whitelists from "./Whitelists";
 
 type AdminSettingsProps = {
   setError: (error: string | null) => void;
@@ -52,6 +53,12 @@ export default function AdminSettings({
   };
 
   const [newSettings, setNewSettings] = useState(settingsToDisplay(settings));
+
+  const [whitelists, setWhitelists] = useState({
+    participants: "",
+    judges: "",
+    admins: "",
+  });
 
   const displayToSettings = (display: typeof newSettings) => {
     let sigmaInit = undefined;
@@ -128,7 +135,6 @@ export default function AdminSettings({
           id="authMode"
           value={newSettings?.authMode ?? "LOCAL"}
           onChange={(e) => {
-            console.log(e.target.value);
             setNewSettings({
               ...newSettings,
               authMode: e.target.value as "LOCAL" | "SYNC",
@@ -142,6 +148,10 @@ export default function AdminSettings({
 
       {newSettings?.authMode === "SYNC" && syncFields}
 
+      <div className={newSettings?.authMode === "SYNC" ? "hidden" : ""}>
+        <Whitelists whitelists={whitelists} setWhitelists={setWhitelists} />
+      </div>
+      
       <div className="flex flex-col gap-2">
         <label htmlFor="judgingDeadline" className="font-bold">
           Judging Deadline
