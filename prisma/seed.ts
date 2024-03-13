@@ -7,7 +7,7 @@ const prisma = new PrismaClient();
 async function main() {
   // Check if an admin user already exists
   const adminUser = await prisma.user.findFirst({
-    where: { isAdmin: true },
+    where: { isAdmin: true, email: env.ADMIN_EMAIL },
   });
 
   if (!adminUser) {
