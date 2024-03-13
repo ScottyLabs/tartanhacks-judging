@@ -8,7 +8,7 @@ import { decodeJWT } from "../../../utils/auth";
 import { prisma } from "../../../server/db";
 import { AuthMode, UserType } from "@prisma/client";
 
-import { JWT } from "next-auth/jwt";
+import type { JWT } from "next-auth/jwt";
 
 declare module "next-auth/jwt" {
   /** Returned by the `jwt` callback and `getToken`, when using JWT sessions */
