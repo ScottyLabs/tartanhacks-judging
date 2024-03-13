@@ -22,9 +22,9 @@ const Login: NextPage<Props> = ({ isUsingLocalAuth }) => {
 export const getServerSideProps: GetServerSideProps<Props> = async () => {
   const settings = await prisma?.settings.findFirst();
 
-  // if (!settings) {
-  //   throw new Error("Settings not found");
-  // }
+  if (!settings) {
+    throw new Error("Settings not found");
+  }
 
   const isUsingLocalAuth = settings?.authMode !== AuthMode.SYNC;
 
