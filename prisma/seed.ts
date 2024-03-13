@@ -22,7 +22,7 @@ async function main() {
     });
     await sendMagicLinkEmail(email);
     console.log(
-      `Admin user created, check the provided admin email(${email}) for the magic link to sign in.`
+      `Admin user created, check the provided admin email (${email}) for the magic link to sign in.`
     );
   } else {
     console.log("Admin user already exists");
