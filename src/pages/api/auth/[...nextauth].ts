@@ -22,7 +22,7 @@ const credentialsProvider = isExternalAuthEnabled
       id: "externalAuthWithCredentials",
       name: "Email",
       credentials: {
-        username: {
+        email: {
           label: "Email",
           type: "text",
           placeholder: "acarnegie@andrew.cmu.edu",
@@ -43,7 +43,7 @@ const credentialsProvider = isExternalAuthEnabled
           throw new Error("Auth URL not set");
         }
 
-        const email = credentials?.username;
+        const email = credentials?.email;
 
         if (!email) {
           return null;
