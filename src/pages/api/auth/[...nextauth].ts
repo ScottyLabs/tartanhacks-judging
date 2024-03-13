@@ -26,126 +26,137 @@ export interface JudgingUser extends User {
   isAdmin: boolean;
 }
 
-const settings = await prisma.settings.findFirst();
-const isExternalAuthEnabled = settings?.authMode == AuthMode.SYNC;
+const externalCredentialProvider = CredentialsProvider({
+  id: "externalAuthWithCredentials",
+  name: "Email",
+  credentials: {
+    email: {
+      label: "Email",
+      type: "text",
+      placeholder: "acarnegie@andrew.cmu.edu",
+    },
+    password: { label: "Password", type: "password" },
+  },
+  async authorize(credentials) {
+    // You need to provide your own logic here that takes the credentials
+    // submitted and returns either a object representing a user or value
+    // that is false/null if the credentials are invalid.
+    // e.g. return { id: 1, name: 'J Smith', email: 'jsmith@example.com' }
+    // You can also use the `req` object to obtain additional parameters
+    // (i.e., the request IP address)
 
-const credentialsProvider = isExternalAuthEnabled
-  ? CredentialsProvider({
-      id: "externalAuthWithCredentials",
-      name: "Email",
-      credentials: {
-        email: {
-          label: "Email",
-          type: "text",
-          placeholder: "acarnegie@andrew.cmu.edu",
-        },
-        password: { label: "Password", type: "password" },
-      },
-      async authorize(credentials) {
-        // You need to provide your own logic here that takes the credentials
-        // submitted and returns either a object representing a user or value
-        // that is false/null if the credentials are invalid.
-        // e.g. return { id: 1, name: 'J Smith', email: 'jsmith@example.com' }
-        // You can also use the `req` object to obtain additional parameters
-        // (i.e., the request IP address)
+    const settings = await prisma.settings.findFirst();
+    const isExternalAuthEnabled = settings?.authMode == AuthMode.SYNC;
 
-        const authURL = settings?.authUrl;
+    if (!isExternalAuthEnabled) {
+      throw new Error("External Auth not enabled");
+    }
 
-        if (!authURL) {
-          throw new Error("Auth URL not set");
-        }
+    const authURL = settings?.authUrl;
 
-        const email = credentials?.email;
+    if (!authURL) {
+      throw new Error("Auth URL not set");
+    }
 
-        if (!email) {
-          return null;
-        }
+    const email = credentials?.email;
 
-        const authResponse = await fetch(authURL, {
-          method: "POST",
-          body: JSON.stringify({
-            email: email,
-            password: credentials?.password,
-          }),
-          headers: { "Content-Type": "application/json" },
-        });
+    if (!email) {
+      return null;
+    }
 
-        if (!authResponse.ok) {
-          return null;
-        }
+    const authResponse = await fetch(authURL, {
+      method: "POST",
+      body: JSON.stringify({
+        email: email,
+        password: credentials?.password,
+      }),
+      headers: { "Content-Type": "application/json" },
+    });
 
-        const helixUser = (await authResponse.json()) as HelixUser | null;
-        if (helixUser) {
-          const prismaUser = await prisma.user.upsert({
-            where: { email: email },
-            create: {
-              email: email,
-              type: helixUser.userType,
-              isAdmin: helixUser.isAdmin,
-            },
-            update: {
-              type: helixUser.userType,
-              isAdmin: helixUser.isAdmin,
-            },
-          });
-          const user: JudgingUser = {
-            id: prismaUser.id,
-            email: email,
-            userType: helixUser.userType,
-            isAdmin: helixUser.isAdmin,
-          };
-          return user;
-        }
-        // Return null if user data could not be retrieved
-        return null;
-      },
-    })
-  : CredentialsProvider({
-      id: "localAuthWithMagicToken",
-      credentials: {
-        magicToken: {
-          label: "Magic Link Token",
-          type: "text",
-        },
-      },
-      async authorize(credentials) {
-        const magicToken = credentials?.magicToken;
+    if (!authResponse.ok) {
+      return null;
+    }
 
-        if (!magicToken) {
-          console.log("No magic token");
-          return null;
-        }
-
-        const decodedToken = decodeJWT(magicToken, env.JWT_SECRET);
-        const email = decodedToken.email;
-
-        if (!email) {
-          console.log("No email in token");
-          return null;
-        }
-
-        const prismaUser = await prisma.user.findFirst({
-          where: {
-            email: email,
-          },
-        });
-        if (!prismaUser) {
-          console.log("No user found with email: " + email);
-          return null;
-        }
-        const user: JudgingUser = {
-          id: prismaUser.id,
+    const helixUser = (await authResponse.json()) as HelixUser | null;
+    if (helixUser) {
+      const prismaUser = await prisma.user.upsert({
+        where: { email: email },
+        create: {
           email: email,
-          userType: prismaUser.type,
-          isAdmin: prismaUser.isAdmin,
-        };
-        return user;
+          type: helixUser.userType,
+          isAdmin: helixUser.isAdmin,
+        },
+        update: {
+          type: helixUser.userType,
+          isAdmin: helixUser.isAdmin,
+        },
+      });
+      const user: JudgingUser = {
+        id: prismaUser.id,
+        email: email,
+        userType: helixUser.userType,
+        isAdmin: helixUser.isAdmin,
+      };
+      return user;
+    }
+    // Return null if user data could not be retrieved
+    return null;
+  },
+});
+const localCredentialProvider = CredentialsProvider({
+  id: "localAuthWithMagicToken",
+  credentials: {
+    magicToken: {
+      label: "Magic Link Token",
+      type: "text",
+    },
+  },
+  async authorize(credentials) {
+    const settings = await prisma.settings.findFirst();
+    const isExternalAuthEnabled = settings?.authMode == AuthMode.SYNC;
+
+    if (isExternalAuthEnabled) {
+      throw new Error(
+        "Authentication is handled by an external service. Please use the email and password fields."
+      );
+    }
+    const magicToken = credentials?.magicToken;
+
+    if (!magicToken) {
+      console.log("No magic token");
+      return null;
+    }
+
+    const decodedToken = decodeJWT(magicToken, env.JWT_SECRET);
+    const email = decodedToken.email;
+
+    if (!email) {
+      console.log("No email in token");
+      return null;
+    }
+
+    const prismaUser = await prisma.user.findFirst({
+      where: {
+        email: email,
       },
     });
+    if (!prismaUser) {
+      console.log("No user found with email: " + email);
+      return null;
+    }
+    const user: JudgingUser = {
+      id: prismaUser.id,
+      email: email,
+      userType: prismaUser.type,
+      isAdmin: prismaUser.isAdmin,
+    };
+    return user;
+  },
+});
 
 export const authOptions: AuthOptions = {
   // Configure one or more authentication providers
-  providers: [credentialsProvider],
+  providers: [localCredentialProvider, externalCredentialProvider],
   callbacks: {
     jwt: async ({ token, user }) => {
       if (user) {
