@@ -22,6 +22,8 @@ const Login: NextPage<Props> = ({ csrfToken, isUsingLocalAuth }) => {
   const [password, setPassword] = useState("");
 
   const [error, setError] = useState(signInError);
+  const [magicLinkSentSuccessfully, setMagicLinkSentSuccessfully] =
+    useState(false);
 
   const { magicToken } = router.query;
 
@@ -70,8 +72,13 @@ const Login: NextPage<Props> = ({ csrfToken, isUsingLocalAuth }) => {
 
   const { mutate: sendMagicLink, isLoading: isMagicLinkLoading } =
     api.auth.sendMagicLink.useMutation({
-      onSuccess: () => {
-        alert("Check your email for a magic link");
+      onSuccess: ({ success, message }) => {
+        console.log(success, message);
+        if (success) {
+          setMagicLinkSentSuccessfully(true);
+        } else {
+          setError(message);
+        }
       },
       onError: (err) => {
         console.log(err);
@@ -99,12 +106,12 @@ const Login: NextPage<Props> = ({ csrfToken, isUsingLocalAuth }) => {
       <Header hideAuth />
       <main className="flex flex-grow flex-col items-center justify-center gap-5 py-5 px-2 md:px-10">
         <div className="text-3xl">
-          {isLoading ? "Verifying...." : "Welcome"}
+          {isLoading || isMagicLinkLoading ? "Verifying...." : "Welcome"}
         </div>
-        {isLoading ? (
+        {isLoading || isMagicLinkLoading ? (
           <Spinner />
         ) : (
-          <form className="w-80">
+          <div className="w-80">
             <div className="mb-6">
               <input
                 type="text"
@@ -130,18 +137,19 @@ const Login: NextPage<Props> = ({ csrfToken, isUsingLocalAuth }) => {
               </div>
             )}
             <button
-              type="submit"
               className="w-full rounded-lg bg-purple px-3 py-2 text-white drop-shadow-2xl transition-transform hover:translate-y-[-3px]"
               onClick={() => {
                 isUsingLocalAuth
                   ? sendMagicLink({ email })
                   : void handleExternalLogin(email, password);
               }}
-              disabled={isLoading}
+              disabled={
+                isLoading || isMagicLinkLoading || magicLinkSentSuccessfully
+              }
             >
               LOG IN
             </button>
-            {error && (
+            {error && !magicLinkSentSuccessfully && (
               <div
                 className="mt-6 w-full rounded-lg bg-red-100 py-2 text-center text-base text-red-700"
                 role="alert"
@@ -149,7 +157,15 @@ const Login: NextPage<Props> = ({ csrfToken, isUsingLocalAuth }) => {
                 {getErrorMessage(error)}
               </div>
             )}
-          </form>
+            {magicLinkSentSuccessfully && (
+              <div
+                className="mt-6 w-full rounded-lg bg-green-100 py-2 text-center text-base text-green-700"
+                role="alert"
+              >
+                Check your email for a link to log in
+              </div>
+            )}
+          </div>
         )}
       </main>
     </div>

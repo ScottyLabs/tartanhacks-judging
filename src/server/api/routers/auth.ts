@@ -6,6 +6,7 @@ import { prisma } from "../../db";
 export const authRouter = createTRPCRouter({
   sendMagicLink: publicProcedure
     .input(z.object({ email: z.string().email() }))
+    .output(z.object({ success: z.boolean(), message: z.string() }))
     .mutation(async ({ input }) => {
       const { email } = input;
 
