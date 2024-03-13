@@ -16,8 +16,6 @@ export default function ExternaLogin() {
     switch (error) {
       case "CredentialsSignin":
         return "Invalid email or password";
-      case "jwt malformed":
-        return "Invalid magic link. Please request a new one.";
       default:
         return error;
     }
