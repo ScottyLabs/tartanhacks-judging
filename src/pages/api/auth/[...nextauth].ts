@@ -109,7 +109,6 @@ const credentialsProvider = isExternalAuthEnabled
         },
       },
       async authorize(credentials) {
-        console.log(credentials);
         const magicToken = credentials?.magicToken;
 
         if (!magicToken) {

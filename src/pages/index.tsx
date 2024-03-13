@@ -32,7 +32,6 @@ const Home: NextPage<Props> = ({ email, isAdmin, userType, authMode }) => {
 export async function getServerSideProps(context: GetServerSidePropsContext) {
   const session = await getSession(context);
   const email = session?.user?.email as string;
-  console.log(email, session);
   const user = await prisma.user.findFirst({
     where: {
       email: email,
