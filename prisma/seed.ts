@@ -1,5 +1,4 @@
 import { PrismaClient, UserType } from "@prisma/client";
-import { generateJWT } from "../src/utils/auth";
 import { sendMagicLinkEmail } from "../src/server/utils/email";
 import { env } from "../src/env/server.mjs";
 
@@ -12,9 +11,7 @@ async function main() {
   });
 
   if (!adminUser) {
-    const jwtSecret = env.JWT_SECRET;
     const email = env.ADMIN_EMAIL;
-    const token = generateJWT(email, jwtSecret);
     // Create a new admin user if it doesn't exist
     await prisma.user.create({
       data: {
@@ -24,7 +21,9 @@ async function main() {
       },
     });
     await sendMagicLinkEmail(email);
-    console.log(`Admin user created, token: ${token}`);
+    console.log(
+      `Admin user created, check the provided admin email(${email}) for the magic link to sign in.`
+    );
   } else {
     console.log("Admin user already exists");
   }
