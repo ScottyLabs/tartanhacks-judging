@@ -49,14 +49,13 @@ const Login: NextPage<Props> = ({ csrfToken, isUsingLocalAuth }) => {
             setError(res?.error as string);
             void clearQueryParams();
             console.log(res);
+            setIsLoading(false);
           }
         })
         .catch((err) => {
           setError(err as string);
           console.log(err);
         });
-
-      setIsLoading(false);
     }
   }, [magicToken]);
 
