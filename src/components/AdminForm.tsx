@@ -25,7 +25,9 @@ export default function AdminForm() {
           Save
         </button>
       </div>
-      {!isLoading && error && <p className="text-red-500">{error}</p>}
+      {!isLoading && error && (
+        <p className="mt-8 w-full text-center text-red-500">{error}</p>
+      )}
     </>
   );
 }
