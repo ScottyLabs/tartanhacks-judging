@@ -2,6 +2,7 @@ import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "../trpc";
 
 export const usersRouter = createTRPCRouter({
+  // TODO make admin only
   putWhitelists: publicProcedure
     .input(
       z.object({
@@ -66,6 +67,26 @@ export const usersRouter = createTRPCRouter({
         ...judgeQuery,
         ...adminQuery,
       ]);
+
       return await result;
+    }),
+
+  getUsers: publicProcedure.query(async ({ ctx }) => {
+    return await ctx.prisma.user.findMany();
+  }),
+
+  deleteByEmail: publicProcedure
+    .input(
+      z.object({
+        email: z.string().trim().email({
+          message: "Invalid email",
+        }),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { email } = input;
+      return await ctx.prisma.user.delete({
+        where: { email },
+      });
     }),
 });
