@@ -27,7 +27,6 @@ export default function AdminSettings({
       },
       onError: (error) => {
         try {
-          console.log(error);
           //TODO: find a better way to deal with errors
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment
           const trpcErr = JSON.parse(error.message)[0] as { message: string };
