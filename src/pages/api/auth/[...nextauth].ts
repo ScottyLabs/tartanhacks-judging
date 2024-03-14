@@ -60,8 +60,8 @@ const externalCredentialProvider = CredentialsProvider({
 
     const email = credentials?.email;
 
-    if (!email) {
-      return null;
+    if (!email || !credentials?.password) {
+      throw new Error("Email or password not provided");
     }
 
     const authResponse = await fetch(authURL, {
