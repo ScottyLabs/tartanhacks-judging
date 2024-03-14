@@ -20,34 +20,10 @@ export default function LocalLogin({router}: Props) {
 
   const { magicToken } = router.query;
 
-  async function clearQueryParams() {
-    await router.replace(
-      {
-        pathname: router.pathname,
-        query: {},
-      },
-      undefined,
-      { shallow: true }
-    );
-  }
   useEffect(() => {
     if (magicToken) {
       setIsLoading(true);
-      signIn("localAuthWithMagicToken", { magicToken, redirect: false })
-        .then((res) => {
-          if (res?.ok) {
-            void router.push("/");
-          } else {
-            setIsLoading(false);
-            setError(res?.error as string);
-            void clearQueryParams();
-            console.log(res);
-          }
-        })
-        .catch((err) => {
-          setError(err as string);
-          console.log(err);
-        });
+      void signIn("localAuthWithMagicToken", { magicToken, callbackUrl: "/" });
     }
   }, [magicToken]);
 
