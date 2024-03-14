@@ -15,7 +15,11 @@ const Login: NextPage<Props> = ({ isUsingLocalAuth }) => {
   return (
     <div className="flex min-h-screen flex-col">
       <Header hideAuth />
-      {isUsingLocalAuth ? <LocalLogin router={router} /> : <ExternaLogin />}
+      {isUsingLocalAuth ? (
+        <LocalLogin router={router} />
+      ) : (
+        <ExternaLogin router={router} />
+      )}
     </div>
   );
 };
