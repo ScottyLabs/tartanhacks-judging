@@ -7,18 +7,18 @@ import ExternaLogin from "../../components/auth/ExternalLogin";
 import { useRouter } from "next/router";
 
 interface Props {
-  isUsingLocalAuth: boolean;
+  isUsingExternalAuth: boolean;
 }
 
-const Login: NextPage<Props> = ({ isUsingLocalAuth }) => {
+const Login: NextPage<Props> = ({ isUsingExternalAuth }) => {
   const router = useRouter();
   return (
     <div className="flex min-h-screen flex-col">
       <Header hideAuth />
-      {isUsingLocalAuth ? (
-        <LocalLogin router={router} />
-      ) : (
+      {isUsingExternalAuth ? (
         <ExternaLogin router={router} />
+      ) : (
+        <LocalLogin router={router} />
       )}
     </div>
   );
@@ -31,11 +31,11 @@ export const getServerSideProps: GetServerSideProps<Props> = async () => {
     throw new Error("Settings not found");
   }
 
-  const isUsingLocalAuth = settings?.authMode !== AuthMode.SYNC;
+  const isUsingExternalAuth = settings?.authMode == AuthMode.SYNC;
   console.log(settings?.authMode);
   return {
     props: {
-      isUsingLocalAuth: isUsingLocalAuth,
+      isUsingExternalAuth: isUsingExternalAuth,
     },
   };
 };
