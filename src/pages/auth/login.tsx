@@ -32,7 +32,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async () => {
   }
 
   const isUsingLocalAuth = settings?.authMode !== AuthMode.SYNC;
-
+  console.log(settings?.authMode);
   return {
     props: {
       isUsingLocalAuth: isUsingLocalAuth,
