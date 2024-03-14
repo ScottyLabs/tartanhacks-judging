@@ -1,5 +1,4 @@
 import type { NextRouter} from "next/router";
-import { useRouter } from "next/router";
 import Spinner from "../Spinner";
 import { useState } from "react";
 import { signIn } from "next-auth/react";
