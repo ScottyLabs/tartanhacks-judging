@@ -168,7 +168,7 @@ export const authOptions: AuthOptions = {
           },
         });
 
-        token.isAdmin = prismaUser?.isAdmin as boolean;
+        token.isAdmin = !!prismaUser?.isAdmin;
         token.userType = prismaUser?.type ?? UserType.PARTICIPANT;
       }
 
