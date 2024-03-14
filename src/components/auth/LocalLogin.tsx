@@ -1,11 +1,14 @@
 import { signIn } from "next-auth/react";
-import { useRouter } from "next/router";
+import type { NextRouter} from "next/router";
 import { useEffect, useState } from "react";
 import { api } from "../../utils/api";
 import Spinner from "../Spinner";
 
-export default function LocalLogin() {
-  const router = useRouter();
+interface Props {
+  router: NextRouter;
+}
+
+export default function LocalLogin({router}: Props) {
   const signInError = router.query.error as string;
 
   const [isLoading, setIsLoading] = useState(false);
@@ -32,10 +35,10 @@ export default function LocalLogin() {
       setIsLoading(true);
       signIn("localAuthWithMagicToken", { magicToken, redirect: false })
         .then((res) => {
-          setIsLoading(false);
           if (res?.ok) {
-            void router.push(process.env.VERCEL_URL ?? "/");
+            void router.push("/");
           } else {
+            setIsLoading(false);
             setError(res?.error as string);
             void clearQueryParams();
             console.log(res);
