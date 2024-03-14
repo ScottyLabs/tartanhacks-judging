@@ -41,7 +41,6 @@ export default function LocalLogin({router}: Props) {
   const { mutate: sendMagicLink, isLoading: isMagicLinkLoading } =
     api.auth.sendMagicLink.useMutation({
       onSuccess: ({ success, message }) => {
-        console.log(success, message);
         if (success) {
           setMagicLinkSentSuccessfully(true);
         } else {
