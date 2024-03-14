@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { api } from "../utils/api";
-import Whitelists from "./Whitelists";
+import { api } from "../../utils/api";
+import Whitelists from ".././Whitelists";
 
 type AdminSettingsProps = {
   setError: (error: string | null) => void;

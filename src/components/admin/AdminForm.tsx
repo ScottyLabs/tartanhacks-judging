@@ -1,6 +1,6 @@
 import { useState } from "react";
 import AdminSettings from "./AdminSettings";
-import Spinner from "./Spinner";
+import Spinner from ".././Spinner";
 
 export default function AdminForm() {
   const [error, setError] = useState<string | null>(null);

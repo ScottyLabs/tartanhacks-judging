@@ -5,12 +5,12 @@ import {
   TabsList,
   TabsTrigger,
 } from "../../@/components/ui/tabs";
-import AdminForm from "../components/AdminForm";
+import AdminForm from "../components/admin/AdminForm";
 import UserTable from "../components/UserTable";
 import { useState } from "react";
 
 export default function Admin() {
-  const tabs = ["settings", "users"] as const;
+  const tabs = ["settings", "users", "prizes"] as const;
   const [selectedTab, setSelectedTab] =
     useState<(typeof tabs)[number]>("settings");
 
@@ -39,6 +39,8 @@ export default function Admin() {
           </TabsContent>
           <TabsContent value="users">
             <UserTable />
+          </TabsContent>
+          <TabsContent value="prizes">
           </TabsContent>
         </Tabs>
       </main>
