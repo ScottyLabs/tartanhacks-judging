@@ -30,6 +30,7 @@ export const usersRouter = createTRPCRouter({
           where: { email },
           update: {
             type: "PARTICIPANT",
+            isAdmin: false,
           },
           create: {
             email,
@@ -42,6 +43,7 @@ export const usersRouter = createTRPCRouter({
           where: { email },
           update: {
             type: "JUDGE",
+            isAdmin: false,
           },
           create: {
             email,
