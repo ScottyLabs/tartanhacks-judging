@@ -32,17 +32,13 @@ export default function LocalLogin() {
       setIsLoading(true);
       signIn("localAuthWithMagicToken", { magicToken, redirect: false })
         .then((res) => {
+          setIsLoading(false);
           if (res?.ok) {
-            router.push("/").then(() => {
-              console.log("logged in");
-            }).catch((err) => {
-              console.error(err);
-            });
+            void router.push("/");
           } else {
             setError(res?.error as string);
             void clearQueryParams();
             console.log(res);
-            setIsLoading(false);
           }
         })
         .catch((err) => {
