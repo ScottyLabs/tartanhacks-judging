@@ -11,7 +11,6 @@ export default function ExternaLogin({router}:Props) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const [error, setError] = useState(signInError);
 
   function getErrorMessage(error: string) {
     switch (error) {
@@ -24,18 +23,11 @@ export default function ExternaLogin({router}:Props) {
 
   async function handleExternalLogin(email: string, password: string) {
     setIsLoading(true);
-    const res = await signIn("externalAuthWithCredentials", {
+    await signIn("externalAuthWithCredentials", {
       email,
       password,
-      redirect: false,
+      callbackUrl: "/",
     });
-    if (res?.ok) {
-      void router.push("/");
-    } else {
-      setIsLoading(false);
-      setError(res?.error as string);
-      console.log(res);
-    }
   }
 
   return (
@@ -74,12 +66,12 @@ export default function ExternaLogin({router}:Props) {
           >
             LOG IN
           </button>
-          {error && (
+          {signInError && (
             <div
               className="mt-6 w-full rounded-lg bg-red-100 py-2 text-center text-base text-red-700"
               role="alert"
             >
-              {getErrorMessage(error)}
+              {getErrorMessage(signInError)}
             </div>
           )}
         </div>
