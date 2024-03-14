@@ -1,20 +1,21 @@
 import { type GetServerSideProps, type NextPage } from "next";
-import { getCsrfToken } from "next-auth/react";
 import Header from "../../components/Header";
 import { AuthMode } from "@prisma/client";
 import { prisma } from "../../server/db";
 import LocalLogin from "../../components/auth/LocalLogin";
 import ExternaLogin from "../../components/auth/ExternalLogin";
+import { useRouter } from "next/router";
 
 interface Props {
   isUsingLocalAuth: boolean;
 }
 
 const Login: NextPage<Props> = ({ isUsingLocalAuth }) => {
+  const router = useRouter();
   return (
     <div className="flex min-h-screen flex-col">
       <Header hideAuth />
-      {isUsingLocalAuth ? <LocalLogin /> : <ExternaLogin />}
+      {isUsingLocalAuth ? <LocalLogin router={router} /> : <ExternaLogin />}
     </div>
   );
 };
