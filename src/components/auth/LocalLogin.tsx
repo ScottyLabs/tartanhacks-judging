@@ -34,7 +34,7 @@ export default function LocalLogin() {
         .then((res) => {
           setIsLoading(false);
           if (res?.ok) {
-            void router.push("/");
+            void router.push(process.env.VERCEL_URL ?? "/");
           } else {
             setError(res?.error as string);
             void clearQueryParams();
