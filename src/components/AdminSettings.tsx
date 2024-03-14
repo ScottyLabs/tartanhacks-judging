@@ -5,11 +5,13 @@ import Whitelists from "./Whitelists";
 type AdminSettingsProps = {
   setError: (error: string | null) => void;
   setIsLoading: (isLoading: boolean) => void;
+  submittedSignal: boolean;
 };
 
 export default function AdminSettings({
   setError,
   setIsLoading,
+  submittedSignal,
 }: AdminSettingsProps) {
   const {
     isFetching,
@@ -25,17 +27,27 @@ export default function AdminSettings({
       },
       onError: (error) => {
         try {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-          setError(JSON.parse(error.message)[0].message as string);
+          console.log(error);
+          //TODO: find a better way to deal with errors
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment
+          const trpcErr = JSON.parse(error.message)[0] as { message: string };
+          const msg = trpcErr.message;
+          setError(msg);
         } catch (e) {
           setError(error.message);
         }
       },
     });
 
+  // display spinner when fetching or updating
   useEffect(() => {
     setIsLoading(isFetching || isLoading);
   }, [isFetching, isLoading, setIsLoading]);
+
+  // update settings when submitted
+  useEffect(() => {
+    updateSettings(displayToSettings(newSettings));
+  }, [submittedSignal]);
 
   const curDateTime = new Date().toISOString();
 
@@ -149,9 +161,13 @@ export default function AdminSettings({
       {newSettings?.authMode === "SYNC" && syncFields}
 
       <div className={newSettings?.authMode === "SYNC" ? "hidden" : ""}>
-        <Whitelists whitelists={whitelists} setWhitelists={setWhitelists} />
+        <Whitelists
+          whitelists={whitelists}
+          setWhitelists={setWhitelists}
+          submittedSignal={submittedSignal}
+        />
       </div>
-      
+
       <div className="flex flex-col gap-2">
         <label htmlFor="judgingDeadline" className="font-bold">
           Judging Deadline
@@ -203,16 +219,6 @@ export default function AdminSettings({
             });
           }}
         />
-      </div>
-      <div className="flex gap-2">
-        <button
-          className="btn m-auto rounded-md bg-purple px-3 py-1 text-white"
-          onClick={() => {
-            updateSettings(displayToSettings(newSettings));
-          }}
-        >
-          Save
-        </button>
       </div>
     </div>
   );
