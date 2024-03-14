@@ -1,10 +1,12 @@
+import type { NextRouter} from "next/router";
 import { useRouter } from "next/router";
 import Spinner from "../Spinner";
 import { useState } from "react";
 import { signIn } from "next-auth/react";
-
-export default function ExternaLogin() {
-  const router = useRouter();
+interface Props {
+  router: NextRouter;
+}
+export default function ExternaLogin({router}:Props) {
   const signInError = router.query.error as string;
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState("");
