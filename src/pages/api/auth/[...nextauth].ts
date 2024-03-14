@@ -159,9 +159,9 @@ export const authOptions: AuthOptions = {
   providers: [localCredentialProvider, externalCredentialProvider],
   callbacks: {
     jwt: async ({ token, user }) => {
-      if (user) {
+      if (user.email) {
         token.id = user.id;
-        token.email = user.email as string;
+        token.email = user.email;
         const prismaUser = await prisma.user.findFirst({
           where: {
             email: token.email,
