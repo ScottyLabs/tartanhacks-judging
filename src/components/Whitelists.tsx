@@ -66,7 +66,7 @@ export default function Whitelists({
   return (
     <div className="flex flex-col gap-5">
       <div>
-        <h3 className="text-xl font-bold">Participants</h3>
+        <h3 className="font-bold">Participants</h3>
         <textarea
           className="h-32 w-full"
           value={whitelists.participants}
@@ -80,7 +80,7 @@ export default function Whitelists({
         />
       </div>
       <div>
-        <h3 className="text-xl font-bold">Judges</h3>
+        <h3 className="font-bold">Judges</h3>
         <textarea
           className="h-32 w-full"
           value={whitelists.judges}
@@ -94,7 +94,7 @@ export default function Whitelists({
         />
       </div>
       <div>
-        <h3 className="text-xl font-bold">Admins</h3>
+        <h3 className="font-bold">Admins</h3>
         <textarea
           className="h-32 w-full"
           value={whitelists.admins}
