@@ -16,10 +16,10 @@ enum AuthMode {
 }
 
 model Settings {
-  id              String    @id @default(cuid()) @map("_id")
-  authMode        AuthMode  @default(LOCAL)
-  authUrl         String? // external backend url (with auth endpoint)
-  getTeamUrl      String? // external backend url (with getTeam endpoint)
+  id         String   @id @default(cuid()) @map("_id")
+  authMode   AuthMode @default(LOCAL)
+  authUrl    String? // external backend url (with auth endpoint)
+  getTeamUrl String? // external backend url (with getTeam endpoint)
 
   judgingDeadline DateTime?
   minVisits       Int
@@ -64,11 +64,17 @@ model Judge {
   updatedAt DateTime @updatedAt
 }
 
+enum PrizeCategory {
+  GENERAL
+  SPECIAL
+}
+
 // Projects can be submitted towards different prizes over which they are judged for
 model Prize {
-  id              String  @id @default(cuid()) @map("_id")
+  id              String        @id @default(cuid()) @map("_id")
   name            String
   description     String
+  category        PrizeCategory
   providerIconUrl String?
 
   judgeAssignments JudgePrizeAssignment[]
