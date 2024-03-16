@@ -2,6 +2,7 @@ import { useState } from "react";
 import { api } from "../utils/api";
 import Spinner from "./Spinner";
 import { UserType } from "@prisma/client";
+import Alert from "./Alert";
 
 export default function UserTable() {
   const { isFetching, data: users, refetch } = api.users.getUsers.useQuery();
@@ -39,7 +40,7 @@ export default function UserTable() {
   }
 
   if (users && users.length === 0) {
-    return <p>No users found</p>;
+    return <Alert message="No users found. Users can be added on the Settings page" type="info" />;
   }
 
   return (

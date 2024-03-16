@@ -41,7 +41,7 @@ export default function Admin() {
       <Header />
       <main className="flex flex-col items-center gap-5 py-5 px-2 md:px-10">
         <h1 className="text-3xl font-bold">Admin</h1>
-        <Tabs defaultValue="settings" className="w-96">
+        <Tabs defaultValue="settings">
           <TabsList className="flex flex-row gap-8 pb-8">
             {tabs.filter(tab => settings?.authMode === AuthMode.LOCAL || !tab.localModeOnly).map((tab) => (
               <TabsTrigger
