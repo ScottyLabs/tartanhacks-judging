@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { api } from "../utils/api";
 import Spinner from "./Spinner";
+import { UserType } from "@prisma/client";
 
 export default function UserTable() {
   const { isFetching, data: users, refetch } = api.users.getUsers.useQuery();
@@ -12,9 +13,28 @@ export default function UserTable() {
       },
     });
 
+  const { isLoading: isLoadingPromoteAdmin, mutate: promoteToAdmin } =
+    api.users.promoteToAdmin.useMutation({
+      onSuccess: async () => {
+        await refetch();
+      },
+    });
+
+  const { isLoading: isLoadingPromoteJudge, mutate: promoteToJudge } =
+    api.users.promoteToJudge.useMutation({
+      onSuccess: async () => {
+        await refetch();
+      },
+    });
+
   const [search, setSearch] = useState<string>("");
 
-  if (isFetching || isLoadingDelete) {
+  if (
+    isFetching ||
+    isLoadingDelete ||
+    isLoadingPromoteAdmin ||
+    isLoadingPromoteJudge
+  ) {
     return <Spinner />;
   }
 
@@ -23,7 +43,7 @@ export default function UserTable() {
   }
 
   return (
-    <div className="flex w-96 flex-col gap-8">
+    <div className="flex flex-col gap-8">
       <input
         type="text"
         placeholder="Search"
@@ -31,34 +51,64 @@ export default function UserTable() {
         onChange={(e) => setSearch(e.target.value)}
         className="rounded-md border-2 border-purple p-2"
       />
-      <div className="flex flex-col gap-5">
-        {users
-          ?.filter((user) => {
-            return (
-              user.email.toLowerCase().includes(search.toLowerCase()) ||
-              user.type.toLowerCase().includes(search.toLowerCase()) ||
-              (user.isAdmin ? "admin" : "").includes(search.toLowerCase())
-            );
-          })
-          .map((user) => (
-            <div
-              key={user.email}
-              className="flex items-center justify-between border-b-4 pb-4"
-            >
-              <p>{`${user.email} (${user.type.toLowerCase()}${
-                user.isAdmin ? ", admin" : ""
-              })`}</p>
-              <button
-                className="h-12 rounded-md bg-red-500 px-3 py-1 text-white"
-                onClick={() => {
-                  deleteUser({ email: user.email });
-                }}
-              >
-                Delete
-              </button>
-            </div>
-          ))}
-      </div>
+      <table className="m-auto">
+        <tbody>
+          {users
+            ?.filter((user) => {
+              return (
+                user.email.toLowerCase().includes(search.toLowerCase()) ||
+                user.type.toLowerCase().includes(search.toLowerCase()) ||
+                (user.isAdmin ? "admin" : "").includes(search.toLowerCase())
+              );
+            })
+            .map((user) => (
+              <tr key={user.email} className="border-b-2">
+                <td className="overflow-wrap max-w-xs break-words py-2 px-4">
+                  {user.email}
+                </td>
+                <td className="px-4">
+                  {user.isAdmin
+                    ? `${user.type.toLowerCase()}, admin`
+                    : user.type.toLowerCase()}
+                </td>
+                <td className="px-4">
+                  <button
+                    className="my-2 rounded-md bg-red-500 p-2 text-white"
+                    onClick={() => {
+                      deleteUser(user.email);
+                    }}
+                  >
+                    Delete
+                  </button>
+                </td>
+                <td className="px-4">
+                  {!user.isAdmin && (
+                    <button
+                      className="bg-purple my-2 rounded-md p-2 text-white"
+                      onClick={() => {
+                        promoteToAdmin(user.email);
+                      }}
+                    >
+                      Make admin
+                    </button>
+                  )}
+                </td>
+                <td className="px-4">
+                  {user.type !== UserType.JUDGE && (
+                    <button
+                      className="bg-blue my-2 rounded-md p-2 text-white"
+                      onClick={() => {
+                        promoteToJudge(user.email);
+                      }}
+                    >
+                      Make judge
+                    </button>
+                  )}
+                </td>
+              </tr>
+            ))}
+        </tbody>
+      </table>
     </div>
   );
 }
