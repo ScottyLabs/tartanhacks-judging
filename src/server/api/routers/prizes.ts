@@ -21,16 +21,13 @@ export const prizesRouter = createTRPCRouter({
   }),
 
   //TODO make admin only
+  /**
+   * Add new prizes to the event. Descriptions are empty by default.
+   */
   putPrizes: publicProcedure.input(
     z.object({
-      generalPrizes: z.array(z.object({
-        name: z.string(),
-        description: z.string(),
-      })),
-      specialPrizes: z.array(z.object({
-        name: z.string(),
-        description: z.string(),
-      })),
+      generalPrizes: z.array(z.string()),
+      specialPrizes: z.array(z.string()),
     }),
   ).mutation(async ({ ctx, input }) => {
     const { generalPrizes, specialPrizes } = input;
@@ -38,13 +35,13 @@ export const prizesRouter = createTRPCRouter({
     await ctx.prisma.prize.createMany({
       data: [
       ...generalPrizes.map((prize) => ({
-        name: prize.name,
-        description: prize.description,
+        name: prize,
+        description: "",
         category: PrizeCategory.GENERAL,
       })),
       ...specialPrizes.map((prize) => ({
-        name: prize.name,
-        description: prize.description,
+        name: prize,
+        description: "",
         category: PrizeCategory.SPECIAL,
       })),
       ],
