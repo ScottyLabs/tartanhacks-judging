@@ -52,7 +52,7 @@ export const prizesRouter = createTRPCRouter({
     }),
 
   deletePrize: publicProcedure
-    .input(z.string().uuid())
+    .input(z.string())
     .mutation(async ({ ctx, input: id }) => {
       await ctx.prisma.prize.delete({
         where: {
@@ -64,7 +64,7 @@ export const prizesRouter = createTRPCRouter({
   updatePrize: publicProcedure
     .input(
       z.object({
-        id: z.string().uuid(),
+        id: z.string(),
         name: z.string(),
         description: z.string(),
         category: z.nativeEnum(PrizeCategory),
