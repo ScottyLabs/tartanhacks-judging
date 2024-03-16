@@ -76,5 +76,6 @@ export const usersRouter = createTRPCRouter({
           },
         },
       });
+      // TODO: assign all general prizes to new judge
     }),
 });
