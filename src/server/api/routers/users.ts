@@ -47,4 +47,30 @@ export const usersRouter = createTRPCRouter({
         where: { email },
       });
     }),
+  
+  promoteToAdmin: publicProcedure.input(z.object({
+    email: z.string().trim().email({
+      message: "Invalid email",
+    }),
+  })).mutation(async ({ ctx, input }) => {
+    const { email } = input;
+    await ctx.prisma.user.update({
+      where: { email },
+      data: { isAdmin: true },
+    });
+  }),
+
+  promoteToJudge: publicProcedure.input(z.object({
+    email: z.string().trim().email({
+      message: "Invalid email",
+    }),
+  })).mutation(async ({ ctx, input }) => {
+    const { email } = input;
+    await ctx.prisma.user.update({
+      where: { email },
+      data: { type: UserType.JUDGE, judge: {
+        create: {}
+      } },
+    });
+  }),
 });
