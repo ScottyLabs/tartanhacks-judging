@@ -1,11 +1,12 @@
 import { useState } from "react";
 import AdminSettings from "./AdminSettings";
 import Spinner from ".././Spinner";
+import Alert from "../Alert";
 
 export default function AdminForm() {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [submittedSignal, setSubmittedSignal] = useState(false);
+  const [submittedSignal, setSubmittedSignal] = useState<boolean | null>(null);
 
   return (
     <>
@@ -26,7 +27,7 @@ export default function AdminForm() {
         </button>
       </div>
       {!isLoading && error && (
-        <p className="mt-8 w-full text-center text-red-500">{error}</p>
+        <Alert message={error} type="error"/>
       )}
     </>
   );
