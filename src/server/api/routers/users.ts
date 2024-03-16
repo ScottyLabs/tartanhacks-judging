@@ -31,7 +31,8 @@ export const usersRouter = createTRPCRouter({
     }),
 
   getUsers: publicProcedure.query(async ({ ctx }) => {
-    return await ctx.prisma.user.findMany();
+    const users = await ctx.prisma.user.findMany();
+    return users.sort((a, b) => a.email.localeCompare(b.email));
   }),
 
   deleteByEmail: publicProcedure
