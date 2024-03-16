@@ -9,22 +9,23 @@ export const usersRouter = createTRPCRouter({
    */
   putParticipantWhitelist: publicProcedure
     .input(
-      z.array(z.string().trim().email({
-        message: "Invalid email",
-      }))
+      z.array(
+        z.string().trim().email({
+          message: "Invalid email",
+        })
+      )
     )
     .mutation(async ({ ctx, input: participants }) => {
-
       const queries = participants.map((email) => {
         return ctx.prisma.user.upsert({
           where: { email },
-          update: { },
+          update: {},
           create: {
             email,
             type: UserType.PARTICIPANT,
           },
         });
-      })
+      });
 
       await ctx.prisma.$transaction(queries);
     }),
@@ -35,42 +36,44 @@ export const usersRouter = createTRPCRouter({
 
   deleteByEmail: publicProcedure
     .input(
-      z.object({
-        email: z.string().trim().email({
-          message: "Invalid email",
-        }),
+      z.string().trim().email({
+        message: "Invalid email",
       })
     )
-    .mutation(async ({ ctx, input }) => {
-      const { email } = input;
-       await ctx.prisma.user.delete({
+    .mutation(async ({ ctx, input: email }) => {
+      await ctx.prisma.user.delete({
         where: { email },
       });
     }),
-  
-  promoteToAdmin: publicProcedure.input(z.object({
-    email: z.string().trim().email({
-      message: "Invalid email",
-    }),
-  })).mutation(async ({ ctx, input }) => {
-    const { email } = input;
-    await ctx.prisma.user.update({
-      where: { email },
-      data: { isAdmin: true },
-    });
-  }),
 
-  promoteToJudge: publicProcedure.input(z.object({
-    email: z.string().trim().email({
-      message: "Invalid email",
+  promoteToAdmin: publicProcedure
+    .input(
+      z.string().trim().email({
+        message: "Invalid email",
+      })
+    )
+    .mutation(async ({ ctx, input: email }) => {
+      await ctx.prisma.user.update({
+        where: { email },
+        data: { isAdmin: true },
+      });
     }),
-  })).mutation(async ({ ctx, input }) => {
-    const { email } = input;
-    await ctx.prisma.user.update({
-      where: { email },
-      data: { type: UserType.JUDGE, judge: {
-        create: {}
-      } },
-    });
-  }),
+
+  promoteToJudge: publicProcedure
+    .input(
+      z.string().trim().email({
+        message: "Invalid email",
+      })
+    )
+    .mutation(async ({ ctx, input: email }) => {
+      await ctx.prisma.user.update({
+        where: { email },
+        data: {
+          type: UserType.JUDGE,
+          judge: {
+            create: {},
+          },
+        },
+      });
+    }),
 });
