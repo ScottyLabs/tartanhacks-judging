@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "../trpc";
 import { UserType } from "@prisma/client";
+import { syncJudgePrizes } from "./judgePrizeUtils";
 
 export const usersRouter = createTRPCRouter({
   // TODO make admin only
@@ -67,7 +68,7 @@ export const usersRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input: email }) => {
-      await ctx.prisma.user.update({
+      const user = await ctx.prisma.user.update({
         where: { email },
         data: {
           type: UserType.JUDGE,
@@ -75,7 +76,11 @@ export const usersRouter = createTRPCRouter({
             create: {},
           },
         },
+        select: {
+          judge: true,
+        },
       });
-      // TODO: assign all general prizes to new judge
+
+      syncJudgePrizes(ctx.prisma, [user.judge!]);
     }),
 });

@@ -1,29 +1,32 @@
-import { PrismaClient, PrizeCategory, UserType } from "@prisma/client";
+import { Judge, PrismaClient, PrizeCategory, UserType } from "@prisma/client";
 
 /**
  * Assign all general prizes to all judges
  * @param prisma: prisma instance
+ * @param judges: list of judges to assign prizes to (optional)
  */
-export async function syncJudgePrizes(prisma: PrismaClient) {
-  const [users, prizes] = await prisma.$transaction([
-    prisma.user.findMany({
+export async function syncJudgePrizes(prisma: PrismaClient, judges?: Judge[]) {
+  let judgeIds: string[] = [];
+  if (judges) {
+    judgeIds = judges.map((judge) => judge.id);
+  } else {
+    // apply to all judges
+    const users = await prisma.user.findMany({
       where: {
         type: UserType.JUDGE,
       },
       select: {
         judge: true,
       },
-    }),
-    prisma.prize.findMany({
-      where: {
-        category: PrizeCategory.GENERAL,
-      },
-    }),
-  ]);
+    });
+    judgeIds = users.filter((user) => user.judge).map((user) => user.judge!.id);
+  }
 
-  const judgeIds = users
-    .filter((user) => user.judge)
-    .map((user) => user.judge!.id);
+  const prizes = await prisma.prize.findMany({
+    where: {
+      category: PrizeCategory.GENERAL,
+    },
+  });
   const prizeIds = prizes.map((prize) => prize.id);
 
   const judgePrizes = judgeIds.flatMap((judgeId) =>
@@ -33,7 +36,7 @@ export async function syncJudgePrizes(prisma: PrismaClient) {
     }))
   );
 
-  const queries = judgePrizes.map(({judgeId, prizeId}) => {
+  const queries = judgePrizes.map(({ judgeId, prizeId }) => {
     return prisma.judgePrizeAssignment.upsert({
       where: {
         judgeId_prizeId: {
@@ -47,7 +50,7 @@ export async function syncJudgePrizes(prisma: PrismaClient) {
         prizeId,
       },
     });
-  })
+  });
 
   return await prisma.$transaction(queries);
 }
