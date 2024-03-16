@@ -8,11 +8,33 @@ import {
 import AdminForm from "../components/admin/AdminForm";
 import UserTable from "../components/UserTable";
 import { useState } from "react";
+import { api } from "../utils/api";
+import { AuthMode } from "@prisma/client";
+
+type TabData = {
+  key: string;
+  name: string;
+  // whether the tab is only available in local mode
+  localModeOnly: boolean;
+}
 
 export default function Admin() {
-  const tabs = ["settings", "users", "prizes"] as const;
+  const tabs = [
+    { key: "settings", name: "Settings", localModeOnly: false },
+    { key: "users", name: "Users", localModeOnly: true },
+    { key: "prizes", name: "Prizes", localModeOnly: true },
+  ] as const
+
+  const tabKeys = tabs.map((tab) => tab.key);
+
   const [selectedTab, setSelectedTab] =
-    useState<(typeof tabs)[number]>("settings");
+    useState<(typeof tabKeys)[number]>("settings");
+
+  const {
+    isLoading,
+    data: settings,
+    refetch
+  } = api.settings.getSettings.useQuery();
 
   return (
     <>
@@ -21,21 +43,21 @@ export default function Admin() {
         <h1 className="text-3xl font-bold">Admin</h1>
         <Tabs defaultValue="settings" className="w-96">
           <TabsList className="flex flex-row gap-8 pb-8">
-            {tabs.map((tab) => (
+            {tabs.filter(tab => settings?.authMode === AuthMode.LOCAL || !tab.localModeOnly).map((tab) => (
               <TabsTrigger
-                key={tab}
-                value={tab}
+                key={tab.key}
+                value={tab.key}
                 className={`m-0 rounded-md ${
-                  selectedTab === tab ? "bg-purple text-white" : ""
+                  selectedTab === tab.key ? "bg-purple text-white" : ""
                 }`}
-                onClick={() => setSelectedTab(tab)}
+                onClick={() => setSelectedTab(tab.key)}
               >
-                {tab}
+                {tab.name}
               </TabsTrigger>
             ))}
           </TabsList>
           <TabsContent value="settings">
-            <AdminForm />
+            <AdminForm onSettingsSubmitted={refetch}/>
           </TabsContent>
           <TabsContent value="users">
             <UserTable />

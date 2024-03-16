@@ -48,7 +48,7 @@ export default function Whitelist({
   };
 
   useEffect(() => {
-    if (submittedSignal === null) return;
+    if (submittedSignal === null || whitelist === "") return;
     updateWhitelist(toEmails(whitelist));
   }, [submittedSignal]);
 

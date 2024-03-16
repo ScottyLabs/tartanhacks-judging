@@ -6,12 +6,14 @@ type AdminSettingsProps = {
   setError: (error: string | null) => void;
   setIsLoading: (isLoading: boolean) => void;
   submittedSignal: boolean | null;
+  onSettingsSubmitted: () => void;
 };
 
 export default function AdminSettings({
   setError,
   setIsLoading,
   submittedSignal,
+  onSettingsSubmitted
 }: AdminSettingsProps) {
   const {
     isFetching,
@@ -65,8 +67,6 @@ export default function AdminSettings({
   };
 
   const [newSettings, setNewSettings] = useState(settingsToDisplay(settings));
-
-  const [whitelist, setWhitelist] = useState("");
 
   const displayToSettings = (display: typeof newSettings) => {
     let sigmaInit = undefined;
