@@ -1,46 +1,42 @@
 import { useEffect, useState } from "react";
 import { api } from "../utils/api";
 import Spinner from "./Spinner";
-
-type Whitelists = {
-  participants: string;
-  judges: string;
-  admins: string;
-};
+import Alert from "./Alert";
 
 type WhitelistsProps = {
-  whitelists: Whitelists;
-  setWhitelists: (whitelists: Whitelists) => void;
-  submittedSignal: boolean;
+  submittedSignal: boolean | null;
 };
 
-export default function Whitelists({
-  whitelists,
-  setWhitelists,
+export default function Whitelist({
   submittedSignal,
 }: WhitelistsProps) {
   const [error, setError] = useState<string | null>(null);
+  const [whitelist, setWhitelist] = useState<string>("");
+  const [success, setSuccess] = useState<boolean>(false);
 
-  const { isLoading, mutate: updateWhitelists } =
-    api.users.putWhitelists.useMutation({
+  const { isLoading, mutate: updateWhitelist } =
+    api.users.putParticipantWhitelist.useMutation({
       onError: (error) => {
         try {
           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
           const trpcErr = JSON.parse(error.message)[0] as {
             message: string;
-            path: (keyof Whitelists | number)[];
+            path: number[];
           };
           const msg = trpcErr.message;
-          const field = trpcErr.path[0] as keyof Whitelists;
-          const idx = trpcErr.path[1] as number;
-          setError(`${msg}: ${toEmails(whitelists[field])[idx] as string}`);
+          const idx = trpcErr.path[0] as number;
+          setError(`${msg}: ${toEmails(whitelist)[idx] as string}`);
         } catch (e) {
           setError(error.message);
+        } finally{
+          setSuccess(false);
         }
       },
 
       onSuccess: () => {
         setError(null);
+        setSuccess(true);
+        setWhitelist("");
       },
     });
 
@@ -52,11 +48,8 @@ export default function Whitelists({
   };
 
   useEffect(() => {
-    updateWhitelists({
-      participants: toEmails(whitelists.participants),
-      judges: toEmails(whitelists.judges),
-      admins: toEmails(whitelists.admins),
-    });
+    if (submittedSignal === null) return;
+    updateWhitelist(toEmails(whitelist));
   }, [submittedSignal]);
 
   if (isLoading) {
@@ -69,45 +62,17 @@ export default function Whitelists({
         <h3 className="font-bold">Participants</h3>
         <textarea
           className="h-32 w-full"
-          value={whitelists.participants}
+          value={whitelist}
           placeholder="Enter participant emails separated by commas or new lines"
           onChange={(e) =>
-            setWhitelists({
-              ...whitelists,
-              participants: e.target.value,
-            })
+            setWhitelist(e.target.value)
           }
         />
       </div>
-      <div>
-        <h3 className="font-bold">Judges</h3>
-        <textarea
-          className="h-32 w-full"
-          value={whitelists.judges}
-          placeholder="Enter judge emails separated by commas or new lines"
-          onChange={(e) =>
-            setWhitelists({
-              ...whitelists,
-              judges: e.target.value,
-            })
-          }
-        />
-      </div>
-      <div>
-        <h3 className="font-bold">Admins</h3>
-        <textarea
-          className="h-32 w-full"
-          value={whitelists.admins}
-          placeholder="Enter admin emails separated by commas or new lines"
-          onChange={(e) =>
-            setWhitelists({
-              ...whitelists,
-              admins: e.target.value,
-            })
-          }
-        />
-      </div>
-      {!isLoading && error && <p className="m-auto text-red-500">{error}</p>}
+      {!isLoading && error && <Alert type="error" message={error}/>}
+      {!isLoading && success && (
+        <Alert type="success" message="Participants added successfully" lifeTimeMs={5000}/>
+      )}
     </div>
   );
 }

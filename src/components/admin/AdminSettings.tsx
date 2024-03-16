@@ -5,7 +5,7 @@ import Whitelists from ".././Whitelists";
 type AdminSettingsProps = {
   setError: (error: string | null) => void;
   setIsLoading: (isLoading: boolean) => void;
-  submittedSignal: boolean;
+  submittedSignal: boolean | null;
 };
 
 export default function AdminSettings({
@@ -45,6 +45,7 @@ export default function AdminSettings({
 
   // update settings when submitted
   useEffect(() => {
+    if (submittedSignal === null) return;
     updateSettings(displayToSettings(newSettings));
   }, [submittedSignal]);
 
@@ -65,11 +66,7 @@ export default function AdminSettings({
 
   const [newSettings, setNewSettings] = useState(settingsToDisplay(settings));
 
-  const [whitelists, setWhitelists] = useState({
-    participants: "",
-    judges: "",
-    admins: "",
-  });
+  const [whitelist, setWhitelist] = useState("");
 
   const displayToSettings = (display: typeof newSettings) => {
     let sigmaInit = undefined;
@@ -161,8 +158,6 @@ export default function AdminSettings({
 
       <div className={newSettings?.authMode === "SYNC" ? "hidden" : ""}>
         <Whitelists
-          whitelists={whitelists}
-          setWhitelists={setWhitelists}
           submittedSignal={submittedSignal}
         />
       </div>
