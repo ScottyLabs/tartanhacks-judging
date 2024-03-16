@@ -10,6 +10,7 @@ import UserTable from "../components/UserTable";
 import { useState } from "react";
 import { api } from "../utils/api";
 import { AuthMode } from "@prisma/client";
+import PrizeTab from "../components/admin/PrizeTab";
 
 type TabData = {
   key: string;
@@ -68,6 +69,7 @@ export default function Admin() {
             <UserTable />
           </TabsContent>
           <TabsContent value="prizes">
+            <PrizeTab />
           </TabsContent>
         </Tabs>
       </main>
