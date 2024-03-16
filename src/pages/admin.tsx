@@ -16,14 +16,14 @@ type TabData = {
   name: string;
   // whether the tab is only available in local mode
   localModeOnly: boolean;
-}
+};
 
 export default function Admin() {
   const tabs = [
     { key: "settings", name: "Settings", localModeOnly: false },
     { key: "users", name: "Users", localModeOnly: true },
     { key: "prizes", name: "Prizes", localModeOnly: true },
-  ] as const
+  ] as const;
 
   const tabKeys = tabs.map((tab) => tab.key);
 
@@ -33,7 +33,7 @@ export default function Admin() {
   const {
     isLoading,
     data: settings,
-    refetch
+    refetch,
   } = api.settings.getSettings.useQuery();
 
   return (
@@ -43,21 +43,26 @@ export default function Admin() {
         <h1 className="text-3xl font-bold">Admin</h1>
         <Tabs defaultValue="settings">
           <TabsList className="flex flex-row gap-8 pb-8">
-            {tabs.filter(tab => settings?.authMode === AuthMode.LOCAL || !tab.localModeOnly).map((tab) => (
-              <TabsTrigger
-                key={tab.key}
-                value={tab.key}
-                className={`m-0 rounded-md ${
-                  selectedTab === tab.key ? "bg-purple text-white" : ""
-                }`}
-                onClick={() => setSelectedTab(tab.key)}
-              >
-                {tab.name}
-              </TabsTrigger>
-            ))}
+            {tabs
+              .filter(
+                (tab) =>
+                  settings?.authMode === AuthMode.LOCAL || !tab.localModeOnly
+              )
+              .map((tab) => (
+                <TabsTrigger
+                  key={tab.key}
+                  value={tab.key}
+                  className={`m-0 rounded-md ${
+                    selectedTab === tab.key ? "bg-purple text-white" : ""
+                  }`}
+                  onClick={() => setSelectedTab(tab.key)}
+                >
+                  {tab.name}
+                </TabsTrigger>
+              ))}
           </TabsList>
           <TabsContent value="settings">
-            <AdminForm onSettingsSubmitted={refetch}/>
+            <AdminForm />
           </TabsContent>
           <TabsContent value="users">
             <UserTable />

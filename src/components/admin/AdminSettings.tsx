@@ -6,14 +6,12 @@ type AdminSettingsProps = {
   setError: (error: string | null) => void;
   setIsLoading: (isLoading: boolean) => void;
   submittedSignal: boolean | null;
-  onSettingsSubmitted: () => void;
 };
 
 export default function AdminSettings({
   setError,
   setIsLoading,
   submittedSignal,
-  onSettingsSubmitted
 }: AdminSettingsProps) {
   const {
     isFetching,
@@ -157,9 +155,7 @@ export default function AdminSettings({
       {newSettings?.authMode === "SYNC" && syncFields}
 
       <div className={newSettings?.authMode === "SYNC" ? "hidden" : ""}>
-        <Whitelists
-          submittedSignal={submittedSignal}
-        />
+        <Whitelists submittedSignal={submittedSignal} />
       </div>
 
       <div className="flex flex-col gap-2">

@@ -3,13 +3,7 @@ import AdminSettings from "./AdminSettings";
 import Spinner from ".././Spinner";
 import Alert from "../Alert";
 
-type AdminFormProps = {
-  onSettingsSubmitted: () => void;
-};
-
-export default function AdminForm({
-  onSettingsSubmitted
-} : AdminFormProps) {
+export default function AdminForm() {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   // when the form is submitted, the submittedSignal state is toggled
@@ -23,7 +17,6 @@ export default function AdminForm({
           setError={setError}
           setIsLoading={setIsLoading}
           submittedSignal={submittedSignal}
-          onSettingsSubmitted={onSettingsSubmitted}
         />
         <button
           className="btn rounded-md bg-purple px-3 py-1 text-white"
@@ -34,9 +27,7 @@ export default function AdminForm({
           Save
         </button>
       </div>
-      {!isLoading && error && (
-        <Alert message={error} type="error"/>
-      )}
+      {!isLoading && error && <Alert message={error} type="error" />}
     </>
   );
 }
