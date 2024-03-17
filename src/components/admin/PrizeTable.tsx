@@ -8,7 +8,7 @@ type PrizeTableProps = {
     description: string;
     category: PrizeCategory;
   }[];
-  onUpdate: () => void;
+  onUpdate: () => any;
 };
 
 export default function PrizeTable({ prizes, onUpdate }: PrizeTableProps) {

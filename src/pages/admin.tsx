@@ -12,14 +12,8 @@ import { api } from "../utils/api";
 import { AuthMode } from "@prisma/client";
 import PrizeTab from "../components/admin/PrizeTab";
 
-type TabData = {
-  key: string;
-  name: string;
-  // whether the tab is only available in local mode
-  localModeOnly: boolean;
-};
-
 export default function Admin() {
+  // localModeOnly: true means the tab is only available in local mode
   const tabs = [
     { key: "settings", name: "Settings", localModeOnly: false },
     { key: "users", name: "Users", localModeOnly: true },
@@ -32,9 +26,7 @@ export default function Admin() {
     useState<(typeof tabKeys)[number]>("settings");
 
   const {
-    isLoading,
     data: settings,
-    refetch,
   } = api.settings.getSettings.useQuery();
 
   return (

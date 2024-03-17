@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { api } from "../../utils/api";
 import { PrizeCategory } from "@prisma/client";
 

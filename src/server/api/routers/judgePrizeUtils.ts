@@ -1,4 +1,4 @@
-import { Judge, PrismaClient, PrizeCategory, UserType } from "@prisma/client";
+import { UserType, type Judge, type PrismaClient, PrizeCategory } from "@prisma/client";
 
 /**
  * Assign all general prizes to all judges

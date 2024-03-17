@@ -81,6 +81,6 @@ export const usersRouter = createTRPCRouter({
         },
       });
 
-      syncJudgePrizes(ctx.prisma, [user.judge!]);
+      await syncJudgePrizes(ctx.prisma, [user.judge!]);
     }),
 });
