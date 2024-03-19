@@ -19,9 +19,9 @@ export default function Header({ hideAuth = false, showAdmin = false }: Props) {
           </div>
           <div className="flex flex-row gap-8">
             {showAdmin && (
-              <a href="/admin" className="text-white">
+              <Link href="/admin" className="text-white">
                 Admin
-              </a>
+              </Link>
             )}
             {!hideAuth && (
               <a href="#" onClick={() => void signOut()} className="text-white">
