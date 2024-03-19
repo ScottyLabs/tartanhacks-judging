@@ -1,14 +1,18 @@
 import { z } from "zod";
 
-import { createTRPCRouter, publicProcedure } from "../trpc";
+import { createTRPCRouter } from "../trpc";
 import { PrizeCategory } from "@prisma/client";
 import { syncJudgePrizes } from "./judgePrizeUtils";
+import {
+  adminProcedure,
+  protectedProcedure,
+} from "../middleware/authMiddleware";
 
 export const prizesRouter = createTRPCRouter({
   /**
    * Get all prizes for the event
    */
-  getPrizes: publicProcedure.query(async ({ ctx }) => {
+  getPrizes: protectedProcedure.query(async ({ ctx }) => {
     const prizes = await ctx.prisma.prize.findMany({
       orderBy: [
         {
@@ -19,11 +23,10 @@ export const prizesRouter = createTRPCRouter({
     return prizes;
   }),
 
-  //TODO make admin only
   /**
    * Add new prizes to the event. Descriptions are empty by default.
    */
-  putPrizes: publicProcedure
+  putPrizes: adminProcedure
     .input(
       z.object({
         generalPrizes: z.array(z.string()),
@@ -51,7 +54,7 @@ export const prizesRouter = createTRPCRouter({
       await syncJudgePrizes(ctx.prisma);
     }),
 
-  deletePrize: publicProcedure
+  deletePrize: adminProcedure
     .input(z.string())
     .mutation(async ({ ctx, input: id }) => {
       await ctx.prisma.prize.delete({
@@ -61,7 +64,7 @@ export const prizesRouter = createTRPCRouter({
       });
     }),
 
-  updatePrize: publicProcedure
+  updatePrize: adminProcedure
     .input(
       z.object({
         id: z.string(),

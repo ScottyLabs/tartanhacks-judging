@@ -1,14 +1,14 @@
 import { z } from "zod";
-import { createTRPCRouter, publicProcedure } from "../trpc";
+import { createTRPCRouter } from "../trpc";
 import { UserType } from "@prisma/client";
 import { syncJudgePrizes } from "./judgePrizeUtils";
+import { adminProcedure } from "../middleware/authMiddleware";
 
 export const usersRouter = createTRPCRouter({
-  // TODO make admin only
   /**
    * Create participants from whitelist
    */
-  putParticipantWhitelist: publicProcedure
+  putParticipantWhitelist: adminProcedure
     .input(
       z.array(
         z.string().trim().email({
@@ -31,12 +31,12 @@ export const usersRouter = createTRPCRouter({
       await ctx.prisma.$transaction(queries);
     }),
 
-  getUsers: publicProcedure.query(async ({ ctx }) => {
+  getUsers: adminProcedure.query(async ({ ctx }) => {
     const users = await ctx.prisma.user.findMany();
     return users.sort((a, b) => a.email.localeCompare(b.email));
   }),
 
-  deleteByEmail: publicProcedure
+  deleteByEmail: adminProcedure
     .input(
       z.string().trim().email({
         message: "Invalid email",
@@ -48,7 +48,7 @@ export const usersRouter = createTRPCRouter({
       });
     }),
 
-  promoteToAdmin: publicProcedure
+  promoteToAdmin: adminProcedure
     .input(
       z.string().trim().email({
         message: "Invalid email",
@@ -61,7 +61,7 @@ export const usersRouter = createTRPCRouter({
       });
     }),
 
-  promoteToJudge: publicProcedure
+  promoteToJudge: adminProcedure
     .input(
       z.string().trim().email({
         message: "Invalid email",

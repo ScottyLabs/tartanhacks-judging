@@ -1,17 +1,14 @@
 import { z } from "zod";
-import { adminMiddleware } from "../middleware/authMiddleware";
+import { adminProcedure } from "../middleware/authMiddleware";
 
-import { createTRPCRouter, publicProcedure } from "../trpc";
+import { createTRPCRouter } from "../trpc";
 import { TRPCError } from "@trpc/server";
-
-const adminProcedure = publicProcedure.use(adminMiddleware);
 
 export const settingsRouter = createTRPCRouter({
   /**
    * Get the current event settings
    */
-  // TODO make admin only
-  getSettings: publicProcedure.query(async ({ ctx }) => {
+  getSettings: adminProcedure.query(async ({ ctx }) => {
     const settings = await ctx.prisma?.settings.findFirst();
     if (settings) {
       return settings;
@@ -19,9 +16,9 @@ export const settingsRouter = createTRPCRouter({
     throw new TRPCError({
       code: "NOT_FOUND",
       message: "Settings not found",
-    })
+    });
   }),
-  putSettings: publicProcedure
+  putSettings: adminProcedure
     .input(
       z
         .object({
@@ -29,11 +26,14 @@ export const settingsRouter = createTRPCRouter({
             invalid_type_error: "Invalid auth mode",
           }),
           authUrl: z.string(),
-          judgingDeadline: z.string().datetime({
-            message: "Invalid deadline",
-          }).refine(date => date > new Date().toISOString(), {
-            message: "Deadline must be in the future",
-          }),
+          judgingDeadline: z
+            .string()
+            .datetime({
+              message: "Invalid deadline",
+            })
+            .refine((date) => date > new Date().toISOString(), {
+              message: "Deadline must be in the future",
+            }),
           minVisits: z.number().nonnegative({
             message: "Minimum visits must be a non-negative number",
           }),
@@ -49,7 +49,9 @@ export const settingsRouter = createTRPCRouter({
       return await ctx.prisma?.settings.updateMany({
         data: {
           ...input,
-          judgingDeadline: input.judgingDeadline ? new Date(input.judgingDeadline) : undefined,
+          judgingDeadline: input.judgingDeadline
+            ? new Date(input.judgingDeadline)
+            : undefined,
         },
       });
     }),
