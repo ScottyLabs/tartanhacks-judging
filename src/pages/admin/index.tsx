@@ -1,16 +1,16 @@
-import Header from "../components/Header";
+import Header from "../../components/Header";
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
-} from "../../@/components/ui/tabs";
-import AdminForm from "../components/admin/AdminForm";
-import UserTable from "../components/UserTable";
+} from "../../../@/components/ui/tabs";
+import AdminForm from "../../components/admin/AdminForm";
+import UserTable from "../../components/UserTable";
 import { useState } from "react";
-import { api } from "../utils/api";
+import { api } from "../../utils/api";
 import { AuthMode } from "@prisma/client";
-import PrizeTab from "../components/admin/PrizeTab";
+import PrizeTab from "../../components/admin/PrizeTab";
 
 export default function Admin() {
   // localModeOnly: true means the tab is only available in local mode
