@@ -4,9 +4,10 @@ import { signOut } from "next-auth/react";
 
 interface Props {
   hideAuth?: boolean;
+  showAdmin?: boolean;
 }
 
-export default function Header({ hideAuth = false }: Props) {
+export default function Header({ hideAuth = false, showAdmin = false }: Props) {
   return (
     <header>
       <nav className="navbar navbar-expand-lg bg-black py-2 shadow-md">
@@ -16,11 +17,18 @@ export default function Header({ hideAuth = false }: Props) {
               <Logo className="h-12" />
             </Link>
           </div>
-          {!hideAuth && (
-            <a href="#" onClick={() => void signOut()} className="text-white">
-              Sign out
-            </a>
-          )}
+          <div className="flex flex-row gap-8">
+            {showAdmin && (
+              <a href="/admin" className="text-white">
+                Admin
+              </a>
+            )}
+            {!hideAuth && (
+              <a href="#" onClick={() => void signOut()} className="text-white">
+                Sign out
+              </a>
+            )}
+          </div>
         </div>
       </nav>
     </header>

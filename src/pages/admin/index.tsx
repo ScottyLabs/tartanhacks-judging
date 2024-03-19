@@ -25,13 +25,11 @@ export default function Admin() {
   const [selectedTab, setSelectedTab] =
     useState<(typeof tabKeys)[number]>("settings");
 
-  const {
-    data: settings,
-  } = api.settings.getSettings.useQuery();
+  const { data: settings } = api.settings.getSettings.useQuery();
 
   return (
     <>
-      <Header />
+      <Header showAdmin />
       <main className="flex flex-col items-center gap-5 py-5 px-2 md:px-10">
         <h1 className="text-3xl font-bold">Admin</h1>
         <Tabs defaultValue="settings">
