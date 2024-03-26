@@ -1,6 +1,8 @@
 import { createTRPCRouter } from "./trpc";
 import { judgingRouter } from "./routers/judging";
 import { prizesRouter } from "./routers/prizes";
+import { settingsRouter } from "./routers/settings";
+import { usersRouter } from "./routers/users";
 import { authRouter } from "./routers/auth";
 
 /**
@@ -11,6 +13,8 @@ import { authRouter } from "./routers/auth";
 export const appRouter = createTRPCRouter({
   judging: judgingRouter,
   prizes: prizesRouter,
+  settings: settingsRouter,
+  users: usersRouter,
   auth: authRouter,
 });
 

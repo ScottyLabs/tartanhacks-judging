@@ -2,13 +2,13 @@ import type { User } from "next-auth";
 import { z } from "zod";
 import cmp from "../../controllers/cmp";
 import { getNext } from "../../controllers/getNext";
-import authMiddleware, { adminMiddleware } from "../middleware/authMiddleware";
+import {
+  adminProcedure,
+  protectedProcedure,
+} from "../middleware/authMiddleware";
 
-import { createTRPCRouter, publicProcedure } from "../trpc";
+import { createTRPCRouter } from "../trpc";
 import { TRPCError } from "@trpc/server";
-
-const protectedProcedure = publicProcedure.use(authMiddleware);
-const adminProcedure = protectedProcedure.use(adminMiddleware);
 
 export const judgingRouter = createTRPCRouter({
   // Get the current project to be judged
@@ -34,9 +34,11 @@ export const judgingRouter = createTRPCRouter({
     };
 
     const judge = await ctx.prisma.judge.findFirst({
-      where: { user: {
-        email: user.email as string
-      } },
+      where: {
+        user: {
+          email: user.email as string,
+        },
+      },
       include: judgeIncludeFields,
     });
 
@@ -88,9 +90,11 @@ export const judgingRouter = createTRPCRouter({
   computeNext: protectedProcedure.mutation(async ({ ctx }) => {
     const user = ctx?.session?.user as User;
     const judge = await ctx.prisma.judge.findFirst({
-      where: {user: {
-        email: user.email as string
-      }},
+      where: {
+        user: {
+          email: user.email as string,
+        },
+      },
       include: {
         prizeAssignments: {
           include: {
@@ -195,9 +199,11 @@ export const judgingRouter = createTRPCRouter({
       const user = ctx?.session?.user as User;
 
       const judge = await ctx.prisma.judge.findFirst({
-        where: {user: {
-          email: user.email as string
-        }},
+        where: {
+          user: {
+            email: user.email as string,
+          },
+        },
       });
 
       if (judge == null) {
@@ -270,7 +276,7 @@ export const judgingRouter = createTRPCRouter({
       where: {
         user: {
           email: user.email as string,
-        }
+        },
       },
       include: {
         prizeAssignments: {
@@ -310,9 +316,11 @@ export const judgingRouter = createTRPCRouter({
       const user = ctx?.session?.user as User;
 
       const judge = await ctx.prisma.judge.findFirst({
-        where: {user: {
-          email: user.email as string
-        }},
+        where: {
+          user: {
+            email: user.email as string,
+          },
+        },
         include: {
           prizeAssignments: {
             include: {
@@ -364,6 +372,7 @@ export const judgingRouter = createTRPCRouter({
       });
     }),
 
+  // TODO: move assignment to project submission
   assignTables: adminProcedure
     .input(
       z.object({

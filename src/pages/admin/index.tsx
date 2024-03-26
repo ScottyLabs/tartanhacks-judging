@@ -1,53 +1,68 @@
-import type { GetServerSidePropsContext } from "next";
-import { type NextPage } from "next";
 import Header from "../../components/Header";
-import { getSession } from "next-auth/react";
-import { prisma } from "../../server/db";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "../../../@/components/ui/tabs";
+import AdminForm from "../../components/admin/AdminForm";
+import UserTable from "../../components/UserTable";
+import { useState } from "react";
+import { api } from "../../utils/api";
+import { AuthMode } from "@prisma/client";
+import PrizeTab from "../../components/admin/PrizeTab";
 
-interface Props {
-  email: string;
-  isAdmin: boolean;
-  userType: string;
-  authMode: string;
-}
+export default function Admin() {
+  // localModeOnly: true means the tab is only available in local mode
+  const tabs = [
+    { key: "settings", name: "Settings", localModeOnly: false },
+    { key: "users", name: "Users", localModeOnly: true },
+    { key: "prizes", name: "Prizes", localModeOnly: true },
+  ] as const;
 
-const Home: NextPage<Props> = ({ email, isAdmin, userType, authMode }) => {
+  const tabKeys = tabs.map((tab) => tab.key);
+
+  const [selectedTab, setSelectedTab] =
+    useState<(typeof tabKeys)[number]>("settings");
+
+  const { data: settings } = api.settings.getSettings.useQuery();
+
   return (
     <>
-      <Header />
+      <Header showAdmin />
       <main className="flex flex-col items-center gap-5 py-5 px-2 md:px-10">
-        {/* Timer */}
-        <div className="w-12/12 flex flex-col items-center justify-center gap-3">
-          <h2 className="text-2xl font-bold">
-            Welcome to the Judging System - Admins Only!
-          </h2>
-          <p>Email: {email}</p>
-          <p>Admin: {isAdmin ? "Yes" : "No"}</p>
-          <p>User Type: {userType}</p>
-          <p>Auth Mode: {authMode}</p>
-        </div>
+        <h1 className="text-3xl font-bold">Admin</h1>
+        <Tabs defaultValue="settings">
+          <TabsList className="flex flex-row gap-8 pb-8">
+            {tabs
+              .filter(
+                (tab) =>
+                  settings?.authMode === AuthMode.LOCAL || !tab.localModeOnly
+              )
+              .map((tab) => (
+                <TabsTrigger
+                  key={tab.key}
+                  value={tab.key}
+                  className={`m-0 rounded-md ${
+                    selectedTab === tab.key ? "bg-purple text-white" : ""
+                  }`}
+                  onClick={() => setSelectedTab(tab.key)}
+                >
+                  {tab.name}
+                </TabsTrigger>
+              ))}
+          </TabsList>
+          <TabsContent value="settings">
+            <AdminForm />
+          </TabsContent>
+          <TabsContent value="users">
+            <UserTable />
+          </TabsContent>
+          <TabsContent value="prizes">
+            <PrizeTab />
+          </TabsContent>
+        </Tabs>
       </main>
     </>
   );
-};
-
-export async function getServerSideProps(context: GetServerSidePropsContext) {
-  const session = await getSession(context);
-  const email = session?.user?.email as string;
-  const user = await prisma.user.findFirst({
-    where: {
-      email: email,
-    },
-  });
-  const settings = await prisma.settings.findFirst();
-  return {
-    props: {
-      email: email,
-      isAdmin: user?.isAdmin as boolean,
-      userType: user?.type as string,
-      authMode: settings?.authMode as string,
-    },
-  };
 }
-
-export default Home;

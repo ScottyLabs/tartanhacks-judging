@@ -1,4 +1,4 @@
-import { PrismaClient, UserType } from "@prisma/client";
+import { AuthMode, PrismaClient, Settings, UserType } from "@prisma/client";
 import { sendMagicLinkEmail } from "../src/server/utils/email";
 import { env } from "../src/env/server.mjs";
 
@@ -26,6 +26,24 @@ async function main() {
     );
   } else {
     console.log("Admin user already exists");
+  }
+
+  const settings = await prisma.settings.findFirst();
+
+  if (!settings) {
+    const defaultSettings = {
+      authMode: AuthMode.LOCAL,
+      authUrl: "",
+      judgingDeadline: new Date(),
+      minVisits: 0,
+      sigmaInit: 1.0,
+      getTeamUrl: "",
+      serviceToken: "",
+    } as Settings;
+
+    await prisma?.settings.create({
+      data: defaultSettings,
+    });
   }
 }
 

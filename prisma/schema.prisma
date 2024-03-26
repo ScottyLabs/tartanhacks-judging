@@ -11,19 +11,19 @@ datasource db {
 }
 
 enum AuthMode {
-  LOCAL
-  SYNC
+  LOCAL // do not use external database
+  SYNC // use external database
 }
 
 model Settings {
-  id              String    @id @default(cuid()) @map("_id")
-  authUrl         String?
-  authMode        AuthMode  @default(LOCAL)
+  id         String   @id @default(cuid()) @map("_id")
+  authMode   AuthMode @default(LOCAL)
+  authUrl    String? // external backend url (with auth endpoint)
+  getTeamUrl String? // external backend url (with getTeam endpoint)
 
   judgingDeadline DateTime?
   minVisits       Int
   sigmaInit       Float
-  getTeamUrl      String?
   serviceToken    String?
 }
 
@@ -64,11 +64,17 @@ model Judge {
   updatedAt DateTime @updatedAt
 }
 
+enum PrizeCategory {
+  GENERAL // prizes that are assigned to all judges by default
+  SPECIAL // prizes that are not assigned to any judges by default
+}
+
 // Projects can be submitted towards different prizes over which they are judged for
 model Prize {
-  id              String  @id @default(cuid()) @map("_id")
+  id              String        @id @default(cuid()) @map("_id")
   name            String
   description     String
+  category        PrizeCategory
   providerIconUrl String?
 
   judgeAssignments JudgePrizeAssignment[]

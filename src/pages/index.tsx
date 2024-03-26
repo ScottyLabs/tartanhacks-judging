@@ -14,7 +14,7 @@ interface Props {
 const Home: NextPage<Props> = ({ email, isAdmin, userType, authMode }) => {
   return (
     <>
-      <Header />
+      <Header showAdmin={isAdmin} />
       <main className="flex flex-col items-center gap-5 py-5 px-2 md:px-10">
         {/* Timer */}
         <div className="w-12/12 flex flex-col items-center justify-center gap-3">

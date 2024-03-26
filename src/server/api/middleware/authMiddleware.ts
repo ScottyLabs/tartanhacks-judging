@@ -1,5 +1,5 @@
 import { TRPCError } from "@trpc/server";
-import { middleware } from "../trpc";
+import { middleware, publicProcedure } from "../trpc";
 import { UserType } from "@prisma/client";
 
 const authMiddleware = middleware(async ({ ctx, next }) => {
@@ -45,5 +45,15 @@ const judgeMiddleware = middleware(async ({ ctx, next }) => {
   });
 });
 
+const protectedProcedure = publicProcedure.use(authMiddleware);
+const adminProcedure = publicProcedure.use(adminMiddleware);
+const judgeProcedure = publicProcedure.use(judgeMiddleware);
+
 export default authMiddleware;
-export { adminMiddleware, judgeMiddleware };
+export {
+  adminMiddleware,
+  judgeMiddleware,
+  protectedProcedure,
+  adminProcedure,
+  judgeProcedure,
+};
