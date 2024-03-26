@@ -65,8 +65,8 @@ model Judge {
 }
 
 enum PrizeCategory {
-  GENERAL
-  SPECIAL
+  GENERAL // prizes that are assigned to all judges by default
+  SPECIAL // prizes that are not assigned to any judges by default
 }
 
 // Projects can be submitted towards different prizes over which they are judged for
