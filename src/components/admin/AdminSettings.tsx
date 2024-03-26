@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { api } from "../../utils/api";
 import Whitelists from ".././Whitelists";
+import { AuthMode } from "@prisma/client";
 
 type AdminSettingsProps = {
   setError: (error: string | null) => void;
@@ -54,7 +55,7 @@ export default function AdminSettings({
   const settingsToDisplay = (logic: typeof settings) => {
     const curDateTime = new Date().toISOString();
     return {
-      authMode: logic?.authMode ?? "LOCAL",
+      authMode: logic?.authMode ?? AuthMode.LOCAL,
       authUrl: logic?.authUrl ?? undefined,
       getTeamUrl: logic?.getTeamUrl ?? undefined,
       serviceToken: logic?.serviceToken ?? undefined,
@@ -139,22 +140,22 @@ export default function AdminSettings({
         </label>
         <select
           id="authMode"
-          value={newSettings?.authMode ?? "LOCAL"}
+          value={newSettings?.authMode ?? AuthMode.LOCAL}
           onChange={(e) => {
             setNewSettings({
               ...newSettings,
-              authMode: e.target.value as "LOCAL" | "SYNC",
+              authMode: e.target.value as AuthMode,
             });
           }}
         >
-          <option value="LOCAL">Import user data manually</option>
-          <option value="SYNC">Use existing backend</option>
+          <option value={AuthMode.LOCAL}>Import user data manually</option>
+          <option value={AuthMode.SYNC}>Use existing backend</option>
         </select>
       </div>
 
-      {newSettings?.authMode === "SYNC" && syncFields}
+      {newSettings?.authMode === AuthMode.SYNC && syncFields}
 
-      <div className={newSettings?.authMode === "SYNC" ? "hidden" : ""}>
+      <div className={newSettings?.authMode === AuthMode.SYNC ? "hidden" : ""}>
         <Whitelists submittedSignal={submittedSignal} />
       </div>
 

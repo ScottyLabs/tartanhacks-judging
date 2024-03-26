@@ -3,6 +3,7 @@ import { adminProcedure } from "../middleware/authMiddleware";
 
 import { createTRPCRouter } from "../trpc";
 import { TRPCError } from "@trpc/server";
+import { AuthMode } from "@prisma/client";
 
 export const settingsRouter = createTRPCRouter({
   /**
@@ -22,7 +23,7 @@ export const settingsRouter = createTRPCRouter({
     .input(
       z
         .object({
-          authMode: z.enum(["LOCAL", "SYNC"], {
+          authMode: z.nativeEnum(AuthMode, {
             invalid_type_error: "Invalid auth mode",
           }),
           authUrl: z.string(),

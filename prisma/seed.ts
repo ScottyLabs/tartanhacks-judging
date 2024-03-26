@@ -1,4 +1,4 @@
-import { PrismaClient, Settings, UserType } from "@prisma/client";
+import { AuthMode, PrismaClient, Settings, UserType } from "@prisma/client";
 import { sendMagicLinkEmail } from "../src/server/utils/email";
 import { env } from "../src/env/server.mjs";
 
@@ -32,7 +32,7 @@ async function main() {
 
   if (!settings) {
     const defaultSettings = {
-      authMode: "LOCAL",
+      authMode: AuthMode.LOCAL,
       authUrl: "",
       judgingDeadline: new Date(),
       minVisits: 0,
