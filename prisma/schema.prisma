@@ -42,6 +42,8 @@ model User {
   projectId  String?
 
   judge Judge?
+
+  @@unique([projectId])
 }
 
 // Judges compare different projects and have some associated priors (alpha, beta)
