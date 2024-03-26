@@ -68,8 +68,7 @@ export default function PrizeRow({
           onChange={(e) => {
             // update the prize category
             // can't use the state directly as it's async
-            const generalOld = general;
-            const generalNew = !generalOld;
+            const generalNew = !general;
 
             setGeneral(e.target.checked);
             submit(generalNew);
