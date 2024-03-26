@@ -47,7 +47,7 @@ export default function UserTable() {
     <div className="flex flex-col gap-8">
       <input
         type="text"
-        placeholder="Search"
+        placeholder="Search by email or role"
         value={search}
         onChange={(e) => setSearch(e.target.value)}
         className="rounded-md border-2 border-purple p-2"
