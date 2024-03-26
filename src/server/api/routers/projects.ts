@@ -134,4 +134,124 @@ export const projectsRouter = createTRPCRouter({
 
       return project;
     }),
+  submitProject: protectedProcedure
+    .input(
+      z.object({
+        prizeId: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const userEmail = ctx?.session?.user?.email;
+
+      if (!userEmail) {
+        throw new Error("Email not found");
+      }
+
+      const user = await ctx.prisma.user.findFirst({
+        where: {
+          email: userEmail,
+        },
+      });
+
+      if (!user) {
+        throw new Error("User not found");
+      }
+
+      const project = await ctx.prisma.project.findFirst({
+        where: {
+          teamMembers: {
+            some: user,
+          },
+        },
+      });
+
+      if (!project) {
+        throw new Error("Project not found");
+      }
+
+      const prize = await ctx.prisma.prize.findFirst({
+        where: {
+          id: input.prizeId,
+        },
+      });
+
+      if (!prize) {
+        throw new Error("Prize not found");
+      }
+
+      const updatedProject = await ctx.prisma.project.update({
+        where: {
+          id: project.id,
+        },
+        data: {
+          prizes: {
+            connect: {
+              id: prize.id,
+            },
+          },
+        },
+      });
+
+      return updatedProject;
+    }),
+  unsubmitProject: protectedProcedure
+    .input(
+      z.object({
+        prizeId: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const userEmail = ctx?.session?.user?.email;
+
+      if (!userEmail) {
+        throw new Error("Email not found");
+      }
+
+      const user = await ctx.prisma.user.findFirst({
+        where: {
+          email: userEmail,
+        },
+      });
+
+      if (!user) {
+        throw new Error("User not found");
+      }
+
+      const project = await ctx.prisma.project.findFirst({
+        where: {
+          teamMembers: {
+            some: user,
+          },
+        },
+      });
+
+      if (!project) {
+        throw new Error("Project not found");
+      }
+
+      const prize = await ctx.prisma.prize.findFirst({
+        where: {
+          id: input.prizeId,
+        },
+      });
+
+      if (!prize) {
+        throw new Error("Prize not found");
+      }
+
+      const updatedProject = await ctx.prisma.project.update({
+        where: {
+          id: project.id,
+        },
+        data: {
+          prizes: {
+            disconnect: {
+              id: prize.id,
+            },
+          },
+        },
+      });
+
+      return updatedProject;
+    }),
 });
