@@ -119,32 +119,38 @@ export const projectsRouter = createTRPCRouter({
         teamMembers = await Promise.all(teamMembersPromise);
       }
 
-      const project = await ctx.prisma.project.upsert({
-        where: user.projectId ? { id: user.projectId } : {},
-        update: {
-          teamName: input.teamName,
-          name: input.name,
-          description: input.description,
-          githubUrl: input.githubUrl,
-          otherResources: input.otherResources,
-          teamMembers: {
-            connect: teamMembers.map((member) => ({ id: member.id })),
+      if (user.projectId) {
+        console.log(input.description);
+        const project = await ctx.prisma.project.update({
+          where: { id: user.projectId },
+          data: {
+            teamName: input.teamName,
+            name: input.name,
+            description: input.description,
+            githubUrl: input.githubUrl,
+            otherResources: input.otherResources,
+            teamMembers: {
+              set: teamMembers.map((member) => ({ id: member.id })),
+            },
           },
-        },
-        create: {
-          teamName: input.teamName,
-          name: input.name,
-          description: input.description,
-          githubUrl: input.githubUrl,
-          otherResources: input.otherResources,
-          teamMembers: {
-            connect: teamMembers.map((member) => ({ id: member.id })),
+        });
+        return project;
+      } else {
+        const project = await ctx.prisma.project.create({
+          data: {
+            teamName: input.teamName,
+            name: input.name,
+            description: input.description,
+            githubUrl: input.githubUrl,
+            otherResources: input.otherResources,
+            teamMembers: {
+              connect: teamMembers.map((member) => ({ id: member.id })),
+            },
+            location: "", // TODO: add table assignment here
           },
-          location: "", // TODO: add table assignment here
-        },
-      });
-
-      return project;
+        });
+        return project;
+      }
     }),
   submitProjectForPrize: protectedProcedure
     .input(
