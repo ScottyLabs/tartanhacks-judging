@@ -89,6 +89,7 @@ export const projectsRouter = createTRPCRouter({
       let teamMembers: User[] = [];
 
       if (!(user.email in input.teamMembers)) {
+        console.log(input.teamMembers);
         input.teamMembers.push(user.email);
       }
 
@@ -134,7 +135,7 @@ export const projectsRouter = createTRPCRouter({
             githubUrl: input.githubUrl,
             otherResources: input.otherResources,
             teamMembers: {
-              set: teamMembers,
+              set: teamMembers.map((member) => ({ id: member.id })),
             },
           },
         });
