@@ -42,8 +42,6 @@ model User {
   projectId  String?
 
   judge Judge?
-
-  @@unique([projectId])
 }
 
 // Judges compare different projects and have some associated priors (alpha, beta)
@@ -82,8 +80,6 @@ model Prize {
   judgeAssignments JudgePrizeAssignment[]
   judgingInstances JudgingInstance[]
   judgments        ProjectComparisonResult[]
-  Project          Project?                  @relation(fields: [projectId], references: [id])
-  projectId        String?
 }
 
 // Projects are compared against each other by judges
@@ -99,7 +95,6 @@ model Project {
   teamName    String
   teamMembers User[]
 
-  prizes           Prize[]
   leadingPrizes    JudgePrizeAssignment[]
   incomingJudges   Judge[]
   judgingInstances JudgingInstance[]
