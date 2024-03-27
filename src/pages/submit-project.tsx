@@ -57,7 +57,7 @@ const SubmitProject: NextPage = () => {
               type="text"
               id="teamMembers"
               placeholder="Enter team member emails (comma separated)"
-              value={teamMembers.join(", ")}
+              value={teamMembers.join(",")}
               required
               onChange={(e) => setTeamMembers(e.target.value.trim().split(","))}
               className="border-grey w-full rounded-md border-2 p-2"
@@ -74,7 +74,7 @@ const SubmitProject: NextPage = () => {
               placeholder="Enter project name"
               value={projectName}
               required
-              onChange={(e) => setTeamName(e.target.value)}
+              onChange={(e) => setProjectName(e.target.value)}
               className="border-grey w-full rounded-md border-2 p-2"
             />
           </div>
@@ -105,7 +105,20 @@ const SubmitProject: NextPage = () => {
               className="border-grey w-full rounded-md border-2 p-2"
             ></textarea>
           </div>
-          <Button text="Save Project Details" className="m-4 w-full" />
+          <Button
+            text="Save Project Details"
+            className="m-4 w-full"
+            onClick={() => {
+              saveProject({
+                name: projectName ?? "",
+                githubUrl: githubUrl,
+                teamName: teamName ?? "",
+                description: description ?? "",
+                otherResources: otherResources ?? "",
+                teamMembers: teamMembers,
+              });
+            }}
+          />
         </div>
       </main>
     </div>
