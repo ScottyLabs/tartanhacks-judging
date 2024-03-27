@@ -95,7 +95,7 @@ model Project {
   teamName    String
   teamMembers User[]
 
-  leadingPrizes    JudgePrizeAssignment[]
+  prizes           JudgePrizeAssignment[]
   incomingJudges   Judge[]
   judgingInstances JudgingInstance[]
   ignores          IgnoreProjects[]

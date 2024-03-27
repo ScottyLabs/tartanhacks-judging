@@ -15,7 +15,12 @@ import { AuthMode, UserType } from "@prisma/client";
 //unsumbitProject - unsubmit project from a prize, protected
 export const projectsRouter = createTRPCRouter({
   getProjects: adminProcedure.query(async ({ ctx }) => {
-    const projects = await ctx.prisma.project.findMany();
+    const projects = await ctx.prisma.project.findMany({
+      include: {
+        teamMembers: true,
+        prizes: true,
+      },
+    });
     return projects.sort((a, b) => a.name.localeCompare(b.name));
   }),
   getUserProject: protectedProcedure.query(async ({ ctx }) => {
@@ -35,11 +40,17 @@ export const projectsRouter = createTRPCRouter({
       throw new Error("User not found");
     }
 
+    if (!user.projectId) {
+      return null;
+    }
+
     const project = await ctx.prisma.project.findFirst({
       where: {
-        teamMembers: {
-          some: user,
-        },
+        id: user.projectId,
+      },
+      include: {
+        teamMembers: true,
+        prizes: true,
       },
     });
 
@@ -76,6 +87,7 @@ export const projectsRouter = createTRPCRouter({
       }
       //create User documents for emails that don't exist in the User collection if and only if setting.AuthMode == SYNC. In the local auth case only users in the User collection can be added as team mates, since we assume that the User collection is an accurate whitelist of participants.
       let teamMembers: User[] = [];
+
       if (isUsingExternalAuth) {
         const teamMembersPromise = input.teamMembers.map(async (email) => {
           const user = await ctx.prisma.user.upsert({
@@ -134,7 +146,7 @@ export const projectsRouter = createTRPCRouter({
 
       return project;
     }),
-  submitProject: protectedProcedure
+  submitProjectForPrize: protectedProcedure
     .input(
       z.object({
         prizeId: z.string(),
@@ -157,44 +169,37 @@ export const projectsRouter = createTRPCRouter({
         throw new Error("User not found");
       }
 
-      const project = await ctx.prisma.project.findFirst({
+      if (!user.projectId) {
+        throw new Error(
+          "Project not found. Save your project information before submitting for prizes!"
+        );
+      }
+
+      const judgingInstance = await ctx.prisma.judgingInstance.upsert({
         where: {
-          teamMembers: {
-            some: user,
+          projectId_prizeId: {
+            projectId: user.projectId,
+            prizeId: input.prizeId,
           },
         },
-      });
-
-      if (!project) {
-        throw new Error("Project not found");
-      }
-
-      const prize = await ctx.prisma.prize.findFirst({
-        where: {
-          id: input.prizeId,
-        },
-      });
-
-      if (!prize) {
-        throw new Error("Prize not found");
-      }
-
-      const updatedProject = await ctx.prisma.project.update({
-        where: {
-          id: project.id,
-        },
-        data: {
-          prizes: {
+        update: {},
+        create: {
+          project: {
             connect: {
-              id: prize.id,
+              id: user.projectId,
+            },
+          },
+          prize: {
+            connect: {
+              id: input.prizeId,
             },
           },
         },
       });
 
-      return updatedProject;
+      return judgingInstance;
     }),
-  unsubmitProject: protectedProcedure
+  unsubmitProjectFromPrize: protectedProcedure
     .input(
       z.object({
         prizeId: z.string(),
@@ -217,41 +222,21 @@ export const projectsRouter = createTRPCRouter({
         throw new Error("User not found");
       }
 
-      const project = await ctx.prisma.project.findFirst({
+      if (!user.projectId) {
+        throw new Error(
+          "Project not found. Save your project information before submitting for prizes!"
+        );
+      }
+
+      const judgingInstance = await ctx.prisma.judgingInstance.delete({
         where: {
-          teamMembers: {
-            some: user,
+          projectId_prizeId: {
+            projectId: user.projectId,
+            prizeId: input.prizeId,
           },
         },
       });
 
-      if (!project) {
-        throw new Error("Project not found");
-      }
-
-      const prize = await ctx.prisma.prize.findFirst({
-        where: {
-          id: input.prizeId,
-        },
-      });
-
-      if (!prize) {
-        throw new Error("Prize not found");
-      }
-
-      const updatedProject = await ctx.prisma.project.update({
-        where: {
-          id: project.id,
-        },
-        data: {
-          prizes: {
-            disconnect: {
-              id: prize.id,
-            },
-          },
-        },
-      });
-
-      return updatedProject;
+      return judgingInstance;
     }),
 });
