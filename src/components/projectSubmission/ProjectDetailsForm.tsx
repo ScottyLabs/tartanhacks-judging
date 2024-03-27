@@ -1,4 +1,3 @@
-import type { JudgePrizeAssignment, Project, User } from "@prisma/client";
 import { useEffect, useState } from "react";
 import { api } from "../../utils/api";
 import Button from "../Button";
