@@ -88,6 +88,10 @@ export const projectsRouter = createTRPCRouter({
       //create User documents for emails that don't exist in the User collection if and only if setting.AuthMode == SYNC. In the local auth case only users in the User collection can be added as team mates, since we assume that the User collection is an accurate whitelist of participants.
       let teamMembers: User[] = [];
 
+      if (!(user.email in input.teamMembers)) {
+        input.teamMembers.push(user.email);
+      }
+
       if (isUsingExternalAuth) {
         const teamMembersPromise = input.teamMembers.map(async (email) => {
           const user = await ctx.prisma.user.upsert({
@@ -130,7 +134,7 @@ export const projectsRouter = createTRPCRouter({
             githubUrl: input.githubUrl,
             otherResources: input.otherResources,
             teamMembers: {
-              set: teamMembers.map((member) => ({ id: member.id })),
+              set: teamMembers,
             },
           },
         });
