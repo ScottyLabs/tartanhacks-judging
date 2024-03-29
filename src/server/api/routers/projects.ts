@@ -7,6 +7,7 @@ import {
 } from "../middleware/authMiddleware";
 import type { User } from "@prisma/client";
 import { AuthMode, UserType } from "@prisma/client";
+import { TRPCError } from "@trpc/server";
 
 //getProjects - get all projects, admin only
 //getUserProject - get a user's project, protected
@@ -27,7 +28,7 @@ export const projectsRouter = createTRPCRouter({
     const userEmail = ctx?.session?.user?.email;
 
     if (!userEmail) {
-      throw new Error("Email not found");
+      throw new TRPCError({ message: "Email not found", code: "UNAUTHORIZED" });
     }
 
     const user = await ctx.prisma.user.findFirst({
@@ -37,7 +38,7 @@ export const projectsRouter = createTRPCRouter({
     });
 
     if (!user) {
-      throw new Error("User not found");
+      throw new TRPCError({ message: "User not found", code: "UNAUTHORIZED" });
     }
 
     if (!user.projectId) {
@@ -73,7 +74,10 @@ export const projectsRouter = createTRPCRouter({
       const userEmail = ctx?.session?.user?.email;
 
       if (!userEmail) {
-        throw new Error("Email not found");
+        throw new TRPCError({
+          message: "Email not found",
+          code: "UNAUTHORIZED",
+        });
       }
 
       const user = await ctx.prisma.user.findFirst({
@@ -83,7 +87,10 @@ export const projectsRouter = createTRPCRouter({
       });
 
       if (!user) {
-        throw new Error("User not found");
+        throw new TRPCError({
+          message: "User not found",
+          code: "UNAUTHORIZED",
+        });
       }
       //create User documents for emails that don't exist in the User collection if and only if setting.AuthMode == SYNC. In the local auth case only users in the User collection can be added as team mates, since we assume that the User collection is an accurate whitelist of participants.
       let teamMembers: User[] = [];
@@ -115,7 +122,10 @@ export const projectsRouter = createTRPCRouter({
           });
 
           if (!user) {
-            throw new Error(`Team member with email ${email} not found`);
+            throw new TRPCError({
+              message: `Team member with email ${email} not found`,
+              code: "NOT_FOUND",
+            });
           }
 
           return user;
@@ -167,7 +177,10 @@ export const projectsRouter = createTRPCRouter({
       const userEmail = ctx?.session?.user?.email;
 
       if (!userEmail) {
-        throw new Error("Email not found");
+        throw new TRPCError({
+          message: "Email not found",
+          code: "UNAUTHORIZED",
+        });
       }
 
       const user = await ctx.prisma.user.findFirst({
@@ -177,13 +190,18 @@ export const projectsRouter = createTRPCRouter({
       });
 
       if (!user) {
-        throw new Error("User not found");
+        throw new TRPCError({
+          message: "User not found",
+          code: "UNAUTHORIZED",
+        });
       }
 
       if (!user.projectId) {
-        throw new Error(
-          "Project not found. Save your project information before submitting for prizes!"
-        );
+        throw new TRPCError({
+          message:
+            "Project not found. Save your project information before submitting for prizes!",
+          code: "NOT_FOUND",
+        });
       }
 
       const judgingInstance = await ctx.prisma.judgingInstance.upsert({
@@ -220,7 +238,10 @@ export const projectsRouter = createTRPCRouter({
       const userEmail = ctx?.session?.user?.email;
 
       if (!userEmail) {
-        throw new Error("Email not found");
+        throw new TRPCError({
+          message: "Email not found",
+          code: "UNAUTHORIZED",
+        });
       }
 
       const user = await ctx.prisma.user.findFirst({
@@ -230,13 +251,18 @@ export const projectsRouter = createTRPCRouter({
       });
 
       if (!user) {
-        throw new Error("User not found");
+        throw new TRPCError({
+          message: "User not found",
+          code: "UNAUTHORIZED",
+        });
       }
 
       if (!user.projectId) {
-        throw new Error(
-          "Project not found. Save your project information before submitting for prizes!"
-        );
+        throw new TRPCError({
+          message:
+            "Project not found. Save your project information before submitting for prizes!",
+          code: "NOT_FOUND",
+        });
       }
 
       const judgingInstance = await ctx.prisma.judgingInstance.delete({
