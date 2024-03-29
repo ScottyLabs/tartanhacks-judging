@@ -94,41 +94,35 @@ export const projectsRouter = createTRPCRouter({
       }
 
       if (isUsingExternalAuth) {
-        const teamMembersPromise = input.teamMembers.map(async (email) => {
-          const user = await ctx.prisma.user.upsert({
+        const teamMembersPromise = input.teamMembers.map((email) =>
+          ctx.prisma.user.upsert({
             where: { email },
             update: {},
             create: {
               email,
               type: UserType.PARTICIPANT,
             },
-          });
+          })
+        );
 
-          return user;
-        });
-
-        teamMembers = await Promise.all(teamMembersPromise);
+        teamMembers = await ctx.prisma.$transaction(teamMembersPromise);
       } else {
-        const teamMembersPromise = input.teamMembers.map(async (email) => {
-          const user = await ctx.prisma.user.findFirst({
+        const teamMembersPromise = input.teamMembers.map((email) =>
+          ctx.prisma.user.findFirstOrThrow({
             where: { email },
+          })
+        );
+        try {
+          teamMembers = await ctx.prisma.$transaction(teamMembersPromise);
+        } catch (e) {
+          throw new TRPCError({
+            message: "One or more team members not found",
+            code: "NOT_FOUND",
           });
-
-          if (!user) {
-            throw new TRPCError({
-              message: `Team member with email ${email} not found`,
-              code: "NOT_FOUND",
-            });
-          }
-
-          return user;
-        });
-
-        teamMembers = await Promise.all(teamMembersPromise);
+        }
       }
 
       if (user.projectId) {
-        console.log(input.description);
         const project = await ctx.prisma.project.update({
           where: { id: user.projectId },
           data: {
