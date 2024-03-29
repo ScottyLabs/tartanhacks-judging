@@ -35,27 +35,21 @@ export const projectsRouter = createTRPCRouter({
       where: {
         email: userEmail,
       },
+      include: {
+        project: {
+          include: {
+            teamMembers: true,
+            prizes: true,
+          },
+        },
+      },
     });
 
     if (!user) {
       throw new TRPCError({ message: "User not found", code: "UNAUTHORIZED" });
     }
 
-    if (!user.projectId) {
-      return null;
-    }
-
-    const project = await ctx.prisma.project.findFirst({
-      where: {
-        id: user.projectId,
-      },
-      include: {
-        teamMembers: true,
-        prizes: true,
-      },
-    });
-
-    return project;
+    return user.project;
   }),
   saveProject: protectedProcedure
     .input(
