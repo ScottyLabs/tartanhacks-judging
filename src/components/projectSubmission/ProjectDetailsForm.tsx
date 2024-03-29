@@ -22,7 +22,9 @@ export default function ProjectDetailsForm({ email }: Props) {
     project?.otherResources ?? ""
   );
   const [teamMembers, setTeamMembers] = useState(
-    project?.teamMembers.map((member) => member.email) ?? []
+    teamMembersToString(
+      project?.teamMembers.map((member) => member.email) ?? []
+    )
   );
 
   useEffect(() => {
@@ -32,9 +34,13 @@ export default function ProjectDetailsForm({ email }: Props) {
       setDescription(project.description);
       setGithubUrl(project.githubUrl ?? "");
       setOtherResources(project.otherResources ?? "");
-      setTeamMembers(project.teamMembers.map((member) => member.email));
+      setTeamMembers(
+        teamMembersToString(
+          project?.teamMembers.map((member) => member.email) ?? []
+        )
+      );
     } else {
-      setTeamMembers([email]);
+      setTeamMembers(email);
     }
   }, [project, email]);
   const { isLoading, mutate: saveProject } =
@@ -43,6 +49,15 @@ export default function ProjectDetailsForm({ email }: Props) {
         await refetch();
       },
     });
+
+  function teamMembersToString(teamMembers: string[]) {
+    return teamMembers.join(", ");
+  }
+
+  function teamMembersToList(teamMembers: string) {
+    const emails = teamMembers.split(",");
+    return emails.map((email) => email.trim());
+  }
 
   return isFetching || isLoading ? (
     <Spinner />
@@ -71,9 +86,9 @@ export default function ProjectDetailsForm({ email }: Props) {
           type="text"
           id="teamMembers"
           placeholder="Enter team member emails (comma separated)"
-          value={teamMembers.join(",")}
+          value={teamMembers}
           required
-          onChange={(e) => setTeamMembers(e.target.value.trim().split(","))}
+          onChange={(e) => setTeamMembers(e.target.value)}
           className="border-grey w-full rounded-md border-2 p-2"
         />
       </div>
@@ -142,7 +157,7 @@ export default function ProjectDetailsForm({ email }: Props) {
             teamName: teamName ?? "",
             description: description ?? "",
             otherResources: otherResources ?? "",
-            teamMembers: teamMembers,
+            teamMembers: teamMembersToList(teamMembers),
           });
         }}
       />
