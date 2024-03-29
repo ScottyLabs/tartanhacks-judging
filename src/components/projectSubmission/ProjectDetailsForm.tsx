@@ -18,7 +18,9 @@ export default function ProjectDetailsForm({ email }: Props) {
   const [projectName, setProjectName] = useState(project?.name);
   const [description, setDescription] = useState(project?.description);
   const [githubUrl, setGithubUrl] = useState(project?.githubUrl ?? "");
-  const [otherResources, setOtherResources] = useState(project?.otherResources);
+  const [otherResources, setOtherResources] = useState(
+    project?.otherResources ?? ""
+  );
   const [teamMembers, setTeamMembers] = useState(
     project?.teamMembers.map((member) => member.email) ?? []
   );
@@ -29,7 +31,7 @@ export default function ProjectDetailsForm({ email }: Props) {
       setProjectName(project.name);
       setDescription(project.description);
       setGithubUrl(project.githubUrl ?? "");
-      setOtherResources(project.otherResources);
+      setOtherResources(project.otherResources ?? "");
       setTeamMembers(project.teamMembers.map((member) => member.email));
     } else {
       setTeamMembers([email]);
@@ -125,7 +127,7 @@ export default function ProjectDetailsForm({ email }: Props) {
         <textarea
           id="otherResources"
           placeholder="Links to other resources associated with your project."
-          value={otherResources as string}
+          value={otherResources}
           onChange={(e) => setOtherResources(e.target.value)}
           className="border-grey w-full rounded-md border-2 p-2"
         ></textarea>
