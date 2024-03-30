@@ -32,7 +32,7 @@ const SubmitProject: NextPage<Props> = ({ email }) => {
                 value={SelectedTab.PROJECT_DETAILS}
                 className={`m-0 w-full rounded-md font-semibold ${
                   selectedTab == SelectedTab.PROJECT_DETAILS
-                    ? "bg-white text-gray-800"
+                    ? "bg-white text-gray-800 drop-shadow-sm"
                     : "text-gray-500"
                 }`}
                 onClick={() => setSelectedTab(SelectedTab.PROJECT_DETAILS)}
@@ -44,7 +44,7 @@ const SubmitProject: NextPage<Props> = ({ email }) => {
                 value={SelectedTab.PROJECT_DETAILS}
                 className={`m-0 w-full rounded-md font-semibold ${
                   selectedTab == SelectedTab.PRIZE_SELECTION
-                    ? "bg-white text-gray-800"
+                    ? "bg-white text-gray-800 drop-shadow-sm"
                     : "text-gray-500"
                 }`}
                 onClick={() => setSelectedTab(SelectedTab.PRIZE_SELECTION)}
