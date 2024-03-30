@@ -122,6 +122,16 @@ export const projectsRouter = createTRPCRouter({
         }
       }
 
+      // Check that team members aren't already on a different team
+      for (const member of teamMembers) {
+        if (member.projectId != user.projectId) {
+          throw new TRPCError({
+            message: `User ${member.email} is on a different team already.`,
+            code: "BAD_REQUEST",
+          });
+        }
+      }
+
       if (user.projectId) {
         const project = await ctx.prisma.project.update({
           where: { id: user.projectId },
