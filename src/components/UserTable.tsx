@@ -40,11 +40,16 @@ export default function UserTable() {
   }
 
   if (users && users.length === 0) {
-    return <Alert message="No users found. Users can be added on the Settings page" type="info" />;
+    return (
+      <Alert
+        message="No users found. Users can be added on the Settings page"
+        type="info"
+      />
+    );
   }
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex w-full flex-col gap-8">
       <input
         type="text"
         placeholder="Search by email or role"
@@ -52,7 +57,7 @@ export default function UserTable() {
         onChange={(e) => setSearch(e.target.value)}
         className="rounded-md border-2 border-purple p-2"
       />
-      <table className="m-auto">
+      <table className="m-auto w-full">
         <tbody>
           {users
             ?.filter((user) => {
@@ -85,7 +90,7 @@ export default function UserTable() {
                 <td className="px-4">
                   {!user.isAdmin && (
                     <button
-                      className="bg-purple my-2 rounded-md p-2 text-white"
+                      className="my-2 rounded-md bg-purple p-2 text-white"
                       onClick={() => {
                         promoteToAdmin(user.email);
                       }}
@@ -97,7 +102,7 @@ export default function UserTable() {
                 <td className="px-4">
                   {user.type !== UserType.JUDGE && (
                     <button
-                      className="bg-blue my-2 rounded-md p-2 text-white"
+                      className="my-2 rounded-md bg-blue p-2 text-white"
                       onClick={() => {
                         promoteToJudge(user.email);
                       }}

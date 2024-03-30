@@ -12,7 +12,7 @@ export default function AdminForm() {
   return (
     <>
       {isLoading && <Spinner />}
-      <div className={isLoading ? "hidden" : "flex w-96 flex-col gap-8"}>
+      <div className={isLoading ? "hidden" : "flex w-full flex-col gap-8"}>
         <AdminSettings
           setError={setError}
           setIsLoading={setIsLoading}
