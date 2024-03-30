@@ -19,7 +19,6 @@ export const projectsRouter = createTRPCRouter({
     const projects = await ctx.prisma.project.findMany({
       include: {
         teamMembers: true,
-        prizes: true,
       },
     });
     return projects.sort((a, b) => a.name.localeCompare(b.name));
@@ -273,4 +272,37 @@ export const projectsRouter = createTRPCRouter({
 
       return judgingInstance;
     }),
+  getPrizesWithSubmissionStatus: protectedProcedure.query(async ({ ctx }) => {
+    const userEmail = ctx?.session?.user?.email;
+
+    if (!userEmail) {
+      throw new TRPCError({ message: "Email not found", code: "UNAUTHORIZED" });
+    }
+
+    const user = await ctx.prisma.user.findFirst({
+      where: {
+        email: userEmail,
+      },
+    });
+
+    if (!user) {
+      throw new TRPCError({ message: "User not found", code: "UNAUTHORIZED" });
+    }
+
+    if (!user.projectId) {
+      return null;
+    }
+
+    const prizes = await ctx.prisma.prize.findMany({
+      include: {
+        judgingInstances: {
+          where: {
+            projectId: user.projectId,
+          },
+        },
+      },
+    });
+
+    return prizes;
+  }),
 });

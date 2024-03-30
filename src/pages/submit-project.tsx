@@ -9,6 +9,7 @@ import {
   TabsTrigger,
 } from "../../@/components/ui/tabs";
 import { useState } from "react";
+import PrizeSelection from "../components/projectSubmission/PrizeSelection";
 interface Props {
   email: string;
 }
@@ -40,8 +41,8 @@ const SubmitProject: NextPage<Props> = ({ email }) => {
                 Project Details
               </TabsTrigger>
               <TabsTrigger
-                key={SelectedTab.PROJECT_DETAILS}
-                value={SelectedTab.PROJECT_DETAILS}
+                key={SelectedTab.PRIZE_SELECTION}
+                value={SelectedTab.PRIZE_SELECTION}
                 className={`m-0 w-full rounded-md font-semibold ${
                   selectedTab == SelectedTab.PRIZE_SELECTION
                     ? "bg-white text-gray-800 drop-shadow-sm"
@@ -53,10 +54,17 @@ const SubmitProject: NextPage<Props> = ({ email }) => {
               </TabsTrigger>
             </TabsList>
             <TabsContent
-              value={selectedTab}
+              value={SelectedTab.PROJECT_DETAILS}
               className=" flex w-full flex-col items-center justify-center gap-3"
             >
               <ProjectDetailsForm email={email} />
+            </TabsContent>
+
+            <TabsContent
+              value={SelectedTab.PRIZE_SELECTION}
+              className=" flex w-full flex-col items-center justify-center gap-3"
+            >
+              <PrizeSelection />
             </TabsContent>
           </Tabs>
         </div>
