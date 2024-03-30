@@ -30,10 +30,10 @@ export default function Admin() {
   return (
     <>
       <Header showAdmin />
-      <main className="flex flex-col items-center gap-5 py-5 px-2 md:px-10">
+      <main className="flex w-full flex-col items-center gap-5 py-5 px-2 md:px-10">
         <h1 className="text-3xl font-bold">Admin</h1>
-        <Tabs defaultValue="settings">
-          <TabsList className="flex flex-row gap-8 pb-8">
+        <Tabs defaultValue="settings" className="w-8/12">
+          <TabsList className="mb-8 flex w-full flex-row bg-gray-200 p-1">
             {tabs
               .filter(
                 (tab) =>
@@ -43,8 +43,10 @@ export default function Admin() {
                 <TabsTrigger
                   key={tab.key}
                   value={tab.key}
-                  className={`m-0 rounded-md ${
-                    selectedTab === tab.key ? "bg-purple text-white" : ""
+                  className={`m-0 w-full rounded-md font-semibold ${
+                    selectedTab == tab.key
+                      ? "bg-white text-gray-800 drop-shadow-sm"
+                      : "text-gray-500"
                   }`}
                   onClick={() => setSelectedTab(tab.key)}
                 >
@@ -52,13 +54,22 @@ export default function Admin() {
                 </TabsTrigger>
               ))}
           </TabsList>
-          <TabsContent value="settings">
+          <TabsContent
+            value="settings"
+            className=" flex w-full flex-col items-center justify-center gap-3"
+          >
             <AdminForm />
           </TabsContent>
-          <TabsContent value="users">
+          <TabsContent
+            value="users"
+            className=" flex w-full flex-col items-center justify-center gap-3"
+          >
             <UserTable />
           </TabsContent>
-          <TabsContent value="prizes">
+          <TabsContent
+            value="prizes"
+            className=" flex w-full flex-col items-center justify-center gap-3"
+          >
             <PrizeTab />
           </TabsContent>
         </Tabs>

@@ -80,8 +80,6 @@ model Prize {
   judgeAssignments JudgePrizeAssignment[]
   judgingInstances JudgingInstance[]
   judgments        ProjectComparisonResult[]
-  Project          Project?                  @relation(fields: [projectId], references: [id])
-  projectId        String?
 }
 
 // Projects are compared against each other by judges
@@ -97,8 +95,7 @@ model Project {
   teamName    String
   teamMembers User[]
 
-  prizes           Prize[]
-  leadingPrizes    JudgePrizeAssignment[]
+  prizes           JudgePrizeAssignment[]
   incomingJudges   Judge[]
   judgingInstances JudgingInstance[]
   ignores          IgnoreProjects[]

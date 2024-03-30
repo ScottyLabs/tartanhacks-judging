@@ -28,7 +28,7 @@ export default function PrizeTab() {
   }
 
   return (
-    <div className="m-auto flex min-w-[60rem] flex-col gap-5 pb-8">
+    <div className="m-auto flex w-full min-w-[60rem] flex-col gap-5 pb-8">
       <div>
         <h3 className="font-bold">General prizes</h3>
         <textarea
