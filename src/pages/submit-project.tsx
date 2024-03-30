@@ -30,7 +30,11 @@ const SubmitProject: NextPage<Props> = ({ email }) => {
               <TabsTrigger
                 key={SelectedTab.PROJECT_DETAILS}
                 value={SelectedTab.PROJECT_DETAILS}
-                className=`m-0 w-full rounded-md font-semibold ${selectedTab == SelectedTab.PROJECT_DETAILS ? "bg-white text-gray-800":"text-gray-500"}`
+                className={`m-0 w-full rounded-md font-semibold ${
+                  selectedTab == SelectedTab.PROJECT_DETAILS
+                    ? "bg-white text-gray-800"
+                    : "text-gray-500"
+                }`}
                 onClick={() => setSelectedTab(SelectedTab.PROJECT_DETAILS)}
               >
                 Project Details
@@ -38,7 +42,11 @@ const SubmitProject: NextPage<Props> = ({ email }) => {
               <TabsTrigger
                 key={SelectedTab.PROJECT_DETAILS}
                 value={SelectedTab.PROJECT_DETAILS}
-                className="bg-gray m-0 w-full  rounded-md  font-semibold text-gray-500"
+                className={`m-0 w-full rounded-md font-semibold ${
+                  selectedTab == SelectedTab.PRIZE_SELECTION
+                    ? "bg-white text-gray-800"
+                    : "text-gray-500"
+                }`}
                 onClick={() => setSelectedTab(SelectedTab.PRIZE_SELECTION)}
               >
                 Prize Selection
