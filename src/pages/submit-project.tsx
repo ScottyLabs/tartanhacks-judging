@@ -10,7 +10,7 @@ const SubmitProject: NextPage<Props> = ({ email }) => {
     <div className="flex min-h-screen flex-col">
       <Header />
       <main className="flex flex-col items-center gap-5 py-5 px-2 md:px-10">
-        <div className="flex w-96 flex-col items-center justify-center gap-3">
+        <div className=" flex w-8/12 flex-col items-center justify-center gap-3">
           <h2 className="m-2 text-2xl font-bold">Submit your project</h2>
           <ProjectDetailsForm email={email} />
         </div>
