@@ -2,135 +2,136 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-    provider = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 datasource db {
-    provider = "mongodb"
-    url      = env("DATABASE_URL")
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
 }
 
 // Judges compare different projects and have some associated priors (alpha, beta)
 model Judge {
-    id      String  @id @default(cuid()) @map("_id")
-    helixId String
-    company String?
-    email   String
-    admin   Boolean @default(false)
+  id      String  @id @default(cuid()) @map("_id")
+  helixId String
+  company String?
+  email   String
+  admin   Boolean @default(false)
 
-    // Alpha and beta prior from gavel (https://github.com/ScottyLabs/gavel/blob/cead49dc88e55a6e2feafd6389e7367d780442f7/gavel/crowd_bt.py#L19-L20)
-    alpha Float @default(10)
-    beta  Float @default(1)
+  // Alpha and beta prior from gavel (https://github.com/ScottyLabs/gavel/blob/cead49dc88e55a6e2feafd6389e7367d780442f7/gavel/crowd_bt.py#L19-L20)
+  alpha Float @default(10)
+  beta  Float @default(1)
 
-    nextProjectId String?
-    nextProject   Project? @relation(fields: [nextProjectId], references: [id])
+  nextProjectId String?
+  nextProject   Project? @relation(fields: [nextProjectId], references: [id])
 
-    prizeAssignments JudgePrizeAssignment[]
-    ignoredProjects  IgnoreProjects[]
-    judgments        ProjectComparisonResult[]
+  prizeAssignments JudgePrizeAssignment[]
+  ignoredProjects  IgnoreProjects[]
+  judgments        ProjectComparisonResult[]
 
-    updatedAt DateTime @updatedAt
+  updatedAt DateTime @updatedAt
 
-    @@unique([helixId])
+  @@unique([helixId])
 }
 
 // Projects can be submitted towards different prizes over which they are judged for
 model Prize {
-    id          String  @id @default(cuid()) @map("_id")
-    helixId     String
-    name        String
-    description String
-    eligibility String?
-    provider    String?
+  id          String  @id @default(cuid()) @map("_id")
+  helixId     String
+  name        String
+  description String
+  eligibility String?
+  provider    String?
 
-    judgeAssignments JudgePrizeAssignment[]
-    judgingInstances JudgingInstance[]
-    judgments        ProjectComparisonResult[]
+  judgeAssignments JudgePrizeAssignment[]
+  judgingInstances JudgingInstance[]
+  judgments        ProjectComparisonResult[]
 
-    @@unique([helixId])
+  @@unique([helixId])
 }
 
 // Projects are compared against each other by judges
 model Project {
-    id          String  @id @default(cuid()) @map("_id")
-    helixId     String
-    name        String
-    description String
-    location    String
-    team        String
-    isCheckedIn Boolean @default(false) // Has the user checked in to the expo yet so we can send judges their way
+  id          String  @id @default(cuid()) @map("_id")
+  helixId     String
+  name        String
+  description String
+  location    String
+  team        String
+  isCheckedIn Boolean @default(false) // Has the user checked in to the expo yet so we can send judges their way
+  tableNumber Int?
 
-    leadingPrizes    JudgePrizeAssignment[]
-    incomingJudges   Judge[]
-    judgingInstances JudgingInstance[]
-    ignores          IgnoreProjects[]
+  leadingPrizes    JudgePrizeAssignment[]
+  incomingJudges   Judge[]
+  judgingInstances JudgingInstance[]
+  ignores          IgnoreProjects[]
 
-    wins   ProjectComparisonResult[] @relation(name: "Winning project")
-    losses ProjectComparisonResult[] @relation(name: "Losing project")
+  wins   ProjectComparisonResult[] @relation(name: "Winning project")
+  losses ProjectComparisonResult[] @relation(name: "Losing project")
 
-    @@unique([helixId])
+  @@unique([helixId])
 }
 
 // A judgment (comparison) of two projects by a judge for a specific prize
 model ProjectComparisonResult {
-    id               String @id @default(cuid()) @map("_id")
-    judgeId          String
-    prizeId          String
-    winningProjectId String
-    losingProjectId  String
+  id               String @id @default(cuid()) @map("_id")
+  judgeId          String
+  prizeId          String
+  winningProjectId String
+  losingProjectId  String
 
-    judge Judge @relation(fields: [judgeId], references: [id])
-    prize Prize @relation(fields: [prizeId], references: [id])
+  judge Judge @relation(fields: [judgeId], references: [id])
+  prize Prize @relation(fields: [prizeId], references: [id])
 
-    winningProject Project @relation(name: "Winning project", fields: [winningProjectId], references: [id])
-    losingProject  Project @relation(name: "Losing project", fields: [losingProjectId], references: [id])
+  winningProject Project @relation(name: "Winning project", fields: [winningProjectId], references: [id])
+  losingProject  Project @relation(name: "Losing project", fields: [losingProjectId], references: [id])
 
-    @@unique([judgeId, prizeId, winningProjectId, losingProjectId])
+  @@unique([judgeId, prizeId, winningProjectId, losingProjectId])
 }
 
 // Ignore projects that have already been seen by the judge
 // Separate from JudgingInstance to account for skips
 model IgnoreProjects {
-    id        String @id @default(cuid()) @map("_id")
-    judgeId   String
-    projectId String
+  id        String @id @default(cuid()) @map("_id")
+  judgeId   String
+  projectId String
 
-    judge   Judge   @relation(fields: [judgeId], references: [id])
-    project Project @relation(fields: [projectId], references: [id])
+  judge   Judge   @relation(fields: [judgeId], references: [id])
+  project Project @relation(fields: [projectId], references: [id])
 
-    @@unique([judgeId, projectId])
+  @@unique([judgeId, projectId])
 }
 
 // Information tied to a project-prize tuple used to determine ranking
 model JudgingInstance {
-    id          String @id @default(cuid()) @map("_id")
-    prizeId     String
-    projectId   String
-    timesJudged Int    @default(0)
+  id          String @id @default(cuid()) @map("_id")
+  prizeId     String
+  projectId   String
+  timesJudged Int    @default(0)
 
-    prize   Prize   @relation(fields: [prizeId], references: [id])
-    project Project @relation(fields: [projectId], references: [id])
+  prize   Prize   @relation(fields: [prizeId], references: [id])
+  project Project @relation(fields: [projectId], references: [id])
 
-    // Mu and sigma2 prior from gavel (https://github.com/ScottyLabs/gavel/blob/cead49dc88e55a6e2feafd6389e7367d780442f7/gavel/crowd_bt.py#L17-L18)
-    mu     Float @default(0)
-    sigma2 Float @default(1)
+  // Mu and sigma2 prior from gavel (https://github.com/ScottyLabs/gavel/blob/cead49dc88e55a6e2feafd6389e7367d780442f7/gavel/crowd_bt.py#L17-L18)
+  mu     Float @default(0)
+  sigma2 Float @default(1)
 
-    @@unique([projectId, prizeId])
+  @@unique([projectId, prizeId])
 }
 
 // Assignments of judges to prizes
 model JudgePrizeAssignment {
-    id               String  @id @default(cuid()) @map("_id")
-    judgeId          String
-    prizeId          String
-    leadingProjectId String?
+  id               String  @id @default(cuid()) @map("_id")
+  judgeId          String
+  prizeId          String
+  leadingProjectId String?
 
-    prize          Prize    @relation(fields: [prizeId], references: [id])
-    leadingProject Project? @relation(fields: [leadingProjectId], references: [id])
+  prize          Prize    @relation(fields: [prizeId], references: [id])
+  leadingProject Project? @relation(fields: [leadingProjectId], references: [id])
 
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-    judge     Judge    @relation(fields: [judgeId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  judge     Judge    @relation(fields: [judgeId], references: [id])
 
-    @@unique([judgeId, prizeId])
+  @@unique([judgeId, prizeId])
 }
