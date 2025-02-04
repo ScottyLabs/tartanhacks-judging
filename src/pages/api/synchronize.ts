@@ -120,7 +120,7 @@ export async function synchronizeProjects() {
       description,
       location: location ?? "Missing table",
       team: team?.name ?? "Missing team name",
-      tableNumber: tableNumber ?? 0,
+      tableNumber: tableNumber,
     })
   );
 
