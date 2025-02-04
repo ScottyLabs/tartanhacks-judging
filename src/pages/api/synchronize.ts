@@ -26,6 +26,7 @@ interface HelixProject {
   location: string;
   team: HelixTeam;
   prizes: HelixPrize[];
+  tableNumber: null | number;
 }
 
 const GRAND_PRIZE_NAME = "Scott Krulcik Grand Prize";
@@ -113,12 +114,13 @@ export async function synchronizeProjects() {
 
   // Remove unnecessary fields
   const minifiedProjects = helixProjects.map(
-    ({ name, description, location, team, _id }) => ({
+    ({ name, description, location, team, _id, tableNumber }) => ({
       helixId: _id,
       name,
       description,
       location: location ?? "Missing table",
       team: team?.name ?? "Missing team name",
+      tableNumber: tableNumber ?? 0,
     })
   );
 
@@ -127,7 +129,7 @@ export async function synchronizeProjects() {
     minifiedProjects.map((project) =>
       prisma.project.upsert({
         where: { helixId: project.helixId },
-        update: {},
+        update: { tableNumber: project.tableNumber },
         create: project,
       })
     )
@@ -174,7 +176,7 @@ export async function synchronizeProjects() {
 
 // TODO: These prizes are only judges by
 const exclusivePrizes = [
-  "PLS Logistics Prize",
+  "",
   // "GSA Campus Experience Prize",
   // "Project Olympus Spark Grant",
 ];
@@ -187,7 +189,7 @@ const partialPrizes = {
   ],
 };
 
-const ignorePrizes = ["Ripple XRP Ledger Prize"];
+const ignorePrizes = ["Best Domain Name"];
 
 /**
  * Get the mapping of partial judge ids to their prizes
