@@ -22,6 +22,7 @@ export default function JudgingPage() {
         await refetch();
       },
     });
+  const { mutate: updateVisitedMutation } = api.judging.updateVisited.useMutation();
 
   const {mutate: skipProject, isLoading: isSkipLoading} = api.judging.skipProject.useMutation({
     onSuccess: async () => {
@@ -53,6 +54,23 @@ export default function JudgingPage() {
     .map((assignment) => assignment.prize);
 
   const [showModal, setShowModal] = useState(false);
+
+  function updateVisited() {
+    if (!project) {
+      return;
+    }
+
+    const updateVisitedInputs = [];
+
+    for (const assignment of relevantPrizes) {
+      updateVisitedInputs.push({
+        projectId: project.id,
+        prizeId: assignment.id,
+      });
+    }
+
+    updateVisitedMutation(updateVisitedInputs);
+  }
 
   return (
     <>
@@ -117,6 +135,7 @@ export default function JudgingPage() {
                             type="button"
                             onClick={() => {
                               setShowModal(false);
+                              void updateVisited();
                               void computeNext();
                             }}
                           >
@@ -134,6 +153,7 @@ export default function JudgingPage() {
                     onVoteFinish={() => {
                       void computeNext();
                     }}
+                    updateVisited={updateVisited}
                   />
                 )}
               </div>

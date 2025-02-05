@@ -104,10 +104,11 @@ model IgnoreProjects {
 
 // Information tied to a project-prize tuple used to determine ranking
 model JudgingInstance {
-  id          String @id @default(cuid()) @map("_id")
-  prizeId     String
-  projectId   String
-  timesJudged Int    @default(0)
+  id           String @id @default(cuid()) @map("_id")
+  prizeId      String
+  projectId    String
+  timesJudged  Int    @default(0)
+  timesVisited Int    @default(0)
 
   prize   Prize   @relation(fields: [prizeId], references: [id])
   project Project @relation(fields: [projectId], references: [id])

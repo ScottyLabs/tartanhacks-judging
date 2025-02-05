@@ -21,7 +21,7 @@ type PrizeAssignmentNext = JudgePrizeAssignment & {
   leadingProject: ProjectNext | null;
 };
 
-const MIN_VIEWS = 1;
+const MIN_VIEWS = 3;
 const TIMEOUT = 5 * 60 * 1000; // in milliseconds
 
 const getPreferredProjects = async (
@@ -66,7 +66,7 @@ const getPreferredProjects = async (
   );
   const candidateProjects = availableProjects ? availableProjects : projects;
   const getUnderviewedCount = mapReducePartial(
-    (ji: JudgingInstance) => (ji.timesJudged < MIN_VIEWS ? 1 : 0),
+    (ji: JudgingInstance) => (ji.timesVisited < MIN_VIEWS ? 1 : 0),
     (x, y) => x + y,
     0
   );
