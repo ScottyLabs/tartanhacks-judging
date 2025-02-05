@@ -176,9 +176,10 @@ export async function synchronizeProjects() {
 
 // TODO: These prizes are only judges by
 const exclusivePrizes = [
-  "",
-  // "GSA Campus Experience Prize",
-  // "Project Olympus Spark Grant",
+  "Best Content Creation Hack",
+  "Story Prize",
+  "XRP Ledger Challenge",
+  "Best Use of Computer Vision"
 ];
 
 const partialPrizes = {
@@ -189,7 +190,12 @@ const partialPrizes = {
   ],
 };
 
-const ignorePrizes = ["Best Domain Name"];
+const ignorePrizes = [
+  "Best Use of AI by powered Reach Capital",
+  "Best Use of Gen AI",
+  "Best Domain Name from GoDaddy Registry",
+  "Best AI Application Built with Cloudflare",
+];
 
 /**
  * Get the mapping of partial judge ids to their prizes
@@ -260,7 +266,7 @@ export async function initJudgePrizeAssignments() {
     // Create assignments for each judge
     for (const prize of prizes) {
       // We're not judging prizes in ignorePrizes
-      if (prize.name in ignorePrizes) {
+      if (ignorePrizes.includes(prize.name)) {
         continue;
       }
 
