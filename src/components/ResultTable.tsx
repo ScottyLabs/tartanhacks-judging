@@ -53,6 +53,12 @@ export default function ResultTable({ projects }: Props): JSX.Element {
                   >
                     Times Judged
                   </th>
+                  <th
+                    scope="col"
+                    className="text-md px-6 py-4 text-left font-medium text-gray-900"
+                  >
+                    Times Visited
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -77,6 +83,9 @@ export default function ResultTable({ projects }: Props): JSX.Element {
                         </td>
                         <td className="text-md whitespace-nowrap px-6 py-4 font-light text-gray-900">
                           {project.timesJudged}
+                        </td>
+                        <td className="text-md whitespace-nowrap px-6 py-4 font-light text-gray-900">
+                          {project.timesVisited}
                         </td>
                       </tr>
                     );

@@ -15,6 +15,7 @@ interface Props {
   project: Project;
   isFetching: boolean;
   onVoteFinish: () => void;
+  updateVisited: () => void;
 }
 
 export enum Vote {
@@ -31,6 +32,7 @@ export default function VotingList({
   project,
   isFetching: isDataFetching,
   onVoteFinish,
+  updateVisited,
 }: Props) {
   const numPrizes = prizeAssignments.length;
   const startVotes = new Array<Vote>(numPrizes).fill(Vote.NONE);
@@ -113,6 +115,7 @@ export default function VotingList({
           className="h-14 w-60 text-xl disabled:bg-slate-400"
           disabled={numVotes < numPrizes || isFetching}
           onClick={() => {
+            updateVisited();
             submitVotes();
           }}
         />

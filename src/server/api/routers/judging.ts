@@ -175,6 +175,36 @@ export const judgingRouter = createTRPCRouter({
     });
   }),
 
+  updateVisited: protectedProcedure
+    .input(
+      z.array(
+        z.object({
+          projectId: z.string(),
+          prizeId: z.string(),
+        })
+      )
+    ).mutation(async ({ ctx, input }) => {
+      for (const { prizeId, projectId } of input) {
+        const prize = await ctx.prisma.prize.findFirst({
+          where: { id: prizeId },
+        });
+        const current = await ctx.prisma.judgingInstance.findFirst({
+          where: { prizeId: prizeId, projectId: projectId },
+        });
+
+        if (!(prize && current)) {
+          throw "Invalid judge, winner, loser, or prize ID";
+        }
+
+        await ctx.prisma.judgingInstance.update({
+          where: { id: current.id },
+          data: {
+            timesVisited: current.timesVisited + 1,
+          },
+        });
+      }
+    }),
+
   // Perform multiple comparisons at once
   compareMany: protectedProcedure
     .input(
