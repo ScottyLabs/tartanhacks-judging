@@ -370,6 +370,14 @@ export const judgingRouter = createTRPCRouter({
       const project = await getNext(judge, ctx.prisma);
 
       if (project == null) {
+        await ctx.prisma.judge.update({
+          where: {
+            id: judge.id,
+          },
+          data: {
+            nextProjectId: null,
+          },
+        });
         return;
       }
 
@@ -380,6 +388,21 @@ export const judgingRouter = createTRPCRouter({
         },
         data: {
           nextProjectId: project.id,
+        },
+      });
+
+      // Add newly assigned project to ignore list
+      await ctx.prisma.ignoreProjects.upsert({
+        where: {
+          judgeId_projectId: {
+            judgeId: judge.id,
+            projectId: project.id,
+          },
+        },
+        update: {},
+        create: {
+          judgeId: judge.id,
+          projectId: project.id,
         },
       });
     }),
