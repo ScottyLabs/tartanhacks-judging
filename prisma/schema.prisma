@@ -59,7 +59,7 @@ model Project {
   location    String
   team        String
   isCheckedIn Boolean @default(false) // Has the user checked in to the expo yet so we can send judges their way
-  tableNumber Int?
+  tableNumber String?
 
   leadingPrizes    JudgePrizeAssignment[]
   incomingJudges   Judge[]

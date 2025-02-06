@@ -1,8 +1,8 @@
-import type { Prize } from "@prisma/client";
-import type { NextApiRequest, NextApiResponse } from "next";
-import { env } from "../../env/server.mjs";
-import { prisma } from "../../server/db";
-import type { HelixUser } from "../../types/user.js";
+import type {Prize} from "@prisma/client";
+import type {NextApiRequest, NextApiResponse} from "next";
+import {env} from "../../env/server.mjs";
+import {prisma} from "../../server/db";
+import type {HelixUser} from "../../types/user.js";
 
 interface HelixPrize {
   _id: string;
@@ -26,7 +26,7 @@ interface HelixProject {
   location: string;
   team: HelixTeam;
   prizes: HelixPrize[];
-  tableNumber: null | number;
+  tableNumber: null | string;
 }
 
 const GRAND_PRIZE_NAME = "Scott Krulcik Grand Prize";
@@ -49,8 +49,7 @@ async function fetchData<T>(path: string, method: string): Promise<T> {
     throw new Error(`Failed to pull data from ${path}`);
   }
 
-  const data = (await response.json()) as T;
-  return data;
+  return (await response.json()) as T;
 }
 
 /**

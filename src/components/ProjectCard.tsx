@@ -30,7 +30,7 @@ export default function ProjectCard({
       </div>
       <div className="flex grow flex-row items-center justify-between pb-4">
         <p className="pr-5 text-lg font-bold">Location:</p>
-        <p className="text-xl font-bold text-yellow">{project.tableNumber}</p>
+        <p className="text-xl font-bold text-yellow">Table {project.tableNumber}</p>
       </div>
       <div className="overflow-hidden">
         <p className="pr-5 text-lg font-bold">Description:</p>
