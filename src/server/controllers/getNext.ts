@@ -22,7 +22,7 @@ type PrizeAssignmentNext = JudgePrizeAssignment & {
 };
 
 const MIN_VIEWS = 3;
-const TIMEOUT = 5 * 60 * 1000; // in milliseconds
+const TIMEOUT = 10 * 60 * 1000; // in milliseconds
 
 const getPreferredProjects = async (
   judge: JudgeNext,
