@@ -178,7 +178,8 @@ const exclusivePrizes = [
   "Best Content Creation Hack",
   "Story Prize",
   "XRP Ledger Challenge",
-  "Best Use of Computer Vision"
+  "Best Use of Computer Vision",
+  "Quantum Track"
 ];
 
 const partialPrizes = {
