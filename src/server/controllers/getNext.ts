@@ -21,7 +21,7 @@ type PrizeAssignmentNext = JudgePrizeAssignment & {
   leadingProject: ProjectNext | null;
 };
 
-const MIN_VIEWS = 3;
+const MIN_VIEWS = 2;
 const TIMEOUT = 10 * 60 * 1000; // in milliseconds
 
 const getPreferredProjects = async (
